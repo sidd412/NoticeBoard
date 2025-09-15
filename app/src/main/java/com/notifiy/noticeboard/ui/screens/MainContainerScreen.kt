@@ -26,7 +26,8 @@ import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
 @Composable
 fun MainContainerScreen(
     navController: NavController,
-    themeViewModel: ThemeViewModel
+    themeViewModel: ThemeViewModel,
+    onBottomNavBarVisibilityChanged: (Boolean) -> Unit = {}
 ) {
     val bottomNavController = rememberNavController()
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
@@ -38,10 +39,17 @@ fun MainContainerScreen(
     // Hide navigation bar on YourBoards screen
     val showBottomBar = currentDestination?.route != BottomNavScreen.YourBoards.route
     
+    // Notify parent about bottom nav bar visibility changes
+    LaunchedEffect(showBottomBar) {
+        onBottomNavBarVisibilityChanged(showBottomBar)
+    }
+    
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ) {
                     listOf(
                         BottomNavScreen.Home,
                         BottomNavScreen.Profile,
