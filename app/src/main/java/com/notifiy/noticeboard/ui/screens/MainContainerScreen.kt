@@ -20,11 +20,13 @@ import androidx.navigation.compose.rememberNavController
 import com.notifiy.noticeboard.navigation.BottomNavScreen
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
+import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainContainerScreen(
-    navController: NavController
+    navController: NavController,
+    themeViewModel: ThemeViewModel
 ) {
     val bottomNavController = rememberNavController()
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
@@ -93,7 +95,7 @@ fun MainContainerScreen(
                     HomeScreenContent(navController = navController, bottomNavController = bottomNavController, authViewModel = authViewModel)
                 }
                 composable(BottomNavScreen.Profile.route) {
-                    ProfileScreenContent(navController = navController, authViewModel = authViewModel)
+                    ProfileScreenContent(navController = navController, authViewModel = authViewModel, themeViewModel = themeViewModel)
                 }
                 composable(BottomNavScreen.YourBoards.route) {
                     YourBoardsScreenContent(navController = bottomNavController, mainNavController = navController, authViewModel = authViewModel)
@@ -109,8 +111,8 @@ fun HomeScreenContent(navController: NavController, bottomNavController: NavCont
 }
 
 @Composable
-fun ProfileScreenContent(navController: NavController, authViewModel: AuthViewModel) {
-    ProfileScreen(navController = navController, authViewModel = authViewModel)
+fun ProfileScreenContent(navController: NavController, authViewModel: AuthViewModel, themeViewModel: ThemeViewModel) {
+    ProfileScreen(navController = navController, authViewModel = authViewModel, themeViewModel = themeViewModel)
 }
 
 @Composable
