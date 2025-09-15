@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read/write their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Notice boards can be read by anyone, written by authenticated users
+    match /noticeBoards/{boardId} {
+      allow read: if true; // Anyone can read notice boards
+      allow write: if request.auth != null; // Only authenticated users can write
+    }
+    
+    // Notices can be read by anyone, written by authenticated users
+    match /notices/{noticeId} {
+      allow read: if true; // Anyone can read notices
+      allow write: if request.auth != null; // Only authenticated users can write
+    }
+    
+    // Pages can be read by anyone, written by authenticated users
+    match /pages/{pageId} {
+      allow read: if true; // Anyone can read pages
+      allow write: if request.auth != null; // Only authenticated users can write
+    }
+    
+    // TEMPORARY: Allow all operations for testing (REMOVE IN PRODUCTION)
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+
