@@ -2,17 +2,41 @@ package com.notifiy.noticeboard.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,10 +45,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.notifiy.noticeboard.data.model.NoticeBoard
-import com.notifiy.noticeboard.navigation.BottomNavScreen
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.HomeViewModel
@@ -42,18 +64,19 @@ fun HomeScreen(
     val currentUser = authState.data
     val subscribedBoards by homeViewModel.subscribedBoards.collectAsState()
     val isLoading by homeViewModel.isLoading.collectAsState()
-    
+
     // State for showing all subscribed boards
     var showAllSubscribedBoards by remember { mutableStateOf(false) }
     val maxVisibleBoards = 3
-    val visibleBoards = if (showAllSubscribedBoards) subscribedBoards else subscribedBoards.take(maxVisibleBoards)
-    
+    val visibleBoards =
+        if (showAllSubscribedBoards) subscribedBoards else subscribedBoards.take(maxVisibleBoards)
+
     LaunchedEffect(currentUser?.id) {
         currentUser?.id?.let { userId ->
             homeViewModel.loadSubscribedBoards(userId)
         }
     }
-    
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -61,17 +84,14 @@ fun HomeScreen(
     ) {
         // Main content
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 80.dp), // Add padding for fixed button
-            contentPadding = PaddingValues(16.dp),
+            modifier = Modifier.fillMaxSize(), // Add padding for fixed button
+            contentPadding = PaddingValues(16.dp, 20.dp, 16.dp, 80.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Welcome message
+            // Welcome message card
             item {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
+                    modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 ) {
@@ -79,21 +99,21 @@ fun HomeScreen(
                         modifier = Modifier.padding(20.dp)
                     ) {
                         Text(
-                            text = "Notice Board",
-                            fontSize = 24.sp,
+                            text = "Welcome! To Notice Board",
+                            fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Stay updated with your subscribed notice boards",
-                            fontSize = 16.sp,
+                            text = "Subscribe your institute! Stay updated with your subscribed notice boards",
+                            fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         )
                     }
                 }
             }
-            
+
             // Subscribed Boards Section
             item {
                 Text(
@@ -103,12 +123,11 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-            
+
             if (isLoading) {
                 item {
                     Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
+                        modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
                     }
@@ -116,8 +135,7 @@ fun HomeScreen(
             } else if (subscribedBoards.isEmpty()) {
                 item {
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
+                        modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                     ) {
@@ -153,14 +171,12 @@ fun HomeScreen(
                 // Subscribed Boards List (no header needed, just show boards)
                 items(visibleBoards) { board ->
                     NoticeBoardCard(
-                        board = board,
-                        onClick = { 
+                        board = board, onClick = {
                             navController.navigate(Screen.NoticeViewer.createRoute(board.id))
-                        }
-                    )
+                        })
                 }
             }
-            
+
             // View More button (only if more than 3 active subscribed boards)
             if (subscribedBoards.size > maxVisibleBoards) {
                 item {
@@ -171,8 +187,7 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TextButton(
-                            onClick = { showAllSubscribedBoards = !showAllSubscribedBoards }
-                        ) {
+                            onClick = { showAllSubscribedBoards = !showAllSubscribedBoards }) {
                             Text(
                                 text = if (showAllSubscribedBoards) "Show Less" else "View More",
                                 fontSize = 16.sp,
@@ -183,7 +198,7 @@ fun HomeScreen(
                 }
             }
         }
-        
+
         // Fixed Subscribe More Button
         Button(
             onClick = { navController.navigate(Screen.SubscribePopup.route) },
@@ -202,9 +217,7 @@ fun HomeScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Subscribe More",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
+                text = "Subscribe More", fontSize = 16.sp, fontWeight = FontWeight.Medium
             )
         }
     }
@@ -212,8 +225,7 @@ fun HomeScreen(
 
 @Composable
 fun NoticeBoardCard(
-    board: NoticeBoard,
-    onClick: () -> Unit
+    board: NoticeBoard, onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -222,8 +234,7 @@ fun NoticeBoardCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
         ) {
             // Board Icon
             Box(
@@ -240,9 +251,9 @@ fun NoticeBoardCard(
                     color = Color.White
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             // Board Info
             Column(
                 modifier = Modifier.weight(1f)
@@ -260,7 +271,7 @@ fun NoticeBoardCard(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             }
-            
+
             // Notification Icon
             Icon(
                 Icons.Default.Notifications,
