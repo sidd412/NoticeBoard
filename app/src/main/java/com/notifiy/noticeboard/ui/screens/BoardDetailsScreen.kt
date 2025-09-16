@@ -278,7 +278,8 @@ fun BoardDetailsScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp, bottom = 50.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
             )

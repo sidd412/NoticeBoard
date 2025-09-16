@@ -56,3 +56,24 @@ fun NoticeBoardTheme(
         content = content
     )
 }
+
+@Composable
+fun NoticeBoardTheme(
+    themeMode: Int,
+    dynamicColor: Boolean = true,
+    content: @Composable () -> Unit
+) {
+    val isSystemInDarkTheme = isSystemInDarkTheme()
+    val darkTheme = when (themeMode) {
+        com.notifiy.noticeboard.data.preferences.PreferencesManager.THEME_DARK -> true
+        com.notifiy.noticeboard.data.preferences.PreferencesManager.THEME_LIGHT -> false
+        com.notifiy.noticeboard.data.preferences.PreferencesManager.THEME_SYSTEM -> isSystemInDarkTheme
+        else -> isSystemInDarkTheme
+    }
+    
+    NoticeBoardTheme(
+        darkTheme = darkTheme,
+        dynamicColor = dynamicColor,
+        content = content
+    )
+}

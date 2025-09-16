@@ -5,9 +5,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.notifiy.noticeboard.ui.screens.*
+import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
 
 @Composable
-fun NoticeBoardNavigation(navController: NavHostController) {
+fun NoticeBoardNavigation(navController: NavHostController, themeViewModel: ThemeViewModel, onBottomNavBarVisibilityChanged: (Boolean) -> Unit = {}) {
     NavHost(
         navController = navController,
         startDestination = Screen.Splash.route
@@ -21,7 +22,7 @@ fun NoticeBoardNavigation(navController: NavHostController) {
         }
         
         composable(Screen.MainContainer.route) {
-            MainContainerScreen(navController = navController)
+            MainContainerScreen(navController = navController, themeViewModel = themeViewModel, onBottomNavBarVisibilityChanged = onBottomNavBarVisibilityChanged)
         }
         
         composable(Screen.SubscribePopup.route) {
