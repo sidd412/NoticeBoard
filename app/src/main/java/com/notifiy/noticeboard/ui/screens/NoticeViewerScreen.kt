@@ -23,7 +23,9 @@ import androidx.navigation.NavController
 import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.NoticePriority
+import com.notifiy.noticeboard.data.model.Page
 import com.notifiy.noticeboard.navigation.Screen
+import com.notifiy.noticeboard.ui.components.HorizontalPagesCarousel
 import com.notifiy.noticeboard.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
 
@@ -33,44 +35,35 @@ fun NoticeViewerScreen(
     boardId: String,
     homeViewModel: HomeViewModel = viewModel()
 ) {
-    var notices by remember { mutableStateOf<List<Notice>>(emptyList()) }
+    var pages by remember { mutableStateOf<List<Page>>(emptyList()) }
     var noticeBoard by remember { mutableStateOf<NoticeBoard?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf("") }
     
     LaunchedEffect(boardId) {
-        // TODO: Load notices for the specific board
-        // For now, we'll simulate with sample data
-        isLoading = false
-        notices = listOf(
-            Notice(
-                id = "1",
-                noticeBoardId = boardId,
-                title = "Important Notice",
-                subtitle = "Urgent Information",
-                content = "This is an important notice from the institute. Please read carefully and follow the instructions.",
-                infoPoints = listOf("Read carefully", "Follow instructions", "Contact office if needed"),
-                priority = NoticePriority.HIGH
-            ),
-            Notice(
-                id = "2",
-                noticeBoardId = boardId,
-                title = "Exam Schedule",
-                subtitle = "Academic Calendar",
-                content = "The exam schedule for the upcoming semester has been released. Please check the details.",
-                infoPoints = listOf("Check your exam dates", "Prepare accordingly", "Contact faculty for queries"),
-                priority = NoticePriority.NORMAL
-            ),
-            Notice(
-                id = "3",
-                noticeBoardId = boardId,
-                title = "Holiday Notice",
-                subtitle = "Institute Closure",
-                content = "The institute will remain closed on the following dates due to holidays.",
-                infoPoints = listOf("Check holiday dates", "Plan accordingly", "Emergency contact available"),
-                priority = NoticePriority.NORMAL
-            )
-        )
+        try {
+            isLoading = true
+            println("DEBUG: NoticeViewerScreen - Loading pages for boardId: $boardId")
+            
+            // Load board details first
+            noticeBoard = homeViewModel.getNoticeBoardById(boardId)
+            println("DEBUG: NoticeViewerScreen - Loaded board: $noticeBoard")
+            
+            if (noticeBoard != null) {
+                val boardCode = noticeBoard!!.organizationCode.toIntOrNull() ?: 0
+                println("DEBUG: NoticeViewerScreen - Board code: $boardCode")
+                
+                // Load pages for this board
+                pages = homeViewModel.getPagesByBoardCode(boardCode)
+                println("DEBUG: NoticeViewerScreen - Loaded ${pages.size} pages")
+            }
+            
+            isLoading = false
+        } catch (e: Exception) {
+            println("DEBUG: NoticeViewerScreen - Error: ${e.message}")
+            errorMessage = e.message ?: "Failed to load pages"
+            isLoading = false
+        }
     }
     
     Box(
@@ -100,7 +93,7 @@ fun NoticeViewerScreen(
             ) {
                 CircularProgressIndicator(color = Color.White)
             }
-        } else if (notices.isEmpty()) {
+        } else if (pages.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -109,7 +102,7 @@ fun NoticeViewerScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "No Notices Available",
+                        text = "No Pages Available",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -117,7 +110,7 @@ fun NoticeViewerScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "There are no notices available for this board at the moment.",
+                        text = "There are no pages available for this board at the moment.",
                         fontSize = 16.sp,
                         color = Color.White.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center
@@ -148,26 +141,24 @@ fun NoticeViewerScreen(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "${notices.size} notices available",
+                            text = "${pages.size} pages available",
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
                 }
                 
-                // Notices List
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(notices) { notice ->
-                        NoticeCard(
-                            notice = notice,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                // Horizontal Pages Carousel
+                HorizontalPagesCarousel(
+                    pages = pages,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp),
+                    onPageClick = { page ->
+                        // Navigate to page details or do something with the page
+                        println("DEBUG: NoticeViewerScreen - Page clicked: ${page.title}")
                     }
-                }
+                )
             }
         }
     }

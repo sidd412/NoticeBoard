@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
+import com.notifiy.noticeboard.data.model.Page
 import com.notifiy.noticeboard.data.repository.FirebaseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -76,5 +77,25 @@ class HomeViewModel : ViewModel() {
     
     fun clearError() {
         _errorMessage.value = null
+    }
+    
+    suspend fun getNoticeBoardById(boardId: String): NoticeBoard? {
+        return try {
+            println("DEBUG: HomeViewModel.getNoticeBoardById - Getting board: $boardId")
+            repository.getNoticeBoardById(boardId)
+        } catch (e: Exception) {
+            println("DEBUG: HomeViewModel.getNoticeBoardById - Error: ${e.message}")
+            null
+        }
+    }
+    
+    suspend fun getPagesByBoardCode(boardCode: Int): List<Page> {
+        return try {
+            println("DEBUG: HomeViewModel.getPagesByBoardCode - Getting pages for code: $boardCode")
+            repository.getPagesByBoardCode(boardCode)
+        } catch (e: Exception) {
+            println("DEBUG: HomeViewModel.getPagesByBoardCode - Error: ${e.message}")
+            emptyList()
+        }
     }
 }
