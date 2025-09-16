@@ -26,6 +26,7 @@ import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.YourBoardsViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.utils.ShowErrorSnackbar
 import com.notifiy.noticeboard.utils.getErrorMessage
 import java.util.*
@@ -34,7 +35,7 @@ import java.util.*
 @Composable
 fun CreateBoardScreen(
     navController: NavController,
-    authViewModel: AuthViewModel = viewModel()
+    authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java)
 ) {
     var organizationName by remember { mutableStateOf("") }
     var organizationCode by remember { mutableStateOf("") }
@@ -47,7 +48,7 @@ fun CreateBoardScreen(
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
     
-    val yourBoardsViewModel: YourBoardsViewModel = viewModel()
+    val yourBoardsViewModel: YourBoardsViewModel = cachedViewModel(YourBoardsViewModel::class.java)
     val errorMessage by yourBoardsViewModel.errorMessage.collectAsState()
     
     val snackbarHostState = remember { SnackbarHostState() }

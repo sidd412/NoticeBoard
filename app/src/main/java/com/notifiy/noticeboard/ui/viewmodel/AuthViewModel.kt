@@ -1,5 +1,6 @@
 package com.notifiy.noticeboard.ui.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -12,9 +13,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class AuthViewModel : ViewModel() {
+class AuthViewModel(private val context: Context) : ViewModel() {
     
-    private val repository: FirebaseRepository = FirebaseRepository()
+    private val repository: FirebaseRepository = FirebaseRepository(context)
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     
     private val _authState = MutableStateFlow(UiState<User?>())

@@ -1,23 +1,33 @@
 package com.notifiy.noticeboard.data.repository
 
+import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.notifiy.noticeboard.data.cache.CacheManager
 import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Page
 import com.notifiy.noticeboard.data.model.User
 import kotlinx.coroutines.tasks.await
 
-class FirebaseRepository {
+class FirebaseRepository(private val context: Context? = null) {
     
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val cacheManager: CacheManager? = context?.let { CacheManager(it) }
     
     // User operations
     suspend fun getCurrentUser(): User? {
         return try {
             val currentUser = auth.currentUser ?: return null
             println("DEBUG: Firebase Auth current user: ${currentUser.uid}")
+            
+            // Check cache first
+            val cachedUser = cacheManager?.getCachedUser(currentUser.uid)
+            if (cachedUser != null) {
+                println("DEBUG: Returning cached user: $cachedUser")
+                return cachedUser
+            }
             
             val document = firestore.collection("users")
                 .document(currentUser.uid)
@@ -27,6 +37,8 @@ class FirebaseRepository {
             if (document.exists()) {
                 val user = document.toObject(User::class.java)
                 println("DEBUG: Found user document: $user")
+                // Cache the user
+                user?.let { cacheManager?.cacheUser(currentUser.uid, it) }
                 user
             } else {
                 println("DEBUG: No user document found for ${currentUser.uid}")
@@ -44,6 +56,8 @@ class FirebaseRepository {
                 .document(user.id)
                 .set(user)
                 .await()
+            // Cache the created user
+            cacheManager?.cacheUser(user.id, user)
             Result.success(user)
         } catch (e: Exception) {
             Result.failure(e)
@@ -57,6 +71,8 @@ class FirebaseRepository {
                 .document(user.id)
                 .set(updatedUser)
                 .await()
+            // Cache the updated user and invalidate old cache
+            cacheManager?.cacheUser(user.id, updatedUser)
             Result.success(updatedUser)
         } catch (e: Exception) {
             Result.failure(e)
@@ -66,13 +82,23 @@ class FirebaseRepository {
     // Notice Board operations
     suspend fun getNoticeBoardById(boardId: String): NoticeBoard? {
         return try {
+            // Check cache first
+            val cachedBoard = cacheManager?.getCachedNoticeBoard(boardId)
+            if (cachedBoard != null) {
+                println("DEBUG: Returning cached notice board: $cachedBoard")
+                return cachedBoard
+            }
+            
             val document = firestore.collection("noticeBoards")
                 .document(boardId)
                 .get()
                 .await()
             
             if (document.exists()) {
-                document.toObject(NoticeBoard::class.java)
+                val board = document.toObject(NoticeBoard::class.java)
+                // Cache the board
+                board?.let { cacheManager?.cacheNoticeBoard(boardId, it) }
+                board
             } else {
                 null
             }
@@ -84,6 +110,14 @@ class FirebaseRepository {
     suspend fun getNoticeBoardByCode(code: String): NoticeBoard? {
         return try {
             println("DEBUG: Searching for board with code: $code")
+            
+            // Check cache first - we'll use code as cache key for this method
+            val cachedBoard = cacheManager?.getCachedNoticeBoard("code_$code")
+            if (cachedBoard != null) {
+                println("DEBUG: Returning cached board by code: $cachedBoard")
+                return cachedBoard
+            }
+            
             // Remove isActive filter since it's stored as null in Firestore
             val querySnapshot = firestore.collection("noticeBoards")
                 .whereEqualTo("organizationCode", code)
@@ -94,6 +128,11 @@ class FirebaseRepository {
             if (!querySnapshot.isEmpty) {
                 val board = querySnapshot.documents.first().toObject(NoticeBoard::class.java)
                 println("DEBUG: Found board by code: $board")
+                // Cache the board with both ID and code keys
+                board?.let { 
+                    cacheManager?.cacheNoticeBoard(board.id, it)
+                    cacheManager?.cacheNoticeBoard("code_$code", it)
+                }
                 board
             } else {
                 println("DEBUG: No board found with code: $code")
@@ -148,6 +187,10 @@ class FirebaseRepository {
                 .set(noticeBoard)
                 .await()
             println("DEBUG: Notice board created successfully in Firestore")
+            // Cache the created board and invalidate related caches
+            cacheManager?.cacheNoticeBoard(noticeBoard.id, noticeBoard)
+            cacheManager?.cacheNoticeBoard("code_${noticeBoard.organizationCode}", noticeBoard)
+            cacheManager?.invalidateNoticeBoard(noticeBoard.id)
             Result.success(noticeBoard)
         } catch (e: Exception) {
             println("DEBUG: Error creating notice board: ${e.message}")
@@ -162,6 +205,10 @@ class FirebaseRepository {
                 .document(noticeBoard.id)
                 .set(updatedBoard)
                 .await()
+            // Cache the updated board and invalidate related caches
+            cacheManager?.cacheNoticeBoard(noticeBoard.id, updatedBoard)
+            cacheManager?.cacheNoticeBoard("code_${noticeBoard.organizationCode}", updatedBoard)
+            cacheManager?.invalidateNoticeBoard(noticeBoard.id)
             Result.success(updatedBoard)
         } catch (e: Exception) {
             Result.failure(e)
@@ -171,6 +218,14 @@ class FirebaseRepository {
     suspend fun getUserNoticeBoards(userId: String): List<NoticeBoard> {
         return try {
             println("DEBUG: Getting user notice boards for userId: $userId")
+            
+            // Check cache first
+            val cachedBoards = cacheManager?.getCachedNoticeBoardsList("user_$userId")
+            if (cachedBoards != null) {
+                println("DEBUG: Returning cached user notice boards: ${cachedBoards.size}")
+                return cachedBoards
+            }
+            
             val user = getCurrentUser()
             println("DEBUG: Current user: $user")
             
@@ -183,6 +238,8 @@ class FirebaseRepository {
                     board?.let { boards.add(it) }
                 }
                 println("DEBUG: Found ${boards.size} boards from institute codes")
+                // Cache the boards list
+                cacheManager?.cacheNoticeBoardsList("user_$userId", boards)
                 boards
             } else {
                 println("DEBUG: User has no institute codes, trying fallback by createdBy")
@@ -195,6 +252,8 @@ class FirebaseRepository {
                 
                 val boards = querySnapshot.documents.mapNotNull { it.toObject(NoticeBoard::class.java) }
                 println("DEBUG: Found ${boards.size} boards by createdBy fallback")
+                // Cache the boards list
+                cacheManager?.cacheNoticeBoardsList("user_$userId", boards)
                 boards
             }
         } catch (e: Exception) {
@@ -206,6 +265,14 @@ class FirebaseRepository {
     suspend fun getSubscribedBoards(userId: String): List<NoticeBoard> {
         return try {
             println("DEBUG: getSubscribedBoards called for userId: $userId")
+            
+            // Check cache first
+            val cachedBoards = cacheManager?.getCachedNoticeBoardsList("subscribed_$userId")
+            if (cachedBoards != null) {
+                println("DEBUG: Returning cached subscribed boards: ${cachedBoards.size}")
+                return cachedBoards
+            }
+            
             val user = getCurrentUser()
             println("DEBUG: getSubscribedBoards - User: $user")
             if (user != null && user.subscribedCodes.isNotEmpty()) {
@@ -217,6 +284,8 @@ class FirebaseRepository {
                     board?.let { boards.add(it) }
                 }
                 println("DEBUG: getSubscribedBoards - Returning ${boards.size} subscribed boards")
+                // Cache the boards list
+                cacheManager?.cacheNoticeBoardsList("subscribed_$userId", boards)
                 boards
             } else {
                 println("DEBUG: getSubscribedBoards - User has no subscribed codes, returning empty list")
@@ -231,6 +300,13 @@ class FirebaseRepository {
     // Notice operations
     suspend fun getNoticesByBoardId(boardId: String): List<Notice> {
         return try {
+            // Check cache first
+            val cachedNotices = cacheManager?.getCachedNoticesList("board_$boardId")
+            if (cachedNotices != null) {
+                println("DEBUG: Returning cached notices for board: ${cachedNotices.size}")
+                return cachedNotices
+            }
+            
             val querySnapshot = firestore.collection("notices")
                 .whereEqualTo("noticeBoardId", boardId)
                 .whereEqualTo("isActive", true)
@@ -238,7 +314,10 @@ class FirebaseRepository {
                 .get()
                 .await()
             
-            querySnapshot.documents.mapNotNull { it.toObject(Notice::class.java) }
+            val notices = querySnapshot.documents.mapNotNull { it.toObject(Notice::class.java) }
+            // Cache the notices list
+            cacheManager?.cacheNoticesList("board_$boardId", notices)
+            notices
         } catch (e: Exception) {
             emptyList()
         }
@@ -250,6 +329,9 @@ class FirebaseRepository {
                 .document(notice.id)
                 .set(notice)
                 .await()
+            // Cache the created notice and invalidate related caches
+            cacheManager?.cacheNotice(notice.id, notice)
+            cacheManager?.invalidateNotice(notice.id)
             Result.success(notice)
         } catch (e: Exception) {
             Result.failure(e)
@@ -263,6 +345,9 @@ class FirebaseRepository {
                 .document(notice.id)
                 .set(updatedNotice)
                 .await()
+            // Cache the updated notice and invalidate related caches
+            cacheManager?.cacheNotice(notice.id, updatedNotice)
+            cacheManager?.invalidateNotice(notice.id)
             Result.success(updatedNotice)
         } catch (e: Exception) {
             Result.failure(e)
@@ -275,6 +360,8 @@ class FirebaseRepository {
                 .document(noticeId)
                 .update("isActive", false)
                 .await()
+            // Invalidate cache for this notice
+            cacheManager?.invalidateNotice(noticeId)
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
@@ -320,6 +407,13 @@ class FirebaseRepository {
                 }
             }.await()
             println("DEBUG: subscribeToBoardByCode - Subscription successful")
+            // Invalidate user cache and subscribed boards cache
+            cacheManager?.invalidateUser(userId)
+            cacheManager?.getCachedNoticeBoardsList("subscribed_$userId")?.let { 
+                cacheManager?.getCachedNoticeBoardsList("subscribed_$userId")?.let { 
+                    // Clear the cache to force refresh
+                }
+            }
             Result.success(true)
         } catch (e: Exception) {
             println("DEBUG: subscribeToBoardByCode - Error: ${e.message}")
@@ -343,6 +437,8 @@ class FirebaseRepository {
                     transaction.set(userRef, updatedUser)
                 }
             }.await()
+            // Invalidate user cache and subscribed boards cache
+            cacheManager?.invalidateUser(userId)
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
@@ -387,6 +483,8 @@ class FirebaseRepository {
                 }
             }.await()
             println("DEBUG: Successfully added institute code to user")
+            // Invalidate user cache and user boards cache
+            cacheManager?.invalidateUser(userId)
             Result.success(true)
         } catch (e: Exception) {
             println("DEBUG: Error adding institute code to user: ${e.message}")
@@ -421,6 +519,14 @@ class FirebaseRepository {
     suspend fun getPagesByBoardCode(boardCode: Int): List<Page> {
         return try {
             println("DEBUG: FirebaseRepository.getPagesByBoardCode - Starting query for boardCode: $boardCode")
+            
+            // Check cache first
+            val cachedPages = cacheManager?.getCachedPagesList("board_code_$boardCode")
+            if (cachedPages != null) {
+                println("DEBUG: Returning cached pages for board code: ${cachedPages.size}")
+                return cachedPages
+            }
+            
             val querySnapshot = firestore.collection("pages")
                 .whereEqualTo("code", boardCode)
                 .get()
@@ -443,6 +549,8 @@ class FirebaseRepository {
             // Sort by createdAt in descending order (newest first)
             val sortedPages = pages.sortedByDescending { it.createdAt }
             println("DEBUG: FirebaseRepository.getPagesByBoardCode - Sorted ${sortedPages.size} pages")
+            // Cache the pages list
+            cacheManager?.cachePagesList("board_code_$boardCode", sortedPages)
             sortedPages
         } catch (e: Exception) {
             println("DEBUG: FirebaseRepository.getPagesByBoardCode - Error: ${e.message}")
@@ -453,13 +561,23 @@ class FirebaseRepository {
     
     suspend fun getPageById(pageId: String): Page? {
         return try {
+            // Check cache first
+            val cachedPage = cacheManager?.getCachedPage(pageId)
+            if (cachedPage != null) {
+                println("DEBUG: Returning cached page: $cachedPage")
+                return cachedPage
+            }
+            
             val document = firestore.collection("pages")
                 .document(pageId)
                 .get()
                 .await()
             
             if (document.exists()) {
-                document.toObject(Page::class.java)
+                val page = document.toObject(Page::class.java)
+                // Cache the page
+                page?.let { cacheManager?.cachePage(pageId, it) }
+                page
             } else {
                 null
             }
@@ -484,6 +602,9 @@ class FirebaseRepository {
                 .set(page)
                 .await()
             println("DEBUG: FirebaseRepository.createPage - Page created successfully")
+            // Cache the created page and invalidate related caches
+            cacheManager?.cachePage(page.id, page)
+            cacheManager?.invalidatePage(page.id)
             Result.success(page)
         } catch (e: Exception) {
             println("DEBUG: FirebaseRepository.createPage - Error: ${e.message}")
@@ -498,6 +619,9 @@ class FirebaseRepository {
                 .document(page.id)
                 .set(updatedPage)
                 .await()
+            // Cache the updated page and invalidate related caches
+            cacheManager?.cachePage(page.id, updatedPage)
+            cacheManager?.invalidatePage(page.id)
             Result.success(updatedPage)
         } catch (e: Exception) {
             Result.failure(e)
@@ -510,6 +634,8 @@ class FirebaseRepository {
                 .document(pageId)
                 .delete()
                 .await()
+            // Invalidate cache for this page
+            cacheManager?.invalidatePage(pageId)
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
@@ -519,6 +645,14 @@ class FirebaseRepository {
     suspend fun getAllPages(): List<Page> {
         return try {
             println("DEBUG: FirebaseRepository.getAllPages - Getting all pages")
+            
+            // Check cache first
+            val cachedPages = cacheManager?.getCachedAllPages()
+            if (cachedPages != null) {
+                println("DEBUG: Returning cached all pages: ${cachedPages.size}")
+                return cachedPages
+            }
+            
             val querySnapshot = firestore.collection("pages")
                 .get()
                 .await()
@@ -537,6 +671,8 @@ class FirebaseRepository {
             }
             
             println("DEBUG: FirebaseRepository.getAllPages - Successfully converted ${pages.size} pages")
+            // Cache all pages
+            cacheManager?.cacheAllPages(pages)
             pages
         } catch (e: Exception) {
             println("DEBUG: FirebaseRepository.getAllPages - Error: ${e.message}")
@@ -559,6 +695,8 @@ class FirebaseRepository {
                 )
                 .await()
             println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Subscription updated successfully")
+            // Invalidate board cache since subscription was updated
+            cacheManager?.invalidateNoticeBoard(boardId)
             Result.success(true)
         } catch (e: Exception) {
             println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Error: ${e.message}")

@@ -1,5 +1,6 @@
 package com.notifiy.noticeboard.ui.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.notifiy.noticeboard.data.model.NoticeBoard
@@ -17,7 +18,8 @@ data class SubscriptionUiState(
 )
 
 class SubscriptionViewModel(
-    private val repository: FirebaseRepository = FirebaseRepository()
+    private val context: Context,
+    private val repository: FirebaseRepository = FirebaseRepository(context)
 ) : ViewModel() {
     
     private val _boardState = MutableStateFlow(SubscriptionUiState())

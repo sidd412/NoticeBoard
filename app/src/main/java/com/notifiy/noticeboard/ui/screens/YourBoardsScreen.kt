@@ -29,6 +29,7 @@ import com.notifiy.noticeboard.navigation.BottomNavScreen
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.YourBoardsViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.utils.ShowErrorSnackbar
 import com.notifiy.noticeboard.utils.getErrorMessage
 
@@ -41,7 +42,7 @@ fun YourBoardsScreen(
 ) {
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
-    val yourBoardsViewModel: YourBoardsViewModel = viewModel()
+    val yourBoardsViewModel: YourBoardsViewModel = cachedViewModel(YourBoardsViewModel::class.java)
     val userBoardsState by yourBoardsViewModel.userBoards.collectAsState()
     val errorMessage by yourBoardsViewModel.errorMessage.collectAsState()
     

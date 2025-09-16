@@ -29,6 +29,7 @@ import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.components.SubscriptionRequiredDialog
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.BoardDetailsViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.utils.ShowErrorSnackbar
 import com.notifiy.noticeboard.utils.getErrorMessage
 import java.text.SimpleDateFormat
@@ -39,8 +40,8 @@ import java.util.*
 fun BoardDetailsScreen(
     navController: NavController,
     boardId: String,
-    authViewModel: AuthViewModel = viewModel(),
-    boardDetailsViewModel: BoardDetailsViewModel = viewModel()
+    authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java),
+    boardDetailsViewModel: BoardDetailsViewModel = cachedViewModel(BoardDetailsViewModel::class.java)
 ) {
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data

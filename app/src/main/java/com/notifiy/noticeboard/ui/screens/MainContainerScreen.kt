@@ -20,6 +20,8 @@ import androidx.navigation.compose.rememberNavController
 import com.notifiy.noticeboard.navigation.BottomNavScreen
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
+import com.notifiy.noticeboard.ui.viewmodel.ViewModelFactory
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,7 +36,7 @@ fun MainContainerScreen(
     val currentDestination = navBackStackEntry?.destination
     
     // Create a shared AuthViewModel instance
-    val authViewModel: AuthViewModel = viewModel()
+    val authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java)
     
     // Hide navigation bar on YourBoards screen
     val showBottomBar = currentDestination?.route != BottomNavScreen.YourBoards.route

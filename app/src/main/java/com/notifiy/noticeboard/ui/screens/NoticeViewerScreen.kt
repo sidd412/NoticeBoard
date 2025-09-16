@@ -27,13 +27,14 @@ import com.notifiy.noticeboard.data.model.Page
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.components.HorizontalPagesCarousel
 import com.notifiy.noticeboard.ui.viewmodel.HomeViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun NoticeViewerScreen(
     navController: NavController,
     boardId: String,
-    homeViewModel: HomeViewModel = viewModel()
+    homeViewModel: HomeViewModel = cachedViewModel(HomeViewModel::class.java)
 ) {
     var pages by remember { mutableStateOf<List<Page>>(emptyList()) }
     var noticeBoard by remember { mutableStateOf<NoticeBoard?>(null) }

@@ -24,13 +24,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.utils.ShowErrorSnackbar
 import com.notifiy.noticeboard.utils.getErrorMessage
 
 @Composable
 fun LoginScreen(
     navController: NavController,
-    authViewModel: AuthViewModel = viewModel()
+    authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java)
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

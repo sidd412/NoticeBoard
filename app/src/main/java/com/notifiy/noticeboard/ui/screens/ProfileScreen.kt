@@ -23,13 +23,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     navController: NavController,
-    authViewModel: AuthViewModel = viewModel(),
+    authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java),
     themeViewModel: ThemeViewModel
 ) {
     val authState by authViewModel.authState.collectAsState()

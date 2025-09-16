@@ -27,6 +27,7 @@ import com.notifiy.noticeboard.data.model.Page
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.components.SubscriptionRequiredDialog
 import com.notifiy.noticeboard.ui.viewmodel.BoardEditorViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.utils.ShowErrorSnackbar
 import com.notifiy.noticeboard.utils.getErrorMessage
 import java.util.*
@@ -36,7 +37,7 @@ import java.util.*
 fun BoardEditorScreen(
     navController: NavController,
     boardId: String? = null,
-    boardEditorViewModel: BoardEditorViewModel = viewModel()
+    boardEditorViewModel: BoardEditorViewModel = cachedViewModel(BoardEditorViewModel::class.java)
 ) {
     var title by remember { mutableStateOf("") }
     var subtitle by remember { mutableStateOf("") }

@@ -25,13 +25,14 @@ import androidx.navigation.NavController
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdateBoardScreen(
     navController: NavController,
     boardId: String,
-    authViewModel: AuthViewModel = viewModel()
+    authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java)
 ) {
     var organizationName by remember { mutableStateOf("") }
     var organizationCode by remember { mutableStateOf("") }

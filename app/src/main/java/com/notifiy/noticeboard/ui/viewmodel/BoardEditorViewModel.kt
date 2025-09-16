@@ -1,5 +1,6 @@
 package com.notifiy.noticeboard.ui.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.notifiy.noticeboard.data.model.Notice
@@ -12,9 +13,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class BoardEditorViewModel : ViewModel() {
+class BoardEditorViewModel(private val context: Context) : ViewModel() {
     
-    private val repository: FirebaseRepository = FirebaseRepository()
+    private val repository: FirebaseRepository = FirebaseRepository(context)
     
     private val _authState = MutableStateFlow(UiState<com.notifiy.noticeboard.data.model.User?>())
     val authState: StateFlow<UiState<com.notifiy.noticeboard.data.model.User?>> = _authState.asStateFlow()

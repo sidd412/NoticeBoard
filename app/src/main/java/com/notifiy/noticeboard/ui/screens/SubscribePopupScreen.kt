@@ -26,13 +26,14 @@ import com.notifiy.noticeboard.data.model.SubscriptionRequest
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.HomeViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SubscribePopupScreen(
     navController: NavController,
-    authViewModel: AuthViewModel = viewModel(),
-    homeViewModel: HomeViewModel = viewModel()
+    authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java),
+    homeViewModel: HomeViewModel = cachedViewModel(HomeViewModel::class.java)
 ) {
     var selectedMethod by remember { mutableStateOf(SubscriptionMethod.NONE) }
     var whatsappNumber by remember { mutableStateOf("") }

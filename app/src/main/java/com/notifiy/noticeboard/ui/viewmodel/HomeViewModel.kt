@@ -1,5 +1,6 @@
 package com.notifiy.noticeboard.ui.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.notifiy.noticeboard.data.model.Notice
@@ -11,9 +12,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(private val context: Context) : ViewModel() {
     
-    private val repository: FirebaseRepository = FirebaseRepository()
+    private val repository: FirebaseRepository = FirebaseRepository(context)
     
     private val _subscribedBoards = MutableStateFlow<List<NoticeBoard>>(emptyList())
     val subscribedBoards: StateFlow<List<NoticeBoard>> = _subscribedBoards.asStateFlow()

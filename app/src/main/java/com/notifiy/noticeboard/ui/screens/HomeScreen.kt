@@ -28,6 +28,7 @@ import com.notifiy.noticeboard.navigation.BottomNavScreen
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.HomeViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +36,7 @@ fun HomeScreen(
     navController: NavController,
     bottomNavController: NavController,
     authViewModel: AuthViewModel,
-    homeViewModel: HomeViewModel = viewModel()
+    homeViewModel: HomeViewModel = cachedViewModel(HomeViewModel::class.java)
 ) {
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
