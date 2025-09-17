@@ -1,12 +1,21 @@
 package com.notifiy.noticeboard.utils
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.net.Uri
 import com.google.gson.Gson
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.BinaryBitmap
+import com.google.zxing.DecodeHintType
 import com.google.zxing.EncodeHintType
+import com.google.zxing.MultiFormatReader
+import com.google.zxing.RGBLuminanceSource
+import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.qrcode.QRCodeWriter
 import com.notifiy.noticeboard.data.model.NoticeBoard
+import java.io.InputStream
 
 object QRCodeUtils {
     
@@ -89,14 +98,54 @@ object QRCodeUtils {
         }
     }
     
-    fun parseQRCodeData(qrText: String): QRBoardData? {
+    fun decodeQRCodeFromImage(context: Context, imageUri: Uri): String? {
+        return try {
+            println("DEBUG: Attempting to decode QR from image URI: $imageUri")
+            
+            val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+            
+            if (bitmap == null) {
+                println("DEBUG: Failed to decode bitmap from URI")
+                return null
+            }
+            
+            println("DEBUG: Bitmap decoded successfully - Size: ${bitmap.width}x${bitmap.height}")
+            
+            val width = bitmap.width
+            val height = bitmap.height
+            val pixels = IntArray(width * height)
+            bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+            
+            val source = RGBLuminanceSource(width, height, pixels)
+            val binaryBitmap = BinaryBitmap(HybridBinarizer(source))
+            
+            val reader = MultiFormatReader()
+            val hints = hashMapOf<DecodeHintType, Any>()
+            hints[DecodeHintType.POSSIBLE_FORMATS] = listOf(BarcodeFormat.QR_CODE)
+            hints[DecodeHintType.TRY_HARDER] = true
+            
+            val result = reader.decode(binaryBitmap, hints)
+            val qrText = result.text
+            
+            println("DEBUG: QR Code decoded successfully from image: $qrText")
+            qrText
+        } catch (e: Exception) {
+            println("DEBUG: Failed to decode QR from image: ${e.message}")
+            e.printStackTrace()
+            null
+        }
+    }
+    
+    fun parseQRCodeData(qrText: String): QRCodeUtils.QRBoardData? {
         return try {
             println("DEBUG: Attempting to parse QR data: $qrText")
             
             // Try JSON parsing first
             if (qrText.startsWith("{") && qrText.endsWith("}")) {
                 val gson = Gson()
-                val parsedData = gson.fromJson(qrText, QRBoardData::class.java)
+                val parsedData = gson.fromJson(qrText, QRCodeUtils.QRBoardData::class.java)
                 println("DEBUG: JSON QR parsing successful - Board: ${parsedData?.organizationName}, Code: ${parsedData?.organizationCode}")
                 return parsedData
             }
@@ -106,7 +155,7 @@ object QRCodeUtils {
             if (qrText.startsWith("NOTICEBOARD:")) {
                 val parts = qrText.split(":")
                 if (parts.size >= 7) {
-                    val parsedData = QRBoardData(
+                    val parsedData = QRCodeUtils.QRBoardData(
                         boardId = parts[1],
                         organizationName = parts[2],
                         organizationCode = parts[3],

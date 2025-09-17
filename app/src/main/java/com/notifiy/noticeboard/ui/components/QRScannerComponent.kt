@@ -6,18 +6,24 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import com.notifiy.noticeboard.utils.QRCodeUtils
 
 @Composable
 fun QRScannerComponent(
@@ -54,6 +61,25 @@ fun QRScannerComponent(
         hasCameraPermission = isGranted
         if (!isGranted) {
             onError("Camera permission is required to scan QR codes")
+        }
+    }
+    
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            try {
+                val qrText: String? = QRCodeUtils.decodeQRCodeFromImage(context, uri)
+                if (!qrText.isNullOrEmpty()) {
+                    onQRCodeScanned(qrText)
+                } else {
+                    onError("No QR code found in the selected image")
+                }
+            } catch (e: Exception) {
+                onError("Error reading image: ${e.message}")
+            }
+        } else {
+            onError("No image selected")
         }
     }
     
@@ -92,16 +118,14 @@ fun QRScannerComponent(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = if (hasCameraPermission) 
-                    "Tap below to open camera and scan QR code" 
-                else 
-                    "Camera permission required to scan QR codes",
+                text = "Choose how to scan the QR code",
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             
+            // Camera Scanner Button
             if (hasCameraPermission) {
                 Button(
                     onClick = {
@@ -118,18 +142,44 @@ fun QRScannerComponent(
                             captureActivity = PortraitCaptureActivity::class.java
                         }
                         scanLauncher.launch(options)
-                    }
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Open Scanner")
+                    Icon(
+                        Icons.Default.CameraAlt,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Open Camera Scanner")
                 }
             } else {
                 Button(
                     onClick = {
                         permissionLauncher.launch(Manifest.permission.CAMERA)
-                    }
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Grant Camera Permission")
                 }
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Gallery Selection Button
+            OutlinedButton(
+                onClick = {
+                    galleryLauncher.launch("image/*")
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    Icons.Default.PhotoLibrary,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Select from Gallery")
             }
         }
     }
