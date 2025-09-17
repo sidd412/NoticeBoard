@@ -1,6 +1,7 @@
 package com.notifiy.noticeboard.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -56,6 +58,7 @@ import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.YourBoardsViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
+import com.notifiy.noticeboard.utils.QRCodeUtils
 import com.notifiy.noticeboard.utils.ShowErrorSnackbar
 import com.notifiy.noticeboard.utils.getErrorMessage
 
@@ -385,9 +388,29 @@ fun YourBoardCard(
             Box(
                 modifier = Modifier.padding(top = 16.dp, end = 16.dp)
                     .size(90.dp)
-                    .border(1.dp, Color.Black)
-                    .align(Alignment.TopEnd)
-            )
+                    .align(Alignment.TopEnd),
+                contentAlignment = Alignment.Center
+            ){
+                val qrBitmap = remember(board.id) { 
+                    QRCodeUtils.generateQRCodeBitmap(board, 90) 
+                }
+                
+                if (qrBitmap != null) {
+                    Image(
+                        bitmap = qrBitmap.asImageBitmap(),
+                        contentDescription = "QR Code for ${board.organizationName}",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(2.dp).clip(RoundedCornerShape(2.dp)) // Small padding to prevent touching borders
+                    )
+                } else {
+                    Text(
+                        text = "QR",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                }
+            }
         }
     }
 }

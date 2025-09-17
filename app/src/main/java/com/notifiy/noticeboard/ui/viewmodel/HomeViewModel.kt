@@ -62,6 +62,16 @@ class HomeViewModel(private val context: Context) : ViewModel() {
         }
     }
     
+    suspend fun isUserSubscribedToBoard(userId: String, instituteCode: String): Boolean {
+        return try {
+            val user = repository.getCurrentUser()
+            user?.subscribedCodes?.contains(instituteCode) ?: false
+        } catch (e: Exception) {
+            println("DEBUG: isUserSubscribedToBoard - Error: ${e.message}")
+            false
+        }
+    }
+    
     fun unsubscribeFromBoard(userId: String, instituteCode: String, onResult: (Result<Boolean>) -> Unit) {
         viewModelScope.launch {
             try {

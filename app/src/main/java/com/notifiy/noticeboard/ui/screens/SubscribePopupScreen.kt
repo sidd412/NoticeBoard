@@ -1,5 +1,6 @@
 package com.notifiy.noticeboard.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -36,21 +38,26 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
 import com.notifiy.noticeboard.data.model.SubscriptionMethod
 import com.notifiy.noticeboard.data.model.SubscriptionRequest
+import com.notifiy.noticeboard.ui.components.QRScannerComponent
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.HomeViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
+import com.notifiy.noticeboard.utils.QRCodeUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +77,8 @@ fun SubscribePopupScreen(
 
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -134,7 +143,7 @@ fun SubscribePopupScreen(
                 SubscriptionMethodCard(
                     title = "QR Code",
                     description = "Scan the QR code provided by the institute",
-                    icon = Icons.Default.Star,
+                    icon = Icons.Default.QrCodeScanner,
                     isSelected = selectedMethod == SubscriptionMethod.QR_CODE,
                     onClick = {
                         selectedMethod = SubscriptionMethod.QR_CODE
@@ -214,44 +223,94 @@ fun SubscribePopupScreen(
 
                 SubscriptionMethod.QR_CODE -> {
                     item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                        if (isLoading) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                )
                             ) {
-                                Icon(
-                                    Icons.Default.Star,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(64.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = "QR Code Scanner",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Point your camera at the QR code to scan",
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Button(
-                                    onClick = {
-                                        // TODO: Implement QR code scanning
-                                        qrCodeData = "sample_qr_data"
-                                    }) {
-                                    Text("Scan QR Code")
+                                Column(
+                                    modifier = Modifier.padding(24.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    CircularProgressIndicator()
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "Subscribing to board...",
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
                                 }
                             }
+                        } else {
+                            QRScannerComponent(
+                            onQRCodeScanned = { scannedData ->
+                                println("DEBUG: QR Code scanned - Raw data: $scannedData")
+                                // Parse the QR code data
+                                val qrBoardData = QRCodeUtils.parseQRCodeData(scannedData)
+                                if (qrBoardData != null) {
+                                    println("DEBUG: QR Code parsed successfully - Board: ${qrBoardData.organizationName}, Code: ${qrBoardData.organizationCode}")
+                                    qrCodeData = qrBoardData.organizationCode
+                                    successMessage = "QR Code scanned successfully! Board: ${qrBoardData.organizationName}"
+                                    errorMessage = ""
+                                    
+                                    // Auto-subscribe after successful QR scan
+                                    if (currentUser != null && qrBoardData.organizationCode.isNotBlank()) {
+                                        // First check if already subscribed
+                                        coroutineScope.launch {
+                                            val isAlreadySubscribed = homeViewModel.isUserSubscribedToBoard(
+                                                currentUser.id, qrBoardData.organizationCode
+                                            )
+                                            
+                                            if (isAlreadySubscribed) {
+                                                Toast.makeText(
+                                                    context,
+                                                    "You are already subscribed to ${qrBoardData.organizationName}",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                                errorMessage = ""
+                                                successMessage = ""
+                                            } else {
+                                                isLoading = true
+                                                homeViewModel.subscribeToBoard(
+                                                    currentUser.id, qrBoardData.organizationCode
+                                                ) { result ->
+                                                    isLoading = false
+                                                    result.fold(onSuccess = { success ->
+                                                        if (success) {
+                                                            println("DEBUG: Auto-subscription successful")
+                                                            Toast.makeText(
+                                                                context,
+                                                                "Successfully subscribed to ${qrBoardData.organizationName}!",
+                                                                Toast.LENGTH_LONG
+                                                            ).show()
+                                                            // Navigate back after successful subscription
+                                                            navController.popBackStack()
+                                                        } else {
+                                                            errorMessage = "Failed to subscribe to ${qrBoardData.organizationName}"
+                                                        }
+                                                    }, onFailure = { exception ->
+                                                        println("DEBUG: Auto-subscription failed: ${exception.message}")
+                                                        errorMessage = exception.message ?: "Failed to subscribe to board"
+                                                    })
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    println("DEBUG: QR Code parsing failed")
+                                    errorMessage = "Invalid QR code format. Please scan a valid board QR code."
+                                    qrCodeData = ""
+                                }
+                            },
+                            onError = { error ->
+                                println("DEBUG: QR Scanner error: $error")
+                                errorMessage = error
+                                qrCodeData = ""
+                            }
+                        )
                         }
                     }
                 }
@@ -360,24 +419,46 @@ fun SubscribePopupScreen(
 
                 println("DEBUG: SubscribePopupScreen - Subscribing to board with code: $instituteCode")
 
-                // Call the repository to subscribe
-                homeViewModel.subscribeToBoard(
-                    currentUser.id, instituteCode
-                ) { result ->
-                    isLoading = false
-                    result.fold(onSuccess = { success ->
-                        if (success) {
-                            println("DEBUG: SubscribePopupScreen - Subscription successful")
-                            successMessage = "Successfully subscribed to notice board!"
-                            // Navigate back after successful subscription
-                            navController.popBackStack()
-                        } else {
-                            errorMessage = "Failed to subscribe to board"
+                // First check if already subscribed
+                coroutineScope.launch {
+                    val isAlreadySubscribed = homeViewModel.isUserSubscribedToBoard(
+                        currentUser.id, instituteCode
+                    )
+                    
+                    if (isAlreadySubscribed) {
+                        isLoading = false
+                        Toast.makeText(
+                            context,
+                            "You are already subscribed to this board",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        errorMessage = ""
+                        successMessage = ""
+                    } else {
+                        // Call the repository to subscribe
+                        homeViewModel.subscribeToBoard(
+                            currentUser.id, instituteCode
+                        ) { result ->
+                            isLoading = false
+                            result.fold(onSuccess = { success ->
+                                if (success) {
+                                    println("DEBUG: SubscribePopupScreen - Subscription successful")
+                                    Toast.makeText(
+                                        context,
+                                        "Successfully subscribed to notice board!",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    // Navigate back after successful subscription
+                                    navController.popBackStack()
+                                } else {
+                                    errorMessage = "Failed to subscribe to board"
+                                }
+                            }, onFailure = { exception ->
+                                println("DEBUG: SubscribePopupScreen - Subscription failed: ${exception.message}")
+                                errorMessage = exception.message ?: "Failed to subscribe to board"
+                            })
                         }
-                    }, onFailure = { exception ->
-                        println("DEBUG: SubscribePopupScreen - Subscription failed: ${exception.message}")
-                        errorMessage = exception.message ?: "Failed to subscribe to board"
-                    })
+                    }
                 }
             },
             enabled = !isLoading && selectedMethod != SubscriptionMethod.NONE,
