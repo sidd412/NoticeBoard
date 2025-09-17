@@ -409,16 +409,19 @@ class FirebaseRepository(private val context: Context? = null) {
             println("DEBUG: subscribeToBoardByCode - Subscription successful")
             // Invalidate user cache and subscribed boards cache
             cacheManager?.invalidateUser(userId)
-            cacheManager?.getCachedNoticeBoardsList("subscribed_$userId")?.let { 
-                cacheManager?.getCachedNoticeBoardsList("subscribed_$userId")?.let { 
-                    // Clear the cache to force refresh
-                }
-            }
+            cacheManager?.invalidateNoticeBoardsList("subscribed_$userId")
+            println("DEBUG: subscribeToBoardByCode - Cache invalidated for user and subscribed boards")
             Result.success(true)
         } catch (e: Exception) {
             println("DEBUG: subscribeToBoardByCode - Error: ${e.message}")
             Result.failure(e)
         }
+    }
+    
+    fun clearSubscribedBoardsCache(userId: String) {
+        println("DEBUG: FirebaseRepository.clearSubscribedBoardsCache called for userId: $userId")
+        cacheManager?.invalidateUser(userId)
+        cacheManager?.invalidateNoticeBoardsList("subscribed_$userId")
     }
     
     suspend fun unsubscribeFromBoardByCode(userId: String, instituteCode: String): Result<Boolean> {
@@ -439,6 +442,8 @@ class FirebaseRepository(private val context: Context? = null) {
             }.await()
             // Invalidate user cache and subscribed boards cache
             cacheManager?.invalidateUser(userId)
+            cacheManager?.invalidateNoticeBoardsList("subscribed_$userId")
+            println("DEBUG: unsubscribeFromBoardByCode - Cache invalidated for user and subscribed boards")
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)

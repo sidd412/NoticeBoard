@@ -277,6 +277,11 @@ class CacheManager(private val context: Context) {
         prefs.edit().remove(KEY_ALL_PAGES).apply()
     }
     
+    fun invalidateNoticeBoardsList(key: String) {
+        prefs.edit().remove("$KEY_NOTICE_BOARDS_LIST_PREFIX$key").apply()
+        println("DEBUG: CacheManager - Invalidated notice boards list: $key")
+    }
+    
     fun clearAllCache() {
         prefs.edit().clear().apply()
     }

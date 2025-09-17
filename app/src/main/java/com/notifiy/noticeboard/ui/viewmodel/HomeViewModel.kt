@@ -90,6 +90,14 @@ class HomeViewModel(private val context: Context) : ViewModel() {
         _errorMessage.value = null
     }
     
+    fun forceRefreshSubscribedBoards(userId: String) {
+        println("DEBUG: HomeViewModel.forceRefreshSubscribedBoards called")
+        // Clear any cached data first
+        repository.clearSubscribedBoardsCache(userId)
+        // Force reload
+        loadSubscribedBoards(userId)
+    }
+    
     suspend fun getNoticeBoardById(boardId: String): NoticeBoard? {
         return try {
             println("DEBUG: HomeViewModel.getNoticeBoardById - Getting board: $boardId")

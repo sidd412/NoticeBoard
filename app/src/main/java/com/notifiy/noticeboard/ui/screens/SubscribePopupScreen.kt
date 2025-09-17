@@ -281,13 +281,15 @@ fun SubscribePopupScreen(
                                                     result.fold(onSuccess = { success ->
                                                         if (success) {
                                                             println("DEBUG: Auto-subscription successful")
-                                                            Toast.makeText(
-                                                                context,
-                                                                "Successfully subscribed to ${qrBoardData.organizationName}!",
-                                                                Toast.LENGTH_LONG
-                                                            ).show()
-                                                            // Navigate back after successful subscription
-                                                            navController.popBackStack()
+                                                                                                                    Toast.makeText(
+                                                            context,
+                                                            "Successfully subscribed to ${qrBoardData.organizationName}!",
+                                                            Toast.LENGTH_LONG
+                                                        ).show()
+                                                        // Force refresh the home screen
+                                                        homeViewModel.forceRefreshSubscribedBoards(currentUser.id)
+                                                        // Navigate back after successful subscription
+                                                        navController.popBackStack()
                                                         } else {
                                                             errorMessage = "Failed to subscribe to ${qrBoardData.organizationName}"
                                                         }
@@ -448,6 +450,8 @@ fun SubscribePopupScreen(
                                         "Successfully subscribed to notice board!",
                                         Toast.LENGTH_LONG
                                     ).show()
+                                    // Force refresh the home screen
+                                    homeViewModel.forceRefreshSubscribedBoards(currentUser.id)
                                     // Navigate back after successful subscription
                                     navController.popBackStack()
                                 } else {
