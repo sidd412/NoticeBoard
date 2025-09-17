@@ -2,6 +2,7 @@ package com.notifiy.noticeboard.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,25 +62,23 @@ import com.notifiy.noticeboard.utils.getErrorMessage
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun YourBoardsScreen(
-    navController: NavController,
-    mainNavController: NavController,
-    authViewModel: AuthViewModel
+    navController: NavController, mainNavController: NavController, authViewModel: AuthViewModel
 ) {
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
     val yourBoardsViewModel: YourBoardsViewModel = cachedViewModel(YourBoardsViewModel::class.java)
     val userBoardsState by yourBoardsViewModel.userBoards.collectAsState()
     val errorMessage by yourBoardsViewModel.errorMessage.collectAsState()
-    
+
     val snackbarHostState = remember { SnackbarHostState() }
-    
+
     // Handle mobile back button
     BackHandler {
         println("DEBUG: YourBoardsScreen - Mobile back button pressed")
         // Navigate to Home tab instead of popBackStack
         navController.navigate(BottomNavScreen.Home.route)
     }
-    
+
     // Load user boards when screen is displayed
     LaunchedEffect(currentUser) {
         println("DEBUG: YourBoardsScreen - LaunchedEffect triggered")
@@ -95,7 +94,7 @@ fun YourBoardsScreen(
             // Don't crash the app, just log the error
         }
     }
-    
+
     // Cleanup when navigating away
     DisposableEffect(Unit) {
         onDispose {
@@ -107,14 +106,13 @@ fun YourBoardsScreen(
             }
         }
     }
-    
+
     // Show error messages
     ShowErrorSnackbar(
         error = errorMessage?.let { getErrorMessage(Exception(it)) },
         snackbarHostState = snackbarHostState,
-        onErrorShown = { yourBoardsViewModel.clearError() }
-    )
-    
+        onErrorShown = { yourBoardsViewModel.clearError() })
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -122,12 +120,11 @@ fun YourBoardsScreen(
     ) {
         // Main content
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 80.dp), // Add padding for fixed button
-            contentPadding = PaddingValues(16.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 90.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        )
+        {
             // Back button and header
             item {
                 Row(
@@ -135,30 +132,23 @@ fun YourBoardsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = { 
-                                println("DEBUG: YourBoardsScreen - Back icon clicked")
-                                // Navigate to Home tab instead of popBackStack
-                                navController.navigate(BottomNavScreen.Home.route)
-                            }
-                        ) {
-                            Icon(
-                                Icons.Default.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Your Notice Boards",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
+                    IconButton(
+                        onClick = {
+                            println("DEBUG: YourBoardsScreen - Back icon clicked")
+                            // Navigate to Home tab instead of popBackStack
+                            navController.navigate(BottomNavScreen.Home.route)
+                        }) {
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back"
                         )
                     }
-                    
+                    Text(
+                        text = "Your Notice Boards",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+
                     // Refresh button
                     IconButton(
                         onClick = {
@@ -169,21 +159,18 @@ fun YourBoardsScreen(
                             } ?: run {
                                 println("DEBUG: YourBoardsScreen - No current user for refresh")
                             }
-                        }
-                    ) {
+                        }) {
                         Icon(
-                            Icons.Default.Refresh,
-                            contentDescription = "Refresh"
+                            Icons.Default.Refresh, contentDescription = "Refresh"
                         )
                     }
                 }
             }
-            
+
             // Header Card
             item {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
+                    modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 ) {
@@ -205,24 +192,23 @@ fun YourBoardsScreen(
                     }
                 }
             }
-            
+
             // My Existing Boards Section
             item {
                 Text(
-                    text = "My Existing Boards",
+                    text = "My Running Boards",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-            
+
             // Boards List
             if (userBoardsState.isLoading) {
                 item {
                     println("DEBUG: YourBoardsScreen - Showing loading indicator")
                     Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
+                        modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
                     }
@@ -231,8 +217,7 @@ fun YourBoardsScreen(
                 item {
                     println("DEBUG: YourBoardsScreen - No boards found, showing empty state")
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
+                        modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                     ) {
@@ -269,16 +254,14 @@ fun YourBoardsScreen(
                 items(userBoardsState.data ?: emptyList()) { board ->
                     println("DEBUG: YourBoardsScreen - Rendering board: ${board.organizationName}")
                     YourBoardCard(
-                        board = board,
-                        onUpdateClick = {
+                        board = board, onUpdateClick = {
                             println("DEBUG: YourBoardsScreen - Update clicked for board: ${board.id}")
                             mainNavController.navigate(Screen.BoardDetails.createRoute(board.id))
-                        }
-                    )
+                        })
                 }
             }
         }
-        
+
         // Fixed Create New Board Button
         Button(
             onClick = { mainNavController.navigate(Screen.CreateBoard.route) },
@@ -297,38 +280,32 @@ fun YourBoardsScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Create New Board",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
+                text = "Create New Board", fontSize = 16.sp, fontWeight = FontWeight.Medium
             )
         }
-        
+
         // Snackbar Host
         SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            hostState = snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
 }
 
 @Composable
 fun YourBoardCard(
-    board: NoticeBoard,
-    onUpdateClick: () -> Unit
+    board: NoticeBoard, onUpdateClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        onClick = onUpdateClick
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            // Header with board name and update button
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.padding(16.dp)
             ) {
+                // Header with board name and update button
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -347,9 +324,9 @@ fun YourBoardCard(
                             color = Color.White
                         )
                     }
-                    
+
                     Spacer(modifier = Modifier.width(12.dp))
-                    
+
                     Column {
                         Text(
                             text = board.organizationName,
@@ -364,70 +341,60 @@ fun YourBoardCard(
                         )
                     }
                 }
-                
-                IconButton(
-                    onClick = onUpdateClick
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Board Details
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = "Update Board",
-                        tint = MaterialTheme.colorScheme.primary
+                    BoardDetailRow(
+                        label = "Code", value = board.organizationCode
+                    )
+                    BoardDetailRow(
+                        label = "WhatsApp", value = board.organizationWhatsapp
+                    )
+                    BoardDetailRow(
+                        label = "Email", value = board.organizationEmail
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Status
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(
+                                if (board.isActive) Color(0xFF4CAF50)
+                                else Color(0xFFF44336)
+                            )
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (board.isActive) "Active" else "Inactive",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                 }
             }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Board Details
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                BoardDetailRow(
-                    label = "Code",
-                    value = board.organizationCode
-                )
-                BoardDetailRow(
-                    label = "Email",
-                    value = board.organizationEmail
-                )
-                BoardDetailRow(
-                    label = "WhatsApp",
-                    value = board.organizationWhatsapp
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Status
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(
-                            if (board.isActive) 
-                                Color(0xFF4CAF50) 
-                            else 
-                                Color(0xFFF44336)
-                        )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = if (board.isActive) "Active" else "Inactive",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-            }
+            Box(
+                modifier = Modifier.padding(top = 16.dp, end = 16.dp)
+                    .size(90.dp)
+                    .border(1.dp, Color.Black)
+                    .align(Alignment.TopEnd)
+            )
         }
     }
 }
 
 @Composable
 fun BoardDetailRow(
-    label: String,
-    value: String
+    label: String, value: String
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()

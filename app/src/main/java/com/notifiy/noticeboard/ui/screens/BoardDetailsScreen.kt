@@ -45,36 +45,34 @@ fun BoardDetailsScreen(
 ) {
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
-    
+
     // Subscription popup state
     var showSubscriptionDialog by remember { mutableStateOf(false) }
-    
+
     // Load board details and pages
     LaunchedEffect(boardId) {
         boardDetailsViewModel.loadBoardDetails(boardId)
     }
-    
+
     // Refresh data when screen becomes visible (e.g., returning from BoardEditor)
     DisposableEffect(Unit) {
         boardDetailsViewModel.loadBoardDetails(boardId)
         onDispose { }
     }
-    
+
     val boardState by boardDetailsViewModel.boardState.collectAsState()
     val pagesState by boardDetailsViewModel.pagesState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    
+
     // Check if subscription is active
     fun isSubscriptionActive(): Boolean {
         val board = boardState.data
         if (board == null) return false
-        
+
         val currentTime = System.currentTimeMillis()
-        return board.subscriptionType.isNotEmpty() && 
-               board.subscriptionType != "null" && 
-               board.subscriptionExpiry > currentTime
+        return board.subscriptionType.isNotEmpty() && board.subscriptionType != "null" && board.subscriptionExpiry > currentTime
     }
-    
+
     // Handle page card click
     fun onPageCardClick(pageId: String) {
         if (isSubscriptionActive()) {
@@ -83,7 +81,7 @@ fun BoardDetailsScreen(
             showSubscriptionDialog = true
         }
     }
-    
+
     // Handle create new page click
     fun onCreateNewPageClick() {
         if (isSubscriptionActive()) {
@@ -94,31 +92,29 @@ fun BoardDetailsScreen(
             showSubscriptionDialog = true
         }
     }
-    
+
     // Show error messages
     val errorMessage by boardDetailsViewModel.errorMessage.collectAsState()
     ShowErrorSnackbar(
         error = errorMessage?.let { getErrorMessage(Exception(it)) },
         snackbarHostState = snackbarHostState,
-        onErrorShown = { boardDetailsViewModel.clearError() }
-    )
-    
+        onErrorShown = { boardDetailsViewModel.clearError() })
+
     // Handle back button
     BackHandler {
         navController.popBackStack()
     }
-    
+
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .padding(top = 35.dp, bottom = 50.dp)
             .background(MaterialTheme.colorScheme.background)
     ) {
         // Main content
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 80.dp), // Add padding for fixed button
-            contentPadding = PaddingValues(16.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 60.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Back button and header
@@ -128,95 +124,87 @@ fun BoardDetailsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = { navController.popBackStack() }
-                        ) {
-                            Icon(
-                                Icons.Default.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = boardState.data?.organizationName ?: "Board Details",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
+                    IconButton(
+                        onClick = { navController.popBackStack() }) {
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back"
                         )
                     }
-                    
+                    Text(
+                        text = "Board Details",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+//                    }
+
                     // Refresh button
                     IconButton(
-                        onClick = { boardDetailsViewModel.loadBoardDetails(boardId) }
-                    ) {
+                        onClick = { boardDetailsViewModel.loadBoardDetails(boardId) }) {
                         Icon(
-                            Icons.Default.Refresh,
-                            contentDescription = "Refresh"
+                            Icons.Default.Refresh, contentDescription = "Refresh"
                         )
                     }
                 }
             }
-            
+
             // Board info card
             item {
                 boardState.data?.let { board ->
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
+                        modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
                     ) {
                         Column(
-                            modifier = Modifier.padding(16.dp)
+                            modifier = Modifier
+                                .padding(7.dp,0.dp,7.dp,7.dp)
                         ) {
                             Text(
-                                text = "Board Information",
-                                fontSize = 16.sp,
+                                text = "Your Board Information",
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Spacer(modifier = Modifier.height(12.dp))
-                            
+
                             BoardInfoRow(
-                                label = "Code",
-                                value = board.organizationCode
+                                label = "Institute Name", value = board.organizationName
+                            )
+
+                            BoardInfoRow(
+                                label = "Code", value = board.organizationCode
                             )
                             BoardInfoRow(
-                                label = "Email",
-                                value = board.organizationEmail
+                                label = "Email", value = board.organizationEmail
                             )
                             BoardInfoRow(
-                                label = "WhatsApp",
-                                value = board.organizationWhatsapp
+                                label = "WhatsApp", value = board.organizationWhatsapp
                             )
                             BoardInfoRow(
-                                label = "Location",
-                                value = board.organizationLocation
+                                label = "Location", value = board.organizationLocation
                             )
                         }
                     }
                 }
             }
-            
+
             // Pages section
             item {
                 Text(
-                    text = "Pages",
+                    text = "Pages On this Board",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 7.dp)
                 )
             }
-            
+
             // Loading state
             if (pagesState.isLoading) {
                 item {
                     Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
+                        modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
                     }
@@ -229,8 +217,7 @@ fun BoardDetailsScreen(
                     println("DEBUG: BoardDetailsScreen - pagesState.isLoading: ${pagesState.isLoading}")
                     println("DEBUG: BoardDetailsScreen - pagesState.error: ${pagesState.error}")
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
+                        modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                     ) {
@@ -260,27 +247,21 @@ fun BoardDetailsScreen(
             }
             // Pages list
             else {
-                item {
-                    println("DEBUG: BoardDetailsScreen - Showing ${pagesState.data?.size ?: 0} pages")
-                }
                 items(pagesState.data ?: emptyList()) { page ->
                     println("DEBUG: BoardDetailsScreen - Rendering page: ${page.title}")
                     PageCard(
-                        page = page,
-                        onClick = { onPageCardClick(page.id) }
-                    )
+                        page = page, onClick = { onPageCardClick(page.id) })
                 }
             }
         }
-        
+
         // Fixed Create New Page Button
         Button(
             onClick = { onCreateNewPageClick() },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(top = 16.dp, bottom = 50.dp),
+                .padding(horizontal = 16.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
             )
@@ -292,23 +273,20 @@ fun BoardDetailsScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Create New Page",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
+                text = "Create New Page", fontSize = 16.sp, fontWeight = FontWeight.Medium
             )
         }
-        
+
         // Snackbar Host
         SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            hostState = snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter)
         )
-        
+
         // Subscription Required Dialog
         SubscriptionRequiredDialog(
             isVisible = showSubscriptionDialog,
             onDismiss = { showSubscriptionDialog = false },
-            onSubscribe = { 
+            onSubscribe = {
                 showSubscriptionDialog = false
                 navController.navigate(Screen.Subscription.createRoute(boardId))
             },
@@ -319,8 +297,7 @@ fun BoardDetailsScreen(
 
 @Composable
 fun BoardInfoRow(
-    label: String,
-    value: String
+    label: String, value: String
 ) {
     Row(
         modifier = Modifier
@@ -346,20 +323,40 @@ fun BoardInfoRow(
 
 @Composable
 fun PageCard(
-    page: Page,
-    onClick: () -> Unit
+    page: Page, onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+            // Priority indicator
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(
+                        when (page.priority.uppercase()) {
+                            "HIGH", "URGENT" -> Color(0xFFF44336)
+                            "NORMAL" -> Color(0xFF2196F3)
+                            "LOW" -> Color(0xFF4CAF50)
+                            else -> Color(0xFF2196F3)
+                        }
+                    )
+                    .padding(horizontal = 6.dp)
+            ) {
+                Text(
+                    text = "${page.priority.uppercase()}-Priority",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.height(5.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -387,31 +384,10 @@ fun PageCard(
                         )
                     }
                 }
-                
-                // Priority indicator
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            when (page.priority.uppercase()) {
-                                "HIGH", "URGENT" -> Color(0xFFF44336)
-                                "NORMAL" -> Color(0xFF2196F3)
-                                else -> Color(0xFF4CAF50)
-                            }
-                        )
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = page.priority,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // Info points preview
             if (page.infoPoints.isNotEmpty()) {
                 Text(
@@ -429,14 +405,16 @@ fun PageCard(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // Created date
             Text(
-                text = "Created: ${SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(page.createdAt))}",
-                fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                text = "Created: ${
+                    SimpleDateFormat(
+                        "MMM dd, yyyy", Locale.getDefault()
+                    ).format(Date(page.createdAt))
+                }", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )
         }
     }

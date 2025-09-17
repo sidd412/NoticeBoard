@@ -99,7 +99,7 @@ fun HomeScreen(
                         modifier = Modifier.padding(20.dp)
                     ) {
                         Text(
-                            text = "Welcome! To Notice Board",
+                            text = "Welcome! To NoteXP",
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer

@@ -2,11 +2,11 @@ package com.notifiy.noticeboard.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,8 +31,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -73,38 +71,39 @@ fun SubscribePopupScreen(
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
+            .padding(top = 35.dp, bottom = 50.dp)
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Top App Bar
-        TopAppBar(
-            title = {
-            Text(
-                text = "Subscribe to Notice Board",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
-        }, navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(
-                    Icons.Default.ArrowBack, contentDescription = "Back"
-                )
-            }
-        }, colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-        )
-
         // Content
         LazyColumn(
-            modifier = Modifier
-                .fillMaxHeight(.85f)
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(16.dp,6.dp,16.dp,16.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 60.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back"
+                        )
+                    }
+                    Text(
+                        text = "Subscribe A Board",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp
+                    )
+                    IconButton(onClick = {}) {}
+                }
+            }
+
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
@@ -155,19 +154,6 @@ fun SubscribePopupScreen(
                         errorMessage = ""
                     })
             }
-
-            // WhatsApp Option
-//            item {
-//                SubscriptionMethodCard(
-//                    title = "WhatsApp Number",
-//                    description = "Enter the WhatsApp number of the institute",
-//                    icon = Icons.Default.Warning,
-//                    isSelected = selectedMethod == SubscriptionMethod.WHATSAPP,
-//                    onClick = {
-//                        selectedMethod = SubscriptionMethod.WHATSAPP
-//                        errorMessage = ""
-//                    })
-//            }
 
             // Email Option
             item {
@@ -308,114 +294,106 @@ fun SubscribePopupScreen(
                 }
             }
 
-            // Subscribe Button
-//            item {
-//
-//            }
         }
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Button(
-                onClick = {
-                    if (selectedMethod == SubscriptionMethod.NONE) {
-                        errorMessage = "Please select a subscription method"
-                        return@Button
-                    }
-
-                    val request = SubscriptionRequest(
-                        whatsappNumber = whatsappNumber,
-                        email = email,
-                        noticeBoardCode = noticeBoardCode,
-                        qrCodeData = qrCodeData,
-                        subscriptionMethod = selectedMethod
-                    )
-
-                    println("DEBUG: SubscribePopupScreen - Button clicked, selectedMethod: $selectedMethod")
-                    println("DEBUG: SubscribePopupScreen - noticeBoardCode: $noticeBoardCode")
-                    println("DEBUG: SubscribePopupScreen - whatsappNumber: $whatsappNumber")
-                    println("DEBUG: SubscribePopupScreen - email: $email")
-                    println("DEBUG: SubscribePopupScreen - qrCodeData: $qrCodeData")
-                    println("DEBUG: SubscribePopupScreen - currentUser: $currentUser")
-                    println("DEBUG: SubscribePopupScreen - isLoading: $isLoading")
-                    println("DEBUG: SubscribePopupScreen - Button enabled: ${!isLoading && selectedMethod != SubscriptionMethod.NONE}")
-
-                    // Implement real subscription logic
-                    isLoading = true
-                    errorMessage = ""
-
-                    if (currentUser == null) {
-                        errorMessage = "Please sign in to subscribe to boards"
-                        isLoading = false
-                        return@Button
-                    }
-
-                    // Get the institute code based on the subscription method
-                    val instituteCode = when (selectedMethod) {
-                        SubscriptionMethod.CODE -> noticeBoardCode
-                        SubscriptionMethod.EMAIL -> {
-                            // For now, use email as code (this should be improved)
-                            email
-                        }
-
-                        SubscriptionMethod.WHATSAPP -> {
-                            // For now, use WhatsApp as code (this should be improved)
-                            whatsappNumber
-                        }
-
-                        SubscriptionMethod.QR_CODE -> {
-                            // Extract code from QR code data
-                            qrCodeData
-                        }
-
-                        else -> ""
-                    }
-
-                    println("DEBUG: SubscribePopupScreen - Calculated instituteCode: $instituteCode")
-
-                    if (instituteCode.isBlank()) {
-                        errorMessage = "Please enter a valid code or contact information"
-                        isLoading = false
-                        return@Button
-                    }
-
-                    println("DEBUG: SubscribePopupScreen - Subscribing to board with code: $instituteCode")
-
-                    // Call the repository to subscribe
-                    homeViewModel.subscribeToBoard(
-                        currentUser.id, instituteCode
-                    ) { result ->
-                        isLoading = false
-                        result.fold(onSuccess = { success ->
-                            if (success) {
-                                println("DEBUG: SubscribePopupScreen - Subscription successful")
-                                successMessage = "Successfully subscribed to notice board!"
-                                // Navigate back after successful subscription
-                                navController.popBackStack()
-                            } else {
-                                errorMessage = "Failed to subscribe to board"
-                            }
-                        }, onFailure = { exception ->
-                            println("DEBUG: SubscribePopupScreen - Subscription failed: ${exception.message}")
-                            errorMessage = exception.message ?: "Failed to subscribe to board"
-                        })
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading && selectedMethod != SubscriptionMethod.NONE
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp), color = Color.White
-                    )
-                } else {
-                    Text(
-                        text = "Subscribe", fontSize = 16.sp, fontWeight = FontWeight.Medium
-                    )
+        Button(
+            onClick = {
+                if (selectedMethod == SubscriptionMethod.NONE) {
+                    errorMessage = "Please select a subscription method"
+                    return@Button
                 }
+
+                val request = SubscriptionRequest(
+                    whatsappNumber = whatsappNumber,
+                    email = email,
+                    noticeBoardCode = noticeBoardCode,
+                    qrCodeData = qrCodeData,
+                    subscriptionMethod = selectedMethod
+                )
+
+                println("DEBUG: SubscribePopupScreen - Button clicked, selectedMethod: $selectedMethod")
+                println("DEBUG: SubscribePopupScreen - noticeBoardCode: $noticeBoardCode")
+                println("DEBUG: SubscribePopupScreen - whatsappNumber: $whatsappNumber")
+                println("DEBUG: SubscribePopupScreen - email: $email")
+                println("DEBUG: SubscribePopupScreen - qrCodeData: $qrCodeData")
+                println("DEBUG: SubscribePopupScreen - currentUser: $currentUser")
+                println("DEBUG: SubscribePopupScreen - isLoading: $isLoading")
+                println("DEBUG: SubscribePopupScreen - Button enabled: ${!isLoading && selectedMethod != SubscriptionMethod.NONE}")
+
+                // Implement real subscription logic
+                isLoading = true
+                errorMessage = ""
+
+                if (currentUser == null) {
+                    errorMessage = "Please sign in to subscribe to boards"
+                    isLoading = false
+                    return@Button
+                }
+
+                // Get the institute code based on the subscription method
+                val instituteCode = when (selectedMethod) {
+                    SubscriptionMethod.CODE -> noticeBoardCode
+                    SubscriptionMethod.EMAIL -> {
+                        // For now, use email as code (this should be improved)
+                        email
+                    }
+
+                    SubscriptionMethod.WHATSAPP -> {
+                        // For now, use WhatsApp as code (this should be improved)
+                        whatsappNumber
+                    }
+
+                    SubscriptionMethod.QR_CODE -> {
+                        // Extract code from QR code data
+                        qrCodeData
+                    }
+
+                    else -> ""
+                }
+
+                println("DEBUG: SubscribePopupScreen - Calculated instituteCode: $instituteCode")
+
+                if (instituteCode.isBlank()) {
+                    errorMessage = "Please enter a valid code or contact information"
+                    isLoading = false
+                    return@Button
+                }
+
+                println("DEBUG: SubscribePopupScreen - Subscribing to board with code: $instituteCode")
+
+                // Call the repository to subscribe
+                homeViewModel.subscribeToBoard(
+                    currentUser.id, instituteCode
+                ) { result ->
+                    isLoading = false
+                    result.fold(onSuccess = { success ->
+                        if (success) {
+                            println("DEBUG: SubscribePopupScreen - Subscription successful")
+                            successMessage = "Successfully subscribed to notice board!"
+                            // Navigate back after successful subscription
+                            navController.popBackStack()
+                        } else {
+                            errorMessage = "Failed to subscribe to board"
+                        }
+                    }, onFailure = { exception ->
+                        println("DEBUG: SubscribePopupScreen - Subscription failed: ${exception.message}")
+                        errorMessage = exception.message ?: "Failed to subscribe to board"
+                    })
+                }
+            },
+            enabled = !isLoading && selectedMethod != SubscriptionMethod.NONE,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp), color = Color.White
+                )
+            } else {
+                Text(
+                    text = "Subscribe", fontSize = 16.sp, fontWeight = FontWeight.Medium
+                )
             }
         }
     }
