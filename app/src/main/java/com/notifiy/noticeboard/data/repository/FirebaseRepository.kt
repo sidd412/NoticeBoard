@@ -9,6 +9,7 @@ import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Page
 import com.notifiy.noticeboard.data.model.User
+import com.notifiy.noticeboard.data.model.UserNotification
 import kotlinx.coroutines.tasks.await
 
 class FirebaseRepository(private val context: Context? = null) {
@@ -784,6 +785,153 @@ class FirebaseRepository(private val context: Context? = null) {
         }
     }
     
+    // Notification operations
+    suspend fun getUserNotificationCount(userId: String): Int {
+        return try {
+            println("DEBUG: FirebaseRepository.getUserNotificationCount - Getting notification count for userId: $userId")
+            
+            // Check cache first
+            val cachedCount = cacheManager?.getCachedNotificationCount("user_$userId")
+            if (cachedCount != null) {
+                println("DEBUG: Returning cached notification count: $cachedCount")
+                return cachedCount
+            }
+            
+            val querySnapshot = firestore.collection("userNotifications")
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+            
+            val totalCount = querySnapshot.documents.sumOf { doc ->
+                val notification = doc.toObject(UserNotification::class.java)
+                notification?.unreadCount ?: 0
+            }
+            
+            println("DEBUG: FirebaseRepository.getUserNotificationCount - Total notification count: $totalCount")
+            // Cache the notification count
+            cacheManager?.cacheNotificationCount("user_$userId", totalCount)
+            totalCount
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository.getUserNotificationCount - Error: ${e.message}")
+            0
+        }
+    }
+    
+    suspend fun getUserNotifications(userId: String): List<UserNotification> {
+        return try {
+            println("DEBUG: FirebaseRepository.getUserNotifications - Getting notifications for userId: $userId")
+            
+            val querySnapshot = firestore.collection("userNotifications")
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+            
+            val notifications = querySnapshot.documents.mapNotNull { doc ->
+                doc.toObject(UserNotification::class.java)
+            }
+            
+            println("DEBUG: FirebaseRepository.getUserNotifications - Found ${notifications.size} notifications")
+            notifications
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository.getUserNotifications - Error: ${e.message}")
+            emptyList()
+        }
+    }
+    
+    suspend fun markNotificationAsRead(userId: String, boardId: String): Result<Boolean> {
+        return try {
+            println("DEBUG: FirebaseRepository.markNotificationAsRead - Marking notification as read for userId: $userId, boardId: $boardId")
+            
+            val querySnapshot = firestore.collection("userNotifications")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("boardId", boardId)
+                .get()
+                .await()
+            
+            if (querySnapshot.isEmpty) {
+                println("DEBUG: FirebaseRepository.markNotificationAsRead - No notification found")
+                return Result.success(true)
+            }
+            
+            val batch = firestore.batch()
+            querySnapshot.documents.forEach { doc ->
+                batch.update(doc.reference, mapOf(
+                    "unreadCount" to 0,
+                    "lastViewedAt" to System.currentTimeMillis(),
+                    "updatedAt" to System.currentTimeMillis()
+                ))
+            }
+            
+            batch.commit().await()
+            println("DEBUG: FirebaseRepository.markNotificationAsRead - Notification marked as read")
+            
+            // Invalidate notification cache
+            cacheManager?.invalidateNotificationCount("user_$userId")
+            
+            Result.success(true)
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository.markNotificationAsRead - Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun incrementNotificationCount(boardId: String, boardCode: String): Result<Boolean> {
+        return try {
+            println("DEBUG: FirebaseRepository.incrementNotificationCount - Incrementing notification count for boardId: $boardId")
+            
+            // Get all users subscribed to this board
+            val subscribedUsersQuery = firestore.collection("users")
+                .whereArrayContains("subscribedCodes", boardCode)
+                .get()
+                .await()
+            
+            val subscribedUsers = subscribedUsersQuery.documents.mapNotNull { doc ->
+                doc.toObject(User::class.java)
+            }
+            
+            println("DEBUG: FirebaseRepository.incrementNotificationCount - Found ${subscribedUsers.size} subscribed users")
+            
+            val batch = firestore.batch()
+            
+            subscribedUsers.forEach { user ->
+                val notificationId = "${user.id}_$boardId"
+                val notificationRef = firestore.collection("userNotifications").document(notificationId)
+                
+                // Check if notification already exists
+                val existingNotification = notificationRef.get().await().toObject(UserNotification::class.java)
+                
+                if (existingNotification != null) {
+                    // Update existing notification
+                    batch.update(notificationRef, mapOf(
+                        "unreadCount" to (existingNotification.unreadCount + 1),
+                        "updatedAt" to System.currentTimeMillis()
+                    ))
+                } else {
+                    // Create new notification
+                    val newNotification = UserNotification(
+                        id = notificationId,
+                        userId = user.id,
+                        boardId = boardId,
+                        boardCode = boardCode,
+                        unreadCount = 1
+                    )
+                    batch.set(notificationRef, newNotification)
+                }
+                
+                // Invalidate cache for this user
+                cacheManager?.invalidateNotificationCount("user_${user.id}")
+            }
+            
+            batch.commit().await()
+            println("DEBUG: FirebaseRepository.incrementNotificationCount - Notification count incremented successfully")
+            
+            Result.success(true)
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository.incrementNotificationCount - Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
     // Board Deletion Request operations
     suspend fun createBoardDeletionRequest(request: BoardDeletionRequest): Result<BoardDeletionRequest> {
         return try {

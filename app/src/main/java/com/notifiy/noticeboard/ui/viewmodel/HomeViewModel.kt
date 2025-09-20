@@ -22,8 +22,53 @@ class HomeViewModel(private val context: Context) : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     
+    private val _notificationCount = MutableStateFlow(0)
+    val notificationCount: StateFlow<Int> = _notificationCount.asStateFlow()
+    
+    private val _boardNotifications = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val boardNotifications: StateFlow<Map<String, Int>> = _boardNotifications.asStateFlow()
+    
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    
+    fun loadNotificationCount(userId: String) {
+        println("DEBUG: HomeViewModel.loadNotificationCount called with userId: $userId")
+        viewModelScope.launch {
+            try {
+                val notifications = repository.getUserNotifications(userId)
+                println("DEBUG: HomeViewModel.loadNotificationCount - Got ${notifications.size} notifications")
+                
+                val totalCount = notifications.sumOf { it.unreadCount }
+                val boardCounts = notifications.associate { it.boardId to it.unreadCount }
+                
+                _notificationCount.value = totalCount
+                _boardNotifications.value = boardCounts
+                
+                println("DEBUG: HomeViewModel.loadNotificationCount - Total count: $totalCount, Board counts: $boardCounts")
+            } catch (e: Exception) {
+                println("DEBUG: HomeViewModel.loadNotificationCount - Error: ${e.message}")
+                _notificationCount.value = 0
+                _boardNotifications.value = emptyMap()
+            }
+        }
+    }
+    
+    fun markNotificationAsRead(userId: String, boardId: String) {
+        println("DEBUG: HomeViewModel.markNotificationAsRead called with userId: $userId, boardId: $boardId")
+        viewModelScope.launch {
+            try {
+                val result = repository.markNotificationAsRead(userId, boardId)
+                if (result.isSuccess) {
+                    println("DEBUG: HomeViewModel.markNotificationAsRead - Success, refreshing count")
+                    loadNotificationCount(userId) // Refresh the count
+                } else {
+                    println("DEBUG: HomeViewModel.markNotificationAsRead - Failed: ${result.exceptionOrNull()?.message}")
+                }
+            } catch (e: Exception) {
+                println("DEBUG: HomeViewModel.markNotificationAsRead - Exception: ${e.message}")
+            }
+        }
+    }
     
     fun loadSubscribedBoards(userId: String) {
         println("DEBUG: HomeViewModel.loadSubscribedBoards called with userId: $userId")
@@ -34,6 +79,9 @@ class HomeViewModel(private val context: Context) : ViewModel() {
                 println("DEBUG: HomeViewModel got ${boards.size} subscribed boards")
                 _subscribedBoards.value = boards
                 _errorMessage.value = null
+                
+                // Also load notification count
+                loadNotificationCount(userId)
             } catch (e: Exception) {
                 println("DEBUG: HomeViewModel error loading subscribed boards: ${e.message}")
                 _errorMessage.value = e.message

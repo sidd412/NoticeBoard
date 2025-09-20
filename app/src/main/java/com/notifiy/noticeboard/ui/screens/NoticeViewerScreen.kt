@@ -52,7 +52,7 @@ fun NoticeViewerScreen(
     var noticeBoard by remember { mutableStateOf<NoticeBoard?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var showUnsubscribeDialog by remember { mutableStateOf(false) }
-    
+
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
     val context = LocalContext.current
@@ -73,6 +73,11 @@ fun NoticeViewerScreen(
                 // Load pages for this board
                 pages = homeViewModel.getPagesByBoardCode(boardCode)
                 println("DEBUG: NoticeViewerScreen - Loaded ${pages.size} pages")
+
+                // Mark notification as read when user views the board
+                currentUser?.let { user ->
+                    homeViewModel.markNotificationAsRead(user.id, boardId)
+                }
             }
 
             isLoading = false
@@ -86,7 +91,8 @@ fun NoticeViewerScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(vertical = 50.dp)
-    ) {
+    )
+    {
 
         if (isLoading) {
             Box(
@@ -176,8 +182,8 @@ fun NoticeViewerScreen(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) { Text(
-                        text = "Unsubscribe from Board", 
-                        fontSize = 16.sp, 
+                        text = "Unsubscribe from Board",
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     ) }
 
@@ -198,6 +204,7 @@ fun NoticeViewerScreen(
             }
         }
     }
+
     
     // Unsubscribe confirmation dialog
     if (showUnsubscribeDialog) {

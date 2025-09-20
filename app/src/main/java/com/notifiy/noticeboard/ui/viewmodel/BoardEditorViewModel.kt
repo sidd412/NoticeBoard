@@ -149,6 +149,13 @@ class BoardEditorViewModel(private val context: Context) : ViewModel() {
                     onSuccess = { savedPage ->
                         println("DEBUG: BoardEditorViewModel.savePage - Success: $savedPage")
                         _errorMessage.value = null
+                        
+                        // Increment notification count for subscribed users
+                        val boardId = getBoardIdByCode(savedPage.code)
+                        if (boardId != null) {
+                            repository.incrementNotificationCount(boardId, savedPage.code.toString())
+                        }
+                        
                         onResult(true)
                     },
                     onFailure = { exception ->
@@ -162,6 +169,15 @@ class BoardEditorViewModel(private val context: Context) : ViewModel() {
                 _errorMessage.value = e.message
                 onResult(false)
             }
+        }
+    }
+    
+    private suspend fun getBoardIdByCode(code: Int): String? {
+        return try {
+            repository.getNoticeBoardByCode(code.toString())?.id
+        } catch (e: Exception) {
+            println("DEBUG: BoardEditorViewModel.getBoardIdByCode - Error: ${e.message}")
+            null
         }
     }
     

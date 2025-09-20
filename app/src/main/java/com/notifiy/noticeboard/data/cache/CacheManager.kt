@@ -42,6 +42,7 @@ class CacheManager(private val context: Context) {
         private const val KEY_PAGE_PREFIX = "page_"
         private const val KEY_PAGES_LIST_PREFIX = "pages_list_"
         private const val KEY_ALL_PAGES = "all_pages"
+        private const val KEY_NOTIFICATION_COUNT_PREFIX = "notification_count_"
     }
     
     // Cache data models
@@ -275,6 +276,35 @@ class CacheManager(private val context: Context) {
         val keys = prefs.all.keys.filter { it.startsWith(KEY_PAGES_LIST_PREFIX) }
         keys.forEach { prefs.edit().remove(it).apply() }
         prefs.edit().remove(KEY_ALL_PAGES).apply()
+    }
+    
+    // Notification caching methods
+    fun cacheNotificationCount(key: String, count: Int) {
+        val cacheEntry = CacheEntry(count, System.currentTimeMillis(), System.currentTimeMillis())
+        val json = gson.toJson(cacheEntry)
+        prefs.edit().putString("$KEY_NOTIFICATION_COUNT_PREFIX$key", json).apply()
+    }
+    
+    fun getCachedNotificationCount(key: String): Int? {
+        val json = prefs.getString("$KEY_NOTIFICATION_COUNT_PREFIX$key", null) ?: return null
+        return try {
+            val type = object : TypeToken<CacheEntry<Int>>() {}.type
+            val cacheEntry: CacheEntry<Int> = gson.fromJson(json, type)
+            
+            if (isCacheValid(cacheEntry.timestamp)) {
+                cacheEntry.data
+            } else {
+                prefs.edit().remove("$KEY_NOTIFICATION_COUNT_PREFIX$key").apply()
+                null
+            }
+        } catch (e: Exception) {
+            prefs.edit().remove("$KEY_NOTIFICATION_COUNT_PREFIX$key").apply()
+            null
+        }
+    }
+    
+    fun invalidateNotificationCount(key: String) {
+        prefs.edit().remove("$KEY_NOTIFICATION_COUNT_PREFIX$key").apply()
     }
     
     fun invalidateNoticeBoardsList(key: String) {

@@ -67,6 +67,8 @@ fun HomeScreen(
     val currentUser = authState.data
     val subscribedBoards by homeViewModel.subscribedBoards.collectAsState()
     val isLoading by homeViewModel.isLoading.collectAsState()
+    val notificationCount by homeViewModel.notificationCount.collectAsState()
+    val boardNotifications by homeViewModel.boardNotifications.collectAsState()
 
     // State for showing all subscribed boards
     var showAllSubscribedBoards by remember { mutableStateOf(false) }
@@ -177,7 +179,8 @@ fun HomeScreen(
                         board = board, 
                         onClick = {
                             navController.navigate(Screen.NoticeViewer.createRoute(board.id))
-                        }
+                        },
+                        notificationCount = boardNotifications[board.id] ?: 0
                     )
                 }
             }
@@ -231,7 +234,8 @@ fun HomeScreen(
 @Composable
 fun NoticeBoardCard(
     board: NoticeBoard, 
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    notificationCount: Int = 0
 ) {
     Card(
         modifier = Modifier
@@ -279,13 +283,37 @@ fun NoticeBoardCard(
                 )
             }
 
-            // Notification Icon
-            Icon(
-                Icons.Default.Notifications,
-                contentDescription = "View Notices",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
+            // Notification Icon with Badge
+            Box {
+                Icon(
+                    Icons.Default.Notifications,
+                    contentDescription = "View Notices",
+                    tint = if (notificationCount > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.size(24.dp)
+                )
+                
+                // Notification Badge
+                if (notificationCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .background(
+                                MaterialTheme.colorScheme.error,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .align(Alignment.TopEnd),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (notificationCount > 99) "99+" else notificationCount.toString(),
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
         }
     }
 }
