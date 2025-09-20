@@ -13,21 +13,27 @@ android {
         applicationId = "com.notifiy.noticeboard"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Use debug signing for now (for development/testing)
             signingConfig = signingConfigs.getByName("debug")
+            // Generate mapping file for crash reporting
+            isDebuggable = false
+        }
+        debug {
+            isDebuggable = true
         }
     }
     compileOptions {
@@ -39,6 +45,18 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    
+    bundle {
+        storeArchive {
+            enable = false
+        }
+    }
+    
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
@@ -71,14 +89,14 @@ dependencies {
     implementation(libs.firebase.firestore)
     
     // Gson for JSON serialization
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.gson)
     
     // QR Code dependencies
-    implementation("com.google.zxing:core:3.5.3")
-    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-    implementation("androidx.camera:camera-camera2:1.3.4")
-    implementation("androidx.camera:camera-lifecycle:1.3.4")
-    implementation("androidx.camera:camera-view:1.3.4")
+    implementation(libs.core)
+    implementation(libs.zxing.android.embedded)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
     
     // Testing
     testImplementation(libs.junit)

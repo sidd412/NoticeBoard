@@ -6,11 +6,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Pin
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Whatsapp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -116,7 +121,7 @@ fun CreateBoardScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Fill in the details to create a new notice board for your institute",
+                            text = "Fill up the details to create a new notice board for your institute",
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         )
@@ -132,7 +137,7 @@ fun CreateBoardScreen(
                     label = { Text("Organization Name") },
                     placeholder = { Text("Enter your institute name") },
                     leadingIcon = {
-                        Icon(Icons.Default.Place, contentDescription = null)
+                        Icon(Icons.Default.AccountBalance, contentDescription = null)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
@@ -147,7 +152,7 @@ fun CreateBoardScreen(
                     label = { Text("Organization Code") },
                     placeholder = { Text("Enter unique code (e.g., ABC001)") },
                     leadingIcon = {
-                        Icon(Icons.Default.Place, contentDescription = null)
+                        Icon(Icons.Default.ConfirmationNumber, contentDescription = null)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
@@ -192,7 +197,7 @@ fun CreateBoardScreen(
                     label = { Text("WhatsApp Number") },
                     placeholder = { Text("+1234567890") },
                     leadingIcon = {
-                        Icon(Icons.Default.Phone, contentDescription = null)
+                        Icon(Icons.Default.Whatsapp, contentDescription = null)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,

@@ -2,7 +2,9 @@ package com.notifiy.noticeboard.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DashboardCustomize
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.NoteAlt
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -63,7 +65,7 @@ fun MainContainerScreen(
                                     imageVector = when (screen) {
                                         BottomNavScreen.Home -> Icons.Default.Home
                                         BottomNavScreen.Profile -> Icons.Default.Person
-                                        BottomNavScreen.YourBoards -> Icons.Default.Settings
+                                        BottomNavScreen.YourBoards -> Icons.Default.NoteAlt
                                     },
                                     contentDescription = screen.title
                                 )
