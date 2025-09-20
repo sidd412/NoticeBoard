@@ -21,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import android.widget.Toast
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
@@ -53,6 +55,7 @@ fun CreateBoardScreen(
 
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
+    val context = LocalContext.current
 
     val yourBoardsViewModel: YourBoardsViewModel = cachedViewModel(YourBoardsViewModel::class.java)
     val errorMessage by yourBoardsViewModel.errorMessage.collectAsState()
@@ -300,10 +303,12 @@ fun CreateBoardScreen(
                             println("DEBUG: CreateBoardScreen - createNoticeBoard result: $success")
                             isCreating = false
                             if (success) {
-                                println("DEBUG: CreateBoardScreen - Board created successfully, navigating back")
+                                println("DEBUG: CreateBoardScreen - Board created successfully, showing toast and navigating back")
+                                Toast.makeText(context, "Notice board \"${organizationName}\" created successfully!", Toast.LENGTH_LONG).show()
                                 navController.popBackStack()
                             } else {
                                 println("DEBUG: CreateBoardScreen - Board creation failed")
+                                Toast.makeText(context, "Failed to create notice board. Please try again.", Toast.LENGTH_SHORT).show()
                             }
                         }
                     },

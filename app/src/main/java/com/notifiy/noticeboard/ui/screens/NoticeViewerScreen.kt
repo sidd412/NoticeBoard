@@ -26,11 +26,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import android.widget.Toast
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Page
 import com.notifiy.noticeboard.ui.components.HorizontalPagesCarousel
@@ -52,6 +54,7 @@ fun NoticeViewerScreen(
     
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
+    val context = LocalContext.current
 
     LaunchedEffect(boardId) {
         try {
@@ -213,10 +216,12 @@ fun NoticeViewerScreen(
                                     result.fold(
                                         onSuccess = {
                                             println("DEBUG: Successfully unsubscribed from ${board.organizationName}")
+                                            Toast.makeText(context, "Successfully unsubscribed from ${board.organizationName}!", Toast.LENGTH_LONG).show()
                                             navController.popBackStack()
                                         },
                                         onFailure = { exception ->
                                             println("DEBUG: Failed to unsubscribe: ${exception.message}")
+                                            Toast.makeText(context, "Failed to unsubscribe. Please try again.", Toast.LENGTH_SHORT).show()
                                         }
                                     )
                                 }

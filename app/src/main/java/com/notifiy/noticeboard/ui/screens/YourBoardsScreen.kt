@@ -52,11 +52,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import android.widget.Toast
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.navigation.BottomNavScreen
 import com.notifiy.noticeboard.navigation.Screen
@@ -74,6 +76,7 @@ fun YourBoardsScreen(
 ) {
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
+    val context = LocalContext.current
     val yourBoardsViewModel: YourBoardsViewModel = cachedViewModel(YourBoardsViewModel::class.java)
     val userBoardsState by yourBoardsViewModel.userBoards.collectAsState()
     val errorMessage by yourBoardsViewModel.errorMessage.collectAsState()
@@ -273,8 +276,10 @@ fun YourBoardsScreen(
                                 yourBoardsViewModel.deleteNoticeBoard(boardToDelete.id, user.id) { success ->
                                     if (success) {
                                         println("DEBUG: YourBoardsScreen - Board deleted successfully")
+                                        Toast.makeText(context, "Notice board \"${boardToDelete.organizationName}\" deleted successfully!", Toast.LENGTH_LONG).show()
                                     } else {
                                         println("DEBUG: YourBoardsScreen - Failed to delete board")
+                                        Toast.makeText(context, "Failed to delete notice board. Please try again.", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             }

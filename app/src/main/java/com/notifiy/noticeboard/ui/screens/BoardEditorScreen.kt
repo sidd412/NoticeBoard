@@ -16,12 +16,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import android.widget.Toast
 import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.NoticePriority
@@ -55,6 +57,7 @@ fun BoardEditorScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val authState by boardEditorViewModel.authState.collectAsState()
     val currentUser = authState.data
+    val context = LocalContext.current
 
     // Load existing page if editing
     LaunchedEffect(boardId) {
@@ -311,6 +314,12 @@ fun BoardEditorScreen(
                 boardEditorViewModel.savePage(page) { success ->
                     isPublishing = false
                     if (success) {
+                        val message = if (boardId?.startsWith("new_") == true) {
+                            "Page \"${title}\" created successfully!"
+                        } else {
+                            "Page \"${title}\" updated successfully!"
+                        }
+                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                         navController.popBackStack()
                     } else {
                         validationError = "Failed to save page. Please try again."
@@ -367,6 +376,7 @@ fun BoardEditorScreen(
                             boardId?.let { id ->
                                 boardEditorViewModel.deletePage(id) { success ->
                                     if (success) {
+                                        Toast.makeText(context, "Page deleted successfully!", Toast.LENGTH_LONG).show()
                                         navController.popBackStack()
                                     } else {
                                         validationError = "Failed to delete page. Please try again."
