@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import android.widget.Toast
+import androidx.compose.foundation.border
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Page
 import com.notifiy.noticeboard.ui.components.HorizontalPagesCarousel
@@ -93,13 +94,14 @@ fun NoticeViewerScreen(
             ) {
                 CircularProgressIndicator(color = Color.White)
             }
-        } else {
+        }
+        else {
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
                 if (pages.isEmpty()) {
                     Box(
-                        modifier = Modifier.fillMaxHeight(.73f)
+                        modifier = Modifier.fillMaxHeight(.65f)
                     ) {
                         Card(
                             modifier = Modifier
@@ -127,7 +129,8 @@ fun NoticeViewerScreen(
                             }
                         }
                     }
-                } else {// Horizontal Pages Carousel
+                }
+                else {// Horizontal Pages Carousel
                     HorizontalPagesCarousel(
                         pages = pages,
                         modifier = Modifier
@@ -172,13 +175,11 @@ fun NoticeViewerScreen(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error
                     )
-                ) {
-                    Text(
+                ) { Text(
                         text = "Unsubscribe from Board", 
                         fontSize = 16.sp, 
                         fontWeight = FontWeight.Medium
-                    )
-                }
+                    ) }
 
                 // Close button
                 Button(
