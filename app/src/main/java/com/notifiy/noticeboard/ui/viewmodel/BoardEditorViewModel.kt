@@ -168,4 +168,29 @@ class BoardEditorViewModel(private val context: Context) : ViewModel() {
     fun clearError() {
         _errorMessage.value = null
     }
+    
+    fun deletePage(pageId: String, onResult: (Boolean) -> Unit) {
+        println("DEBUG: BoardEditorViewModel.deletePage called for page: $pageId")
+        viewModelScope.launch {
+            try {
+                val result = repository.deletePage(pageId)
+                result.fold(
+                    onSuccess = {
+                        println("DEBUG: Page deleted successfully")
+                        _errorMessage.value = null
+                        onResult(true)
+                    },
+                    onFailure = { exception ->
+                        println("DEBUG: Failed to delete page: ${exception.message}")
+                        _errorMessage.value = exception.message
+                        onResult(false)
+                    }
+                )
+            } catch (e: Exception) {
+                println("DEBUG: Exception in deletePage: ${e.message}")
+                _errorMessage.value = e.message
+                onResult(false)
+            }
+        }
+    }
 }

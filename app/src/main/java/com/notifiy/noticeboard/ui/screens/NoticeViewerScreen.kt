@@ -8,14 +8,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +34,7 @@ import androidx.navigation.NavController
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Page
 import com.notifiy.noticeboard.ui.components.HorizontalPagesCarousel
+import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.HomeViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 
@@ -38,11 +42,16 @@ import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 fun NoticeViewerScreen(
     navController: NavController,
     boardId: String,
-    homeViewModel: HomeViewModel = cachedViewModel(HomeViewModel::class.java)
+    homeViewModel: HomeViewModel = cachedViewModel(HomeViewModel::class.java),
+    authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java)
 ) {
     var pages by remember { mutableStateOf<List<Page>>(emptyList()) }
     var noticeBoard by remember { mutableStateOf<NoticeBoard?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var showUnsubscribeDialog by remember { mutableStateOf(false) }
+    
+    val authState by authViewModel.authState.collectAsState()
+    val currentUser = authState.data
 
     LaunchedEffect(boardId) {
         try {
@@ -151,6 +160,23 @@ fun NoticeViewerScreen(
                     }
                 }
 
+                // Unsubscribe button
+                Button(
+                    onClick = { showUnsubscribeDialog = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(
+                        text = "Unsubscribe from Board", 
+                        fontSize = 16.sp, 
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
                 // Close button
                 Button(
                     onClick = { navController.popBackStack() },
@@ -167,5 +193,48 @@ fun NoticeViewerScreen(
                 }
             }
         }
+    }
+    
+    // Unsubscribe confirmation dialog
+    if (showUnsubscribeDialog) {
+        AlertDialog(
+            onDismissRequest = { showUnsubscribeDialog = false },
+            title = { Text("Unsubscribe from Board") },
+            text = { 
+                Text("Are you sure you want to unsubscribe from \"${noticeBoard?.organizationName}\"? You will no longer receive updates from this board.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = { 
+                        showUnsubscribeDialog = false
+                        currentUser?.let { user ->
+                            noticeBoard?.let { board ->
+                                homeViewModel.unsubscribeFromBoard(user.id, board.organizationCode) { result ->
+                                    result.fold(
+                                        onSuccess = {
+                                            println("DEBUG: Successfully unsubscribed from ${board.organizationName}")
+                                            navController.popBackStack()
+                                        },
+                                        onFailure = { exception ->
+                                            println("DEBUG: Failed to unsubscribe: ${exception.message}")
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Unsubscribe")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showUnsubscribeDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }

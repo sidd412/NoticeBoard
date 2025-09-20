@@ -257,6 +257,38 @@ class FirebaseRepository(private val context: Context? = null) {
         }
     }
     
+    suspend fun deleteNoticeBoard(boardId: String): Result<Boolean> {
+        return try {
+            println("DEBUG: FirebaseRepository.deleteNoticeBoard - Starting deletion for board: $boardId")
+            
+            // First, get the board to get the organization code for cache invalidation
+            val board = getNoticeBoardById(boardId)
+            val organizationCode = board?.organizationCode
+            
+            // Delete the notice board document
+            firestore.collection("noticeBoards")
+                .document(boardId)
+                .delete()
+                .await()
+            
+            println("DEBUG: FirebaseRepository.deleteNoticeBoard - Board deleted successfully")
+            
+            // Invalidate all related caches
+            cacheManager?.invalidateNoticeBoard(boardId)
+            organizationCode?.let { 
+                cacheManager?.invalidateNoticeBoard("code_$it")
+            }
+            cacheManager?.invalidateNoticeBoardsList("user_${auth.currentUser?.uid}")
+            cacheManager?.invalidateNoticeBoardsList("subscribed_${auth.currentUser?.uid}")
+            
+            println("DEBUG: FirebaseRepository.deleteNoticeBoard - Cache invalidated")
+            Result.success(true)
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository.deleteNoticeBoard - Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
     suspend fun getUserNoticeBoards(userId: String): List<NoticeBoard> {
         return try {
             println("DEBUG: Getting user notice boards for userId: $userId")

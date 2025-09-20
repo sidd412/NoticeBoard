@@ -100,4 +100,34 @@ class BoardDetailsViewModel(
     fun refreshData(boardId: String) {
         loadBoardDetails(boardId)
     }
+    
+    fun deletePage(pageId: String, boardId: String, onResult: (Boolean) -> Unit) {
+        println("DEBUG: BoardDetailsViewModel.deletePage called for page: $pageId")
+        _pagesState.value = _pagesState.value.copy(isLoading = true, error = null)
+        viewModelScope.launch {
+            try {
+                val result = repository.deletePage(pageId)
+                result.fold(
+                    onSuccess = {
+                        println("DEBUG: Page deleted successfully, reloading board details")
+                        // Reload board details to reflect the deletion
+                        loadBoardDetails(boardId)
+                        _errorMessage.value = null
+                        onResult(true)
+                    },
+                    onFailure = { exception ->
+                        println("DEBUG: Failed to delete page: ${exception.message}")
+                        _pagesState.value = _pagesState.value.copy(isLoading = false, error = exception.message)
+                        _errorMessage.value = exception.message
+                        onResult(false)
+                    }
+                )
+            } catch (e: Exception) {
+                println("DEBUG: Exception in deletePage: ${e.message}")
+                _pagesState.value = _pagesState.value.copy(isLoading = false, error = e.message)
+                _errorMessage.value = e.message
+                onResult(false)
+            }
+        }
+    }
 }

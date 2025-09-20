@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -250,7 +251,9 @@ fun BoardDetailsScreen(
                 items(pagesState.data ?: emptyList()) { page ->
                     println("DEBUG: BoardDetailsScreen - Rendering page: ${page.title}")
                     PageCard(
-                        page = page, onClick = { onPageCardClick(page.id) })
+                        page = page, 
+                        onClick = { onPageCardClick(page.id) }
+                    )
                 }
             }
         }
@@ -323,7 +326,8 @@ fun BoardInfoRow(
 
 @Composable
 fun PageCard(
-    page: Page, onClick: () -> Unit
+    page: Page, 
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier

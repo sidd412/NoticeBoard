@@ -22,8 +22,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -36,12 +38,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -257,10 +262,24 @@ fun YourBoardsScreen(
                 items(userBoardsState.data ?: emptyList()) { board ->
                     println("DEBUG: YourBoardsScreen - Rendering board: ${board.organizationName}")
                     YourBoardCard(
-                        board = board, onUpdateClick = {
+                        board = board, 
+                        onUpdateClick = {
                             println("DEBUG: YourBoardsScreen - Update clicked for board: ${board.id}")
                             mainNavController.navigate(Screen.BoardDetails.createRoute(board.id))
-                        })
+                        },
+                        onDeleteClick = { boardToDelete ->
+                            println("DEBUG: YourBoardsScreen - Delete clicked for board: ${boardToDelete.id}")
+                            currentUser?.let { user ->
+                                yourBoardsViewModel.deleteNoticeBoard(boardToDelete.id, user.id) { success ->
+                                    if (success) {
+                                        println("DEBUG: YourBoardsScreen - Board deleted successfully")
+                                    } else {
+                                        println("DEBUG: YourBoardsScreen - Failed to delete board")
+                                    }
+                                }
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -296,8 +315,12 @@ fun YourBoardsScreen(
 
 @Composable
 fun YourBoardCard(
-    board: NoticeBoard, onUpdateClick: () -> Unit
+    board: NoticeBoard, 
+    onUpdateClick: () -> Unit,
+    onDeleteClick: (NoticeBoard) -> Unit
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -307,10 +330,10 @@ fun YourBoardCard(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                // Header with board name and update button
-
+                // Header with board name and action buttons
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     // Board Icon
                     Box(
@@ -330,7 +353,7 @@ fun YourBoardCard(
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = board.organizationName,
                             fontSize = 16.sp,
@@ -342,6 +365,28 @@ fun YourBoardCard(
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
+                    }
+                    
+                    // Action buttons
+                    Row {
+                        IconButton(
+                            onClick = onUpdateClick
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit Board",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        IconButton(
+                            onClick = { showDeleteDialog = true }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete Board",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 }
 
@@ -411,6 +456,35 @@ fun YourBoardCard(
                     )
                 }
             }
+        }
+        
+        // Delete confirmation dialog
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text("Delete Notice Board") },
+                text = { 
+                    Text("Are you sure you want to delete \"${board.organizationName}\"? This action cannot be undone and will permanently remove the board and all its data.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { 
+                            showDeleteDialog = false
+                            onDeleteClick(board)
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Delete")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }

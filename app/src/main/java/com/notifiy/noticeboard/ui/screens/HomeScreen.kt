@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -27,6 +29,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -171,9 +174,11 @@ fun HomeScreen(
                 // Subscribed Boards List (no header needed, just show boards)
                 items(visibleBoards) { board ->
                     NoticeBoardCard(
-                        board = board, onClick = {
+                        board = board, 
+                        onClick = {
                             navController.navigate(Screen.NoticeViewer.createRoute(board.id))
-                        })
+                        }
+                    )
                 }
             }
 
@@ -225,7 +230,8 @@ fun HomeScreen(
 
 @Composable
 fun NoticeBoardCard(
-    board: NoticeBoard, onClick: () -> Unit
+    board: NoticeBoard, 
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -234,7 +240,8 @@ fun NoticeBoardCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(16.dp), 
+            verticalAlignment = Alignment.CenterVertically
         ) {
             // Board Icon
             Box(
@@ -275,7 +282,7 @@ fun NoticeBoardCard(
             // Notification Icon
             Icon(
                 Icons.Default.Notifications,
-                contentDescription = "Notifications",
+                contentDescription = "View Notices",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )

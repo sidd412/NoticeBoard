@@ -50,6 +50,7 @@ fun BoardEditorScreen(
     var validationError by remember { mutableStateOf("") }
     var boardCode by remember { mutableStateOf(0) }
     var showSubscriptionDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val authState by boardEditorViewModel.authState.collectAsState()
@@ -129,7 +130,22 @@ fun BoardEditorScreen(
                             fontWeight = FontWeight.Bold,
                             fontSize = 22.sp
                         )
-                        IconButton(onClick = {}) {}
+                        // Show delete button only when editing existing page
+                        if (boardId != null && !boardId.startsWith("new_")) {
+                            IconButton(
+                                onClick = { 
+                                    showDeleteDialog = true
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Default.Delete, 
+                                    contentDescription = "Delete Page",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        } else {
+                            IconButton(onClick = {}) {}
+                        }
                     }
                 }
 
@@ -335,5 +351,42 @@ fun BoardEditorScreen(
             },
             boardName = "Notice Board"
         )
+        
+        // Delete Page Confirmation Dialog
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text("Delete Page") },
+                text = { 
+                    Text("Are you sure you want to delete this page? This action cannot be undone.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { 
+                            showDeleteDialog = false
+                            boardId?.let { id ->
+                                boardEditorViewModel.deletePage(id) { success ->
+                                    if (success) {
+                                        navController.popBackStack()
+                                    } else {
+                                        validationError = "Failed to delete page. Please try again."
+                                    }
+                                }
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Delete")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
     }
 }

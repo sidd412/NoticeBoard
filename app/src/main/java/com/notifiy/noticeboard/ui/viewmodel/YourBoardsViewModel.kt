@@ -102,6 +102,36 @@ class YourBoardsViewModel(private val context: Context) : ViewModel() {
         }
     }
     
+    fun deleteNoticeBoard(boardId: String, userId: String, onResult: (Boolean) -> Unit) {
+        println("DEBUG: YourBoardsViewModel.deleteNoticeBoard called for board: $boardId")
+        _userBoards.value = _userBoards.value.copy(isLoading = true, error = null)
+        viewModelScope.launch {
+            try {
+                val result = repository.deleteNoticeBoard(boardId)
+                result.fold(
+                    onSuccess = {
+                        println("DEBUG: Board deleted successfully, reloading boards")
+                        // Reload user boards to reflect the deletion
+                        loadUserBoards(userId)
+                        _errorMessage.value = null
+                        onResult(true)
+                    },
+                    onFailure = { exception ->
+                        println("DEBUG: Failed to delete board: ${exception.message}")
+                        _userBoards.value = UiState(isLoading = false, error = exception.message)
+                        _errorMessage.value = exception.message
+                        onResult(false)
+                    }
+                )
+            } catch (e: Exception) {
+                println("DEBUG: Exception in deleteNoticeBoard: ${e.message}")
+                _userBoards.value = UiState(isLoading = false, error = e.message)
+                _errorMessage.value = e.message
+                onResult(false)
+            }
+        }
+    }
+    
     fun clearError() {
         _errorMessage.value = null
     }
