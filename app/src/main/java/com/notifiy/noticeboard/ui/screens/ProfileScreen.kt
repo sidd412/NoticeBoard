@@ -1,40 +1,39 @@
 package com.notifiy.noticeboard.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.SettingsBrightness
 import androidx.compose.material.icons.filled.Help
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.SettingsBrightness
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.notifiy.noticeboard.data.preferences.PreferencesManager
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
-import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
-import com.notifiy.noticeboard.data.preferences.PreferencesManager
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
+import com.notifiy.noticeboard.utils.ValidationUtils
+import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,8 +43,19 @@ fun ProfileScreen(
     themeViewModel: ThemeViewModel
 ) {
     val authState by authViewModel.authState.collectAsState()
+    val profileUpdated by authViewModel.profileUpdated.collectAsState()
     val currentUser = authState.data
     var showSignOutDialog by remember { mutableStateOf(false) }
+    var showEditProfileDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    
+    // Handle profile update success
+    LaunchedEffect(profileUpdated) {
+        if (profileUpdated) {
+            Toast.makeText(context, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
+            authViewModel.clearProfileUpdated()
+        }
+    }
 
     if (currentUser != null) {
         LazyColumn(
@@ -62,8 +72,9 @@ fun ProfileScreen(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 ) {
+
                     Row(
-                        modifier = Modifier.padding(20.dp,24.dp,20.dp,24.dp),
+                        modifier = Modifier.padding(20.dp, 16.dp, 20.dp, 24.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
@@ -88,14 +99,29 @@ fun ProfileScreen(
 
                         // User Name
                         Column(modifier = Modifier) {
-                            Text(
-                                text = currentUser.name,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                maxLines = 1,
-                                overflow = TextOverflow.Clip
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = currentUser.name,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Clip
+                                )
+                                Text(
+                                    text = "✎ edit",
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.clickable(onClick = {
+                                        showEditProfileDialog = true
+                                    })
+                                )
+                            }
 
                             Spacer(modifier = Modifier.height(2.dp))
 
@@ -298,58 +324,46 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
-        
+
         // Sign Out Confirmation Dialog
         if (showSignOutDialog) {
-            AlertDialog(
-                onDismissRequest = { showSignOutDialog = false },
-                title = {
-                    Text(
-                        text = "Sign Out",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+            AlertDialog(onDismissRequest = { showSignOutDialog = false }, title = {
+                Text(
+                    text = "Sign Out", fontSize = 20.sp, fontWeight = FontWeight.Bold
+                )
+            }, text = {
+                Text(
+                    text = "Are you sure you want to sign out? You will need to sign in again to access your account.",
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                )
+            }, confirmButton = {
+                Button(
+                    onClick = {
+                        showSignOutDialog = false
+                        authViewModel.signOut()
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.MainContainer.route) { inclusive = true }
+                        }
+                    }, colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
                     )
-                },
-                text = {
+                ) {
                     Text(
-                        text = "Are you sure you want to sign out? You will need to sign in again to access your account.",
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                        text = "Yes, Sign Out", fontSize = 14.sp, fontWeight = FontWeight.Medium
                     )
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            showSignOutDialog = false
-                            authViewModel.signOut()
-                            navController.navigate(Screen.Login.route) {
-                                popUpTo(Screen.MainContainer.route) { inclusive = true }
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Text(
-                            text = "Yes, Sign Out",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = { showSignOutDialog = false }
-                    ) {
-                        Text(
-                            text = "Cancel",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
                 }
-            )
+            }, dismissButton = {
+                TextButton(
+                    onClick = { showSignOutDialog = false }) {
+                    Text(
+                        text = "Cancel",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            })
         }
     } else {
         LoginScreen(
@@ -357,18 +371,30 @@ fun ProfileScreen(
         )
     }
 
+    // Edit Profile Dialog
+    if (showEditProfileDialog) {
+        EditProfileDialog(
+            currentUser = currentUser,
+            onDismiss = { showEditProfileDialog = false },
+            onUpdateProfile = { name, email ->
+                authViewModel.updateUserProfile(name, email)
+                showEditProfileDialog = false
+            },
+            isLoading = authState.isLoading
+        )
+    }
 }
 
 @Composable
 fun ThemeModeDropdown(themeViewModel: ThemeViewModel) {
     var expanded by remember { mutableStateOf(false) }
-    
+
     val themeOptions = listOf(
         Triple("System", PreferencesManager.THEME_SYSTEM, Icons.Default.SettingsBrightness),
         Triple("Light", PreferencesManager.THEME_LIGHT, Icons.Default.LightMode),
         Triple("Dark", PreferencesManager.THEME_DARK, Icons.Default.DarkMode)
     )
-    
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -387,15 +413,13 @@ fun ThemeModeDropdown(themeViewModel: ThemeViewModel) {
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
         )
-        
+
         Box {
-            Row(
-                modifier = Modifier
-                    .clickable { expanded = true }
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+            Row(modifier = Modifier
+                .clickable { expanded = true }
+                .padding(horizontal = 8.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
+                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = themeViewModel.getThemeModeString(),
                     fontSize = 14.sp,
@@ -409,49 +433,126 @@ fun ThemeModeDropdown(themeViewModel: ThemeViewModel) {
                     modifier = Modifier.size(16.dp)
                 )
             }
-            
+
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surface)
+                modifier = Modifier.background(MaterialTheme.colorScheme.surface)
             ) {
                 themeOptions.forEach { (label, value, icon) ->
-                    DropdownMenuItem(
-                        text = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
+                    DropdownMenuItem(text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = label,
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = label,
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            if (themeViewModel.themeMode == value) {
+                                Spacer(modifier = Modifier.weight(1f))
                                 Icon(
-                                    imageVector = icon,
-                                    contentDescription = label,
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                    modifier = Modifier.size(18.dp)
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Selected",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(16.dp)
                                 )
-                                Text(
-                                    text = label,
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                if (themeViewModel.themeMode == value) {
-                                    Spacer(modifier = Modifier.weight(1f))
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "Selected",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
                             }
-                        },
-                        onClick = {
-                            themeViewModel.setThemeMode(value)
-                            expanded = false
                         }
-                    )
+                    }, onClick = {
+                        themeViewModel.setThemeMode(value)
+                        expanded = false
+                    })
                 }
             }
         }
     }
+}
+
+@Composable
+fun EditProfileDialog(
+    currentUser: com.notifiy.noticeboard.data.model.User?,
+    onDismiss: () -> Unit,
+    onUpdateProfile: (String, String) -> Unit,
+    isLoading: Boolean
+) {
+    val originalName = currentUser?.name ?: ""
+    val originalEmail = currentUser?.email ?: ""
+
+    var name by remember { mutableStateOf(originalName) }
+    var email by remember { mutableStateOf(originalEmail) }
+    var validationError by remember { mutableStateOf("") }
+
+    // Check if any changes have been made
+    val hasChanges = name != originalName || email != originalEmail
+
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("Edit Profile") }, text = {
+        Column {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Name") },
+                leadingIcon = {
+                    Icon(Icons.Default.Person, contentDescription = null)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                isError = validationError.isNotEmpty()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                leadingIcon = {
+                    Icon(Icons.Default.Email, contentDescription = null)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Email),
+                isError = validationError.isNotEmpty()
+            )
+
+            if (validationError.isNotEmpty()) {
+                Text(
+                    text = validationError,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+    }, confirmButton = {
+        Button(
+            onClick = {
+                val validation = ValidationUtils.validateProfileUpdateFields(name, email)
+                if (!validation.isValid) {
+                    validationError = validation.errorMessage
+                    return@Button
+                }
+                onUpdateProfile(name, email)
+            }, enabled = !isLoading && hasChanges
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(16.dp), color = Color.White
+                )
+            } else {
+                Text("Update")
+            }
+        }
+    }, dismissButton = {
+        TextButton(onClick = onDismiss) {
+            Text("Cancel")
+        }
+    })
 }

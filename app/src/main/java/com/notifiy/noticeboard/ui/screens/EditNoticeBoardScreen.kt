@@ -31,6 +31,7 @@ import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.BoardDetailsViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
+import com.notifiy.noticeboard.utils.ValidationUtils
 import com.notifiy.noticeboard.utils.isValidPhoneNumber
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -293,6 +294,10 @@ fun EditNoticeBoardScreen(
                                 }
                                 if (organizationEmail.isEmpty()) {
                                     errorMessage = "Organization email is required"
+                                    return@Button
+                                }
+                                if (!ValidationUtils.isValidEmail(organizationEmail)) {
+                                    errorMessage = "Please enter a valid email address"
                                     return@Button
                                 }
                                 if (organizationLocation.isEmpty()) {

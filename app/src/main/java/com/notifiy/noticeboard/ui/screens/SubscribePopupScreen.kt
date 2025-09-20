@@ -58,6 +58,7 @@ import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.HomeViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.utils.QRCodeUtils
+import com.notifiy.noticeboard.utils.ValidationUtils
 import com.notifiy.noticeboard.utils.isValidPhoneNumber
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -367,6 +368,12 @@ fun SubscribePopupScreen(
                 // Validate WhatsApp number if WhatsApp method is selected
                 if (selectedMethod == SubscriptionMethod.WHATSAPP && !isValidPhoneNumber(whatsappNumber)) {
                     errorMessage = "Please enter a valid 10-digit WhatsApp number"
+                    return@Button
+                }
+                
+                // Validate email if EMAIL method is selected
+                if (selectedMethod == SubscriptionMethod.EMAIL && !ValidationUtils.isValidEmail(email)) {
+                    errorMessage = "Please enter a valid email address"
                     return@Button
                 }
 

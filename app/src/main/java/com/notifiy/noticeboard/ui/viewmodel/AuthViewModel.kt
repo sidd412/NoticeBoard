@@ -3,7 +3,12 @@ package com.notifiy.noticeboard.ui.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.notifiy.noticeboard.R
 import com.notifiy.noticeboard.data.model.User
 import com.notifiy.noticeboard.data.repository.FirebaseRepository
 import com.notifiy.noticeboard.utils.UiState
@@ -23,6 +28,21 @@ class AuthViewModel(private val context: Context) : ViewModel() {
     
     private val _accountDeleted = MutableStateFlow(false)
     val accountDeleted: StateFlow<Boolean> = _accountDeleted.asStateFlow()
+    
+    private val _passwordResetSent = MutableStateFlow(false)
+    val passwordResetSent: StateFlow<Boolean> = _passwordResetSent.asStateFlow()
+    
+    private val _profileUpdated = MutableStateFlow(false)
+    val profileUpdated: StateFlow<Boolean> = _profileUpdated.asStateFlow()
+    
+    // Google Sign-In client
+    val googleSignInClient: GoogleSignInClient by lazy {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        GoogleSignIn.getClient(context, gso)
+    }
     
     init {
         checkAuthState()
@@ -162,5 +182,105 @@ class AuthViewModel(private val context: Context) : ViewModel() {
     
     fun clearError() {
         _authState.value = _authState.value.copy(error = null)
+    }
+    
+    fun clearPasswordResetSent() {
+        _passwordResetSent.value = false
+    }
+    
+    fun clearProfileUpdated() {
+        _profileUpdated.value = false
+    }
+    
+    fun sendPasswordResetEmail(email: String) {
+        _authState.value = _authState.value.copy(isLoading = true)
+        viewModelScope.launch {
+            try {
+                auth.sendPasswordResetEmail(email).await()
+                _passwordResetSent.value = true
+                _authState.value = _authState.value.copy(isLoading = false)
+            } catch (e: Exception) {
+                _authState.value = UiState(isLoading = false, error = e.message)
+            }
+        }
+    }
+    
+    fun signInWithGoogle(idToken: String) {
+        _authState.value = _authState.value.copy(isLoading = true)
+        viewModelScope.launch {
+            try {
+                val credential = GoogleAuthProvider.getCredential(idToken, null)
+                val authResult = auth.signInWithCredential(credential).await()
+                val firebaseUser = authResult.user
+                
+                if (firebaseUser != null) {
+                    // Check if user exists in Firestore
+                    val existingUser = repository.getCurrentUser()
+                    if (existingUser == null) {
+                        // Create new user if doesn't exist
+                        val user = User(
+                            id = firebaseUser.uid,
+                            name = firebaseUser.displayName ?: "User",
+                            email = firebaseUser.email ?: "",
+                            phoneNumber = "",
+                            profileImageUrl = firebaseUser.photoUrl?.toString() ?: "",
+                            subscribedBoards = emptyList(),
+                            subscribedCodes = emptyList(),
+                            instituteCodes = emptyList(),
+                            createdAt = System.currentTimeMillis(),
+                            updatedAt = System.currentTimeMillis()
+                        )
+                        repository.createUser(user)
+                        _authState.value = UiState(data = user, isLoading = false)
+                    } else {
+                        _authState.value = UiState(data = existingUser, isLoading = false)
+                    }
+                } else {
+                    _authState.value = UiState(isLoading = false, error = "Failed to sign in with Google")
+                }
+            } catch (e: Exception) {
+                _authState.value = UiState(isLoading = false, error = e.message)
+            }
+        }
+    }
+    
+    fun updateUserProfile(name: String, email: String) {
+        _authState.value = _authState.value.copy(isLoading = true)
+        viewModelScope.launch {
+            try {
+                val currentUser = auth.currentUser
+                if (currentUser != null) {
+                    // Update Firebase Auth profile
+                    val profileUpdates = com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                        .setDisplayName(name)
+                        .build()
+                    currentUser.updateProfile(profileUpdates).await()
+                    
+                    // Update email if changed
+                    if (email != currentUser.email) {
+                        currentUser.updateEmail(email).await()
+                    }
+                    
+                    // Update user in Firestore
+                    val existingUser = repository.getCurrentUser()
+                    if (existingUser != null) {
+                        val updatedUser = existingUser.copy(
+                            name = name,
+                            email = email,
+                            updatedAt = System.currentTimeMillis()
+                        )
+                        repository.updateUser(updatedUser)
+                        _authState.value = UiState(data = updatedUser, isLoading = false)
+                        _profileUpdated.value = true
+                    } else {
+                        _authState.value = UiState(isLoading = false, error = "User not found")
+                    }
+                } else {
+                    _authState.value = UiState(isLoading = false, error = "No user logged in")
+                }
+            } catch (e: Exception) {
+                _authState.value = UiState(isLoading = false, error = e.message)
+            }
+        }
     }
 }

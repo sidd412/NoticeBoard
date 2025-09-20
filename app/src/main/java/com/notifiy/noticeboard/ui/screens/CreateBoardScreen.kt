@@ -36,6 +36,7 @@ import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.YourBoardsViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.utils.ShowErrorSnackbar
+import com.notifiy.noticeboard.utils.ValidationUtils
 import com.notifiy.noticeboard.utils.getErrorMessage
 import com.notifiy.noticeboard.utils.isValidPhoneNumber
 import java.util.*
@@ -268,9 +269,7 @@ fun CreateBoardScreen(
                         }
 
                         // Validate email format
-                        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(organizationEmail)
-                                .matches()
-                        ) {
+                        if (!ValidationUtils.isValidEmail(organizationEmail)) {
                             println("DEBUG: CreateBoardScreen - Email validation failed")
                             validationError = "Please enter a valid email address"
                             return@Button
