@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -121,12 +122,31 @@ fun HomeScreen(
 
             // Subscribed Boards Section
             item {
-                Text(
-                    text = "Your Subscribed Boards",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Subscribed Boards",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+
+                    IconButton(
+                        onClick = {
+                            navController.navigate(Screen.Search.route)
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = "Search Notice Boards",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
             }
 
             if (isLoading) {
@@ -176,7 +196,7 @@ fun HomeScreen(
                 // Subscribed Boards List (no header needed, just show boards)
                 items(visibleBoards) { board ->
                     NoticeBoardCard(
-                        board = board, 
+                        board = board,
                         onClick = {
                             navController.navigate(Screen.NoticeViewer.createRoute(board.id))
                         },
@@ -233,7 +253,7 @@ fun HomeScreen(
 
 @Composable
 fun NoticeBoardCard(
-    board: NoticeBoard, 
+    board: NoticeBoard,
     onClick: () -> Unit,
     notificationCount: Int = 0
 ) {
@@ -244,7 +264,7 @@ fun NoticeBoardCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp), 
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Board Icon
@@ -292,7 +312,7 @@ fun NoticeBoardCard(
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp)
                     )
-                    
+
                     // Notification Badge
                     Box(
                         modifier = Modifier

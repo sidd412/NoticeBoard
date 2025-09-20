@@ -29,6 +29,9 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
             modelClass.isAssignableFrom(SubscriptionViewModel::class.java) -> {
                 SubscriptionViewModel(context) as T
             }
+            modelClass.isAssignableFrom(SearchViewModel::class.java) -> {
+                SearchViewModel(context) as T
+            }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }
     }

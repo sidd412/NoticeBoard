@@ -933,6 +933,111 @@ class FirebaseRepository(private val context: Context? = null) {
         }
     }
 
+    // Search operations
+    suspend fun searchNoticeBoards(query: String): List<NoticeBoard> {
+        return try {
+            println("DEBUG: FirebaseRepository.searchNoticeBoards - Searching for: $query")
+            
+            if (query.isBlank()) {
+                return emptyList()
+            }
+            
+            val searchQuery = query.lowercase().trim()
+            val allBoards = getAllNoticeBoards()
+            
+            println("DEBUG: FirebaseRepository.searchNoticeBoards - Total boards loaded: ${allBoards.size}")
+            allBoards.forEach { board ->
+                println("DEBUG: Board - Name: '${board.organizationName}', Location: '${board.organizationLocation}', Code: '${board.organizationCode}'")
+            }
+            
+            val filteredBoards = allBoards.filter { board ->
+                val nameMatch = board.organizationName.lowercase().contains(searchQuery)
+                val locationMatch = board.organizationLocation.lowercase().contains(searchQuery)
+                val codeMatch = board.organizationCode.lowercase().contains(searchQuery)
+                val emailMatch = board.organizationEmail.lowercase().contains(searchQuery)
+                
+                val matches = nameMatch || locationMatch || codeMatch || emailMatch
+                if (matches) {
+                    println("DEBUG: Match found - Name: '${board.organizationName}', Location: '${board.organizationLocation}', Code: '${board.organizationCode}'")
+                }
+                
+                matches
+            }
+            
+            println("DEBUG: FirebaseRepository.searchNoticeBoards - Found ${filteredBoards.size} matching boards for query: '$searchQuery'")
+            filteredBoards
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository.searchNoticeBoards - Error: ${e.message}")
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+    
+    suspend fun getAllNoticeBoards(): List<NoticeBoard> {
+        return try {
+            println("DEBUG: FirebaseRepository.getAllNoticeBoards - Getting all notice boards")
+            
+            // Check cache first, but only if it has data
+            val cachedBoards = cacheManager?.getCachedNoticeBoardsList("all_boards")
+            if (cachedBoards != null && cachedBoards.isNotEmpty()) {
+                println("DEBUG: Returning cached all boards: ${cachedBoards.size}")
+                cachedBoards.forEach { board ->
+                    println("DEBUG: Cached Board - Name: '${board.organizationName}', Location: '${board.organizationLocation}', Code: '${board.organizationCode}'")
+                }
+                return cachedBoards
+            }
+            
+            println("DEBUG: No cached boards found or cache is empty, fetching from Firestore...")
+            
+            // Try without the isActive filter first
+            var querySnapshot = firestore.collection("noticeBoards")
+                .get()
+                .await()
+            
+            println("DEBUG: Firestore query (all boards) returned ${querySnapshot.size()} documents")
+            
+            // If no results, try with isActive filter
+            if (querySnapshot.isEmpty) {
+                println("DEBUG: No boards found without filter, trying with isActive=true...")
+                querySnapshot = firestore.collection("noticeBoards")
+                    .whereEqualTo("isActive", true)
+                    .get()
+                    .await()
+                println("DEBUG: Firestore query (active boards) returned ${querySnapshot.size()} documents")
+            }
+            
+            val boards = querySnapshot.documents.mapNotNull { doc ->
+                try {
+                    val board = doc.toObject(NoticeBoard::class.java)
+                    println("DEBUG: Firestore Board - Name: '${board?.organizationName}', Location: '${board?.organizationLocation}', Code: '${board?.organizationCode}', Active: '${board?.isActive}'")
+                    board
+                } catch (e: Exception) {
+                    println("DEBUG: Error converting document ${doc.id}: ${e.message}")
+                    null
+                }
+            }
+            
+            println("DEBUG: FirebaseRepository.getAllNoticeBoards - Successfully converted ${boards.size} boards")
+            
+            // Only cache if we have results
+            if (boards.isNotEmpty()) {
+                cacheManager?.cacheNoticeBoardsList("all_boards", boards)
+            }
+            
+            boards
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository.getAllNoticeBoards - Error: ${e.message}")
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    // Clear search cache for testing
+    fun clearSearchCache() {
+        cacheManager?.invalidateNoticeBoardsList("all_boards")
+        println("DEBUG: FirebaseRepository.clearSearchCache - Search cache cleared")
+    }
+
     // Local notification management
     suspend fun sendLocalNotificationToSubscribers(boardId: String, boardCode: String, title: String, body: String): Result<Boolean> {
         return try {
