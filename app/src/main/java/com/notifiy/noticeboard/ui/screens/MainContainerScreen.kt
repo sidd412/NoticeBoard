@@ -31,7 +31,8 @@ import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
 fun MainContainerScreen(
     navController: NavController,
     themeViewModel: ThemeViewModel,
-    onBottomNavBarVisibilityChanged: (Boolean) -> Unit = {}
+    onBottomNavBarVisibilityChanged: (Boolean) -> Unit = {},
+    onHomeTabChanged: (Boolean) -> Unit = {}
 ) {
     val bottomNavController = rememberNavController()
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
@@ -46,6 +47,14 @@ fun MainContainerScreen(
     // Notify parent about bottom nav bar visibility changes
     LaunchedEffect(showBottomBar) {
         onBottomNavBarVisibilityChanged(showBottomBar)
+    }
+    
+    // Notify parent about home tab changes
+    LaunchedEffect(currentDestination?.route) {
+        val isHomeTab = currentDestination?.route == BottomNavScreen.Home.route
+        println("backLogging: MainContainerScreen - Current destination: ${currentDestination?.route}")
+        println("backLogging: MainContainerScreen - Is home tab: $isHomeTab")
+        onHomeTabChanged(isHomeTab)
     }
     
     Scaffold(

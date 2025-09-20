@@ -79,6 +79,48 @@ class FirebaseRepository(private val context: Context? = null) {
         }
     }
     
+    suspend fun deleteUser(userId: String): Result<Unit> {
+        return try {
+            println("accountdeletion: FirebaseRepository - Starting user deletion for ID: $userId")
+            
+            // Delete user document from Firestore
+            println("accountdeletion: FirebaseRepository - Deleting user document from Firestore")
+            firestore.collection("users")
+                .document(userId)
+                .delete()
+                .await()
+            println("accountdeletion: FirebaseRepository - User document deleted from Firestore successfully")
+            
+            // Clear user from cache
+            println("accountdeletion: FirebaseRepository - Invalidating user cache")
+            cacheManager?.invalidateUser(userId)
+            println("accountdeletion: FirebaseRepository - User cache invalidated")
+            
+            println("accountdeletion: FirebaseRepository - User deletion completed successfully")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            println("accountdeletion: FirebaseRepository - Error deleting user: ${e.message}")
+            println("accountdeletion: FirebaseRepository - Exception type: ${e.javaClass.simpleName}")
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun clearAllCache(): Result<Unit> {
+        return try {
+            println("accountdeletion: FirebaseRepository - Starting cache clearing")
+            // Clear all cached data
+            cacheManager?.clearAllCache()
+            println("accountdeletion: FirebaseRepository - All cache cleared successfully")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            println("accountdeletion: FirebaseRepository - Error clearing cache: ${e.message}")
+            println("accountdeletion: FirebaseRepository - Exception type: ${e.javaClass.simpleName}")
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+    
     // Notice Board operations
     suspend fun getNoticeBoardById(boardId: String): NoticeBoard? {
         return try {

@@ -1,6 +1,7 @@
 package com.notifiy.noticeboard
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,12 +24,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.notifiy.noticeboard.navigation.BottomNavScreen
 import com.notifiy.noticeboard.navigation.NoticeBoardNavigation
+import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.theme.NoticeBoardTheme
 import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
+    private var backPressTime: Long = 0
+    private var isOnHomeScreen: Boolean = false
+    private var isOnHomeTab: Boolean = false
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -55,10 +64,48 @@ class MainActivity : ComponentActivity() {
                         themeViewModel = themeViewModel,
                         onBottomNavBarVisibilityChanged = { isVisible ->
                             isBottomNavBarVisible = isVisible
-                        }
+                        },
+                        onHomeScreenChanged = { isHome -> isOnHomeScreen = isHome },
+                        onHomeTabChanged = { isHome -> isOnHomeTab = isHome }
                     )
                 }
             }
+        }
+    }
+    
+    override fun onBackPressed() {
+        println("backLogging: onBackPressed triggered!")
+        println("backLogging: isOnHomeScreen: $isOnHomeScreen")
+        println("backLogging: isOnHomeTab: $isOnHomeTab")
+        
+        // If not on main container, allow normal navigation
+        if (!isOnHomeScreen) {
+            println("backLogging: Not on main container, allowing normal navigation")
+            super.onBackPressed()
+            return
+        }
+        
+        // If on main container but not on home tab, allow normal navigation
+        if (!isOnHomeTab) {
+            println("backLogging: Not on home tab, allowing normal navigation")
+            super.onBackPressed()
+            return
+        }
+        
+        // Only handle double-back-press when on home tab
+        println("backLogging: On home tab, checking for double-back-press")
+        val currentTime = System.currentTimeMillis()
+        println("backLogging: Current time: $currentTime, Last back press time: $backPressTime")
+        
+        if (currentTime - backPressTime > 3000) {
+            // First back press - show toast
+            println("backLogging: First back press - showing toast")
+            Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show()
+            backPressTime = currentTime
+        } else {
+            // Second back press within 3 seconds - exit app
+            println("backLogging: Second back press - exiting app")
+            finishAffinity()
         }
     }
 }
@@ -101,11 +148,31 @@ fun ConfigureStatusBar(themeViewModel: ThemeViewModel, isBottomNavBarVisible: Bo
 }
 
 @Composable
-fun NoticeBoardApp(themeViewModel: ThemeViewModel, onBottomNavBarVisibilityChanged: (Boolean) -> Unit) {
+fun NoticeBoardApp(
+    themeViewModel: ThemeViewModel, 
+    onBottomNavBarVisibilityChanged: (Boolean) -> Unit,
+    onHomeScreenChanged: (Boolean) -> Unit,
+    onHomeTabChanged: (Boolean) -> Unit
+) {
     val navController = rememberNavController()
+    val context = LocalContext.current
+    
+    // Get current back stack entry to determine current screen
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
+    
+    // Update isOnHomeScreen based on current route
+    LaunchedEffect(currentRoute) {
+        val isHomeScreen = currentRoute == Screen.MainContainer.route
+        println("backLogging: Current route changed to: $currentRoute")
+        println("backLogging: isOnHomeScreen set to: $isHomeScreen")
+        onHomeScreenChanged(isHomeScreen)
+    }
+    
     NoticeBoardNavigation(
         navController = navController, 
         themeViewModel = themeViewModel,
-        onBottomNavBarVisibilityChanged = onBottomNavBarVisibilityChanged
+        onBottomNavBarVisibilityChanged = onBottomNavBarVisibilityChanged,
+        onHomeTabChanged = onHomeTabChanged
     )
 }

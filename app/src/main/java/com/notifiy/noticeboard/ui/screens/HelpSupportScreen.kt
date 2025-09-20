@@ -105,43 +105,43 @@ fun HelpSupportScreen(navController: NavController) {
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        val faqs = listOf(
-                            Triple<String, String, String>(
+                        val faqs: List<Triple<String, String, String>> = listOf(
+                            Triple(
                                 "How do I create a notice board?",
                                 "Go to 'My Boards' tab and tap 'Create New Board'. Fill in the required information and your board will be ready to use.",
                                 ""
                             ),
-                            Triple<String, String, String>(
+                            Triple(
                                 "How do I subscribe to a notice board?",
                                 "You can subscribe by scanning the QR code or entering the board ID manually. Look for the subscribe option on the board details page.",
                                 ""
                             ),
-                            Triple<String, String, String>(
+                            Triple(
                                 "Why am I not receiving notifications?",
                                 "Check your notification settings in 'Privacy & Notifications'. Make sure push notifications are enabled and check your device's notification settings.",
                                 ""
                             ),
-                            Triple<String, String, String>(
+                            Triple(
                                 "How do I change my theme?",
                                 "Go to your Profile and tap on 'Theme Mode'. You can choose between System, Light, or Dark theme.",
                                 ""
                             ),
-                            Triple<String, String, String>(
+                            Triple(
                                 "Can I delete my account?",
                                 "Yes, you can delete your account and all associated data by going to 'Privacy & Notifications' and selecting 'Delete My Account & Data'.",
                                 ""
                             ),
-                            Triple<String, String, String>(
+                            Triple(
                                 "How do I share a notice?",
                                 "Open any notice and look for the share button. You can share via social media, email, or other apps installed on your device.",
                                 ""
                             ),
-                            Triple<String, String, String>(
+                            Triple(
                                 "Is my data secure?",
                                 "Yes, we use industry-standard encryption and security measures. Your data is never shared with third parties without your consent.",
                                 ""
                             ),
-                            Triple<String, String, String>(
+                            Triple(
                                 "How do I update my profile?",
                                 "Go to your Profile tab and tap on your profile information. You can update your name and other details there.",
                                 ""

@@ -13,14 +13,22 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import android.content.Intent
+import android.widget.Toast
 import com.notifiy.noticeboard.data.preferences.PreferencesManager
+import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
+import com.notifiy.noticeboard.navigation.Screen
+import com.notifiy.noticeboard.MainActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,14 +36,36 @@ fun PrivacySettingsScreen(navController: NavController) {
     var showDataDeletionDialog by remember { mutableStateOf(false) }
     var showDataExportDialog by remember { mutableStateOf(false) }
     
-    // Initialize preferences manager
+    // Initialize preferences manager and auth view model
     val context = androidx.compose.ui.platform.LocalContext.current
     val preferencesManager = remember { PreferencesManager(context) }
+    val authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java)
     
     // Load notification preferences
     var pushNotifications by remember { mutableStateOf(preferencesManager.getPushNotifications()) }
     var emailNotifications by remember { mutableStateOf(preferencesManager.getEmailNotifications()) }
     var marketingEmails by remember { mutableStateOf(preferencesManager.getMarketingEmails()) }
+    
+    // Observe account deletion state
+    val accountDeleted by authViewModel.accountDeleted.collectAsState()
+    
+    // Handle successful account deletion
+    LaunchedEffect(accountDeleted) {
+        if (accountDeleted) {
+            println("accountdeletion: PrivacySettingsScreen - Account deletion success detected")
+            // Show success toast
+            Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_LONG).show()
+            println("accountdeletion: PrivacySettingsScreen - Success toast shown")
+            
+            // Restart the app by navigating to MainActivity
+            println("accountdeletion: PrivacySettingsScreen - Restarting app")
+            val intent = Intent(context, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            println("accountdeletion: PrivacySettingsScreen - App restart initiated")
+        }
+    }
     
     Scaffold(
         topBar = {
@@ -473,11 +503,16 @@ fun PrivacySettingsScreen(navController: NavController) {
                 onDismissRequest = { showDataDeletionDialog = false },
                 title = { Text("Delete Account & Data") },
                 text = {
-                    Text("This action is permanent and cannot be undone. All your data, including notices, boards, and account information will be permanently deleted.")
+                    Text("This action is permanent and cannot be undone. All your data, including notices, boards, and account information will be permanently deleted from our servers.")
                 },
                 confirmButton = {
                     Button(
-                        onClick = { showDataDeletionDialog = false },
+                        onClick = { 
+                            println("accountdeletion: PrivacySettingsScreen - Delete button clicked")
+                            showDataDeletionDialog = false
+                            println("accountdeletion: PrivacySettingsScreen - Calling authViewModel.deleteAccount()")
+                            authViewModel.deleteAccount()
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error
                         )

@@ -8,7 +8,7 @@ import com.notifiy.noticeboard.ui.screens.*
 import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
 
 @Composable
-fun NoticeBoardNavigation(navController: NavHostController, themeViewModel: ThemeViewModel, onBottomNavBarVisibilityChanged: (Boolean) -> Unit = {}) {
+fun NoticeBoardNavigation(navController: NavHostController, themeViewModel: ThemeViewModel, onBottomNavBarVisibilityChanged: (Boolean) -> Unit = {}, onHomeTabChanged: (Boolean) -> Unit = {}) {
     NavHost(
         navController = navController,
         startDestination = Screen.Splash.route
@@ -22,7 +22,7 @@ fun NoticeBoardNavigation(navController: NavHostController, themeViewModel: Them
         }
         
         composable(Screen.MainContainer.route) {
-            MainContainerScreen(navController = navController, themeViewModel = themeViewModel, onBottomNavBarVisibilityChanged = onBottomNavBarVisibilityChanged)
+            MainContainerScreen(navController = navController, themeViewModel = themeViewModel, onBottomNavBarVisibilityChanged = onBottomNavBarVisibilityChanged, onHomeTabChanged = onHomeTabChanged)
         }
         
         composable(Screen.SubscribePopup.route) {
