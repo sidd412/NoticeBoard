@@ -130,4 +130,37 @@ class BoardDetailsViewModel(
             }
         }
     }
+    
+    fun updateNoticeBoard(noticeBoard: NoticeBoard, onResult: (Boolean) -> Unit) {
+        println("DEBUG: BoardDetailsViewModel.updateNoticeBoard called for board: ${noticeBoard.id}")
+        _boardState.value = _boardState.value.copy(isLoading = true, error = null)
+        viewModelScope.launch {
+            try {
+                val result = repository.updateNoticeBoard(noticeBoard)
+                result.fold(
+                    onSuccess = { updatedBoard ->
+                        println("DEBUG: Board updated successfully")
+                        _boardState.value = _boardState.value.copy(
+                            isLoading = false,
+                            data = updatedBoard,
+                            error = null
+                        )
+                        _errorMessage.value = null
+                        onResult(true)
+                    },
+                    onFailure = { exception ->
+                        println("DEBUG: Failed to update board: ${exception.message}")
+                        _boardState.value = _boardState.value.copy(isLoading = false, error = exception.message)
+                        _errorMessage.value = exception.message
+                        onResult(false)
+                    }
+                )
+            } catch (e: Exception) {
+                println("DEBUG: Exception in updateNoticeBoard: ${e.message}")
+                _boardState.value = _boardState.value.copy(isLoading = false, error = e.message)
+                _errorMessage.value = e.message
+                onResult(false)
+            }
+        }
+    }
 }

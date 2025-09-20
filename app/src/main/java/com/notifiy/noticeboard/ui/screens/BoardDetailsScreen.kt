@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -137,13 +138,15 @@ fun BoardDetailsScreen(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
-//                    }
 
-                    // Refresh button
+                    // Edit button
                     IconButton(
-                        onClick = { boardDetailsViewModel.loadBoardDetails(boardId) }) {
+                        onClick = { 
+                            navController.navigate(Screen.EditNoticeBoard.createRoute(boardId))
+                        }
+                    ) {
                         Icon(
-                            Icons.Default.Refresh, contentDescription = "Refresh"
+                            Icons.Default.Edit, contentDescription = "Edit Board"
                         )
                     }
                 }
