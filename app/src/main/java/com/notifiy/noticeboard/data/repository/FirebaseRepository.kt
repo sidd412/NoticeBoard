@@ -10,6 +10,7 @@ import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Page
 import com.notifiy.noticeboard.data.model.User
 import com.notifiy.noticeboard.data.model.UserNotification
+import com.notifiy.noticeboard.services.LocalNotificationService
 import kotlinx.coroutines.tasks.await
 
 class FirebaseRepository(private val context: Context? = null) {
@@ -928,6 +929,44 @@ class FirebaseRepository(private val context: Context? = null) {
             Result.success(true)
         } catch (e: Exception) {
             println("DEBUG: FirebaseRepository.incrementNotificationCount - Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    // Local notification management
+    suspend fun sendLocalNotificationToSubscribers(boardId: String, boardCode: String, title: String, body: String): Result<Boolean> {
+        return try {
+            println("DEBUG: FirebaseRepository.sendLocalNotificationToSubscribers - Sending local notification for boardId: $boardId")
+            
+            // Get all users subscribed to this board
+            val subscribedUsersQuery = firestore.collection("users")
+                .whereArrayContains("subscribedCodes", boardCode)
+                .get()
+                .await()
+            
+            val subscribedUsers = subscribedUsersQuery.documents.mapNotNull { doc ->
+                doc.toObject(User::class.java)
+            }
+            
+            println("DEBUG: FirebaseRepository.sendLocalNotificationToSubscribers - Found ${subscribedUsers.size} subscribed users")
+            
+            // Show local notification (only for current user if they're subscribed)
+            val currentUser = getCurrentUser()
+            val isCurrentUserSubscribed = currentUser?.let { user ->
+                subscribedUsers.any { it.id == user.id }
+            } ?: false
+            
+            if (isCurrentUserSubscribed && context != null) {
+                val notificationService = LocalNotificationService(context)
+                val boardName = getNoticeBoardById(boardId)?.organizationName ?: "Notice Board"
+                notificationService.showNotification(title, body, boardId, boardName)
+                println("DEBUG: FirebaseRepository.sendLocalNotificationToSubscribers - Local notification shown to current user")
+            }
+            
+            println("DEBUG: FirebaseRepository.sendLocalNotificationToSubscribers - Local notification process completed")
+            Result.success(true)
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository.sendLocalNotificationToSubscribers - Error: ${e.message}")
             Result.failure(e)
         }
     }

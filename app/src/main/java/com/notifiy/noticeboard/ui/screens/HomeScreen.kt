@@ -283,17 +283,17 @@ fun NoticeBoardCard(
                 )
             }
 
-            // Notification Icon with Badge
-            Box {
-                Icon(
-                    Icons.Default.Notifications,
-                    contentDescription = "View Notices",
-                    tint = if (notificationCount > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier.size(24.dp)
-                )
-                
-                // Notification Badge
-                if (notificationCount > 0) {
+            // Notification Icon with Badge (only show if there are notifications)
+            if (notificationCount > 0) {
+                Box {
+                    Icon(
+                        Icons.Default.Notifications,
+                        contentDescription = "View Notices",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    
+                    // Notification Badge
                     Box(
                         modifier = Modifier
                             .size(16.dp)

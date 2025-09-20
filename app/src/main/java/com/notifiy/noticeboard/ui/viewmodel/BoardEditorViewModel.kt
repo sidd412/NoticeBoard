@@ -154,6 +154,11 @@ class BoardEditorViewModel(private val context: Context) : ViewModel() {
                         val boardId = getBoardIdByCode(savedPage.code)
                         if (boardId != null) {
                             repository.incrementNotificationCount(boardId, savedPage.code.toString())
+                            
+                            // Send local notification to subscribers
+                            val title = "New Notice Update"
+                            val body = "A new notice has been added to ${getNoticeBoardById(boardId)?.organizationName ?: "a notice board"} you're subscribed to"
+                            repository.sendLocalNotificationToSubscribers(boardId, savedPage.code.toString(), title, body)
                         }
                         
                         onResult(true)
@@ -177,6 +182,15 @@ class BoardEditorViewModel(private val context: Context) : ViewModel() {
             repository.getNoticeBoardByCode(code.toString())?.id
         } catch (e: Exception) {
             println("DEBUG: BoardEditorViewModel.getBoardIdByCode - Error: ${e.message}")
+            null
+        }
+    }
+    
+    private suspend fun getNoticeBoardById(boardId: String): NoticeBoard? {
+        return try {
+            repository.getNoticeBoardById(boardId)
+        } catch (e: Exception) {
+            println("DEBUG: BoardEditorViewModel.getNoticeBoardById - Error: ${e.message}")
             null
         }
     }
