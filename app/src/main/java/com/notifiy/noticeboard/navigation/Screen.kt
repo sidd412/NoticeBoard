@@ -24,6 +24,9 @@ sealed class Screen(val route: String) {
     object Subscription : Screen("subscription/{boardId}") {
         fun createRoute(boardId: String) = "subscription/$boardId"
     }
+    object About : Screen("about")
+    object PrivacySettings : Screen("privacy_settings")
+    object HelpSupport : Screen("help_support")
 }
 
 sealed class BottomNavScreen(val route: String, val title: String, val icon: String) {

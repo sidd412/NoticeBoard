@@ -72,5 +72,17 @@ fun NoticeBoardNavigation(navController: NavHostController, themeViewModel: Them
                 boardId = boardId
             )
         }
+        
+        composable(Screen.About.route) {
+            AboutScreen(navController = navController)
+        }
+        
+        composable(Screen.PrivacySettings.route) {
+            PrivacySettingsScreen(navController = navController)
+        }
+        
+        composable(Screen.HelpSupport.route) {
+            HelpSupportScreen(navController = navController)
+        }
     }
 }
