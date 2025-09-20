@@ -37,6 +37,7 @@ import com.notifiy.noticeboard.ui.viewmodel.YourBoardsViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.utils.ShowErrorSnackbar
 import com.notifiy.noticeboard.utils.getErrorMessage
+import com.notifiy.noticeboard.utils.isValidPhoneNumber
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -198,7 +199,7 @@ fun CreateBoardScreen(
                     value = organizationWhatsapp,
                     onValueChange = { organizationWhatsapp = it },
                     label = { Text("WhatsApp Number") },
-                    placeholder = { Text("+1234567890") },
+                    placeholder = { Text("1234567890") },
                     leadingIcon = {
                         Icon(Icons.Default.Whatsapp, contentDescription = null)
                     },
@@ -276,10 +277,10 @@ fun CreateBoardScreen(
                         }
 
                         // Validate WhatsApp number format
-                        if (!organizationWhatsapp.startsWith("+") || organizationWhatsapp.length < 10) {
+                        if (!isValidPhoneNumber(organizationWhatsapp)) {
                             println("DEBUG: CreateBoardScreen - WhatsApp validation failed")
                             validationError =
-                                "Please enter a valid WhatsApp number with country code"
+                                "Please enter a valid 10-digit WhatsApp number"
                             return@Button
                         }
 

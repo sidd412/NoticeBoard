@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.notifiy.noticeboard.data.cache.CacheManager
+import com.notifiy.noticeboard.data.model.BoardDeletionRequest
 import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Page
@@ -779,6 +780,82 @@ class FirebaseRepository(private val context: Context? = null) {
             Result.success(true)
         } catch (e: Exception) {
             println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    // Board Deletion Request operations
+    suspend fun createBoardDeletionRequest(request: BoardDeletionRequest): Result<BoardDeletionRequest> {
+        return try {
+            println("DEBUG: Creating board deletion request for board: ${request.boardId}")
+            firestore.collection("boardDeletionRequests")
+                .document(request.id)
+                .set(request)
+                .await()
+            println("DEBUG: Board deletion request created successfully")
+            Result.success(request)
+        } catch (e: Exception) {
+            println("DEBUG: Error creating board deletion request: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun getBoardDeletionRequestByBoardId(boardId: String): BoardDeletionRequest? {
+        return try {
+            println("DEBUG: Checking for existing deletion request for board: $boardId")
+            val querySnapshot = firestore.collection("boardDeletionRequests")
+                .whereEqualTo("boardId", boardId)
+                .whereEqualTo("status", "PENDING")
+                .get()
+                .await()
+            
+            if (!querySnapshot.isEmpty) {
+                val request = querySnapshot.documents.first().toObject(BoardDeletionRequest::class.java)
+                println("DEBUG: Found existing deletion request: $request")
+                request
+            } else {
+                println("DEBUG: No existing deletion request found for board: $boardId")
+                null
+            }
+        } catch (e: Exception) {
+            println("DEBUG: Error checking for existing deletion request: ${e.message}")
+            null
+        }
+    }
+    
+    suspend fun getAllBoardDeletionRequests(): List<BoardDeletionRequest> {
+        return try {
+            println("DEBUG: Getting all board deletion requests")
+            val querySnapshot = firestore.collection("boardDeletionRequests")
+                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            val requests = querySnapshot.documents.mapNotNull { it.toObject(BoardDeletionRequest::class.java) }
+            println("DEBUG: Found ${requests.size} board deletion requests")
+            requests
+        } catch (e: Exception) {
+            println("DEBUG: Error getting all board deletion requests: ${e.message}")
+            emptyList()
+        }
+    }
+    
+    suspend fun updateBoardDeletionRequestStatus(requestId: String, status: String): Result<Boolean> {
+        return try {
+            println("DEBUG: Updating board deletion request status: $requestId to $status")
+            firestore.collection("boardDeletionRequests")
+                .document(requestId)
+                .update(
+                    mapOf(
+                        "status" to status,
+                        "updatedAt" to System.currentTimeMillis()
+                    )
+                )
+                .await()
+            println("DEBUG: Board deletion request status updated successfully")
+            Result.success(true)
+        } catch (e: Exception) {
+            println("DEBUG: Error updating board deletion request status: ${e.message}")
             Result.failure(e)
         }
     }

@@ -49,4 +49,13 @@ fun getErrorMessage(exception: Throwable): String {
     }
 }
 
+/**
+ * Validates if a phone number is exactly 10 digits
+ * @param phoneNumber The phone number to validate
+ * @return true if the phone number is exactly 10 digits, false otherwise
+ */
+fun isValidPhoneNumber(phoneNumber: String): Boolean {
+    return phoneNumber.matches(Regex("^\\d{10}$"))
+}
+
 

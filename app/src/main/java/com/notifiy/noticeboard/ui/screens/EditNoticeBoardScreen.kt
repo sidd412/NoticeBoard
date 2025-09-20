@@ -24,11 +24,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import android.widget.Toast
+import com.notifiy.noticeboard.data.model.BoardDeletionRequest
 import com.notifiy.noticeboard.data.model.NoticeBoard
+import com.notifiy.noticeboard.data.repository.FirebaseRepository
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.BoardDetailsViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
+import com.notifiy.noticeboard.utils.isValidPhoneNumber
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,13 +55,13 @@ fun EditNoticeBoardScreen(
     var shouldNavigateBack by remember { mutableStateOf(false) }
     var hasChanges by remember { mutableStateOf(false) }
     var showDeleteRequestDialog by remember { mutableStateOf(false) }
-    var shouldShowDeleteToast by remember { mutableStateOf(false) }
-
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
 
     val boardState by boardDetailsViewModel.boardState.collectAsState()
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val firebaseRepository = remember { FirebaseRepository(context) }
 
     // Load board data
     LaunchedEffect(boardId) {
@@ -94,15 +99,6 @@ fun EditNoticeBoardScreen(
         if (shouldNavigateBack) {
             kotlinx.coroutines.delay(2000)
             navController.popBackStack()
-        }
-    }
-
-    // Handle delete request toast and navigation
-    LaunchedEffect(shouldShowDeleteToast) {
-        if (shouldShowDeleteToast) {
-            Toast.makeText(context, "Your request has been raised successfully! Soon we will contact you.", Toast.LENGTH_LONG).show()
-            navController.popBackStack()
-            shouldShowDeleteToast = false
         }
     }
 
@@ -228,6 +224,7 @@ fun EditNoticeBoardScreen(
                                 value = organizationWhatsapp,
                                 onValueChange = { organizationWhatsapp = it },
                                 label = { Text("WhatsApp Number") },
+                                placeholder = { Text("1234567890") },
                                 modifier = Modifier.fillMaxWidth(),
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
@@ -300,6 +297,14 @@ fun EditNoticeBoardScreen(
                                 }
                                 if (organizationLocation.isEmpty()) {
                                     errorMessage = "Organization location is required"
+                                    return@Button
+                                }
+                                if (organizationWhatsapp.isEmpty()) {
+                                    errorMessage = "WhatsApp number is required"
+                                    return@Button
+                                }
+                                if (!isValidPhoneNumber(organizationWhatsapp)) {
+                                    errorMessage = "Please enter a valid 10-digit WhatsApp number"
                                     return@Button
                                 }
 
@@ -388,7 +393,69 @@ fun EditNoticeBoardScreen(
                     Button(
                     onClick = {
                         showDeleteRequestDialog = false
-                        shouldShowDeleteToast = true
+                        
+                        // Check if request already exists
+                        coroutineScope.launch {
+                            try {
+                                val existingRequest = firebaseRepository.getBoardDeletionRequestByBoardId(boardId)
+                                
+                                if (existingRequest != null) {
+                                    // Request already exists
+                                    Toast.makeText(
+                                        context,
+                                        "Your request already exists! We will sort it soon.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                } else {
+                                    // Create new deletion request
+                                    val board = boardState.data
+                                    if (board != null && currentUser != null) {
+                                        val deletionRequest = BoardDeletionRequest(
+                                            id = UUID.randomUUID().toString(),
+                                            boardId = boardId,
+                                            organizationName = board.organizationName,
+                                            organizationCode = board.organizationCode,
+                                            organizationEmail = board.organizationEmail,
+                                            organizationLocation = board.organizationLocation,
+                                            organizationWhatsapp = board.organizationWhatsapp,
+                                            requestedBy = currentUser.id,
+                                            requestReason = "User requested board deletion",
+                                            status = com.notifiy.noticeboard.data.model.DeletionRequestStatus.PENDING,
+                                            createdAt = System.currentTimeMillis(),
+                                            updatedAt = System.currentTimeMillis()
+                                        )
+                                        
+                                        val result = firebaseRepository.createBoardDeletionRequest(deletionRequest)
+                                        if (result.isSuccess) {
+                                            Toast.makeText(
+                                                context,
+                                                "Your request has been raised successfully! Soon we will contact you.",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                            navController.popBackStack()
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                "Failed to submit request. Please try again.",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "Unable to process request. Please try again.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                Toast.makeText(
+                                    context,
+                                    "Error processing request: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
                     }, colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error
                         )

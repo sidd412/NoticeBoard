@@ -58,6 +58,7 @@ import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.HomeViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.utils.QRCodeUtils
+import com.notifiy.noticeboard.utils.isValidPhoneNumber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -185,7 +186,7 @@ fun SubscribePopupScreen(
                             value = whatsappNumber,
                             onValueChange = { whatsappNumber = it },
                             label = { Text("WhatsApp Number") },
-                            placeholder = { Text("+1234567890") },
+                            placeholder = { Text("1234567890") },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
@@ -360,6 +361,12 @@ fun SubscribePopupScreen(
             onClick = {
                 if (selectedMethod == SubscriptionMethod.NONE) {
                     errorMessage = "Please select a subscription method"
+                    return@Button
+                }
+
+                // Validate WhatsApp number if WhatsApp method is selected
+                if (selectedMethod == SubscriptionMethod.WHATSAPP && !isValidPhoneNumber(whatsappNumber)) {
+                    errorMessage = "Please enter a valid 10-digit WhatsApp number"
                     return@Button
                 }
 
