@@ -1,6 +1,8 @@
 package com.notifiy.noticeboard.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,7 +13,10 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.SettingsBrightness
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +33,7 @@ import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
+import com.notifiy.noticeboard.data.preferences.PreferencesManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +44,7 @@ fun ProfileScreen(
 ) {
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
+    var showSignOutDialog by remember { mutableStateOf(false) }
 
     if (currentUser != null) {
         LazyColumn(
@@ -79,7 +86,7 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         // User Name
-                        Column {
+                        Column(modifier = Modifier) {
                             Text(
                                 text = currentUser.name,
                                 fontSize = 20.sp,
@@ -151,7 +158,7 @@ fun ProfileScreen(
                 }
             }
 
-            // Settings Options
+            // Account & Settings Options
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth()
@@ -160,7 +167,7 @@ fun ProfileScreen(
                         modifier = Modifier.padding(20.dp)
                     ) {
                         Text(
-                            text = "Settings",
+                            text = "Account & Settings",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -220,96 +227,126 @@ fun ProfileScreen(
                             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                         )
 
-                        // Theme Toggle
+                        // Theme Mode Dropdown
+                        ThemeModeDropdown(themeViewModel = themeViewModel)
+
+                        Divider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        )
+
+                        // About Notice Board Button
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 8.dp),
+                                .padding(vertical = 8.dp)
+                                .clickable { /* TODO: Navigate to about screen */ },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = if (themeViewModel.isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode,
-                                contentDescription = "Theme",
+                                imageVector = Icons.Default.Email,
+                                contentDescription = "About",
                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
-                                text = "Theme Mode",
+                                text = "About Notice Board",
                                 fontSize = 16.sp,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f)
                             )
-                            Text(
-                                text = themeViewModel.getThemeModeString(),
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                            Switch(
-                                checked = themeViewModel.isDarkMode, onCheckedChange = {
-                                    themeViewModel.toggleTheme()
-                                }, modifier = Modifier
-                            )
                         }
-                    }
-                }
-            }
 
-            // Action Buttons
-            item {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    if (currentUser != null) {
-                        // Sign Out Button
-                        Button(
-                            onClick = {
-                                authViewModel.signOut()
-                                navController.navigate(Screen.Login.route) {
-                                    popUpTo(Screen.MainContainer.route) { inclusive = true }
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error
-                            )
-                        ) {
-                            Text(
-                                text = "Sign Out", fontSize = 16.sp, fontWeight = FontWeight.Medium
-                            )
-                        }
-                    } else {
-                        // Sign In Button
-                        Button(
-                            onClick = {
-                                navController.navigate(Screen.Login.route)
-                            }, modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "Sign In", fontSize = 16.sp, fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-
-                    // About App Button
-                    OutlinedButton(
-                        onClick = { /* TODO: Navigate to about screen */ },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "About Notice Board",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
+                        Divider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                         )
+
+                        // Sign Out Button
+                        if (currentUser != null) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                                    .clickable { showSignOutDialog = true },
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ExitToApp,
+                                    contentDescription = "Sign Out",
+                                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
+                                )
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text(
+                                    text = "Sign Out",
+                                    fontSize = 16.sp,
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
                     }
                 }
             }
+
 
             // Empty space for bottom padding
             item {
                 Spacer(modifier = Modifier.height(32.dp))
             }
+        }
+        
+        // Sign Out Confirmation Dialog
+        if (showSignOutDialog) {
+            AlertDialog(
+                onDismissRequest = { showSignOutDialog = false },
+                title = {
+                    Text(
+                        text = "Sign Out",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        text = "Are you sure you want to sign out? You will need to sign in again to access your account.",
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showSignOutDialog = false
+                            authViewModel.signOut()
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(Screen.MainContainer.route) { inclusive = true }
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text(
+                            text = "Yes, Sign Out",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showSignOutDialog = false }
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            )
         }
     } else {
         LoginScreen(
@@ -317,4 +354,101 @@ fun ProfileScreen(
         )
     }
 
+}
+
+@Composable
+fun ThemeModeDropdown(themeViewModel: ThemeViewModel) {
+    var expanded by remember { mutableStateOf(false) }
+    
+    val themeOptions = listOf(
+        Triple("System", PreferencesManager.THEME_SYSTEM, Icons.Default.SettingsBrightness),
+        Triple("Light", PreferencesManager.THEME_LIGHT, Icons.Default.LightMode),
+        Triple("Dark", PreferencesManager.THEME_DARK, Icons.Default.DarkMode)
+    )
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.SettingsBrightness,
+            contentDescription = "Theme",
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = "Theme Mode",
+            fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f)
+        )
+        
+        Box {
+            Row(
+                modifier = Modifier
+                    .clickable { expanded = true }
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = themeViewModel.getThemeModeString(),
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
+                )
+                Icon(
+                    imageVector = Icons.Default.ExpandMore,
+                    contentDescription = "Expand",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface)
+            ) {
+                themeOptions.forEach { (label, value, icon) ->
+                    DropdownMenuItem(
+                        text = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = label,
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    text = label,
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                if (themeViewModel.themeMode == value) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Selected",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        },
+                        onClick = {
+                            themeViewModel.setThemeMode(value)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
