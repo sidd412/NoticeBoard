@@ -13,10 +13,19 @@ android {
         applicationId = "com.notifiy.noticeboard"
         minSdk = 24
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("noteXP-release-key.keystore")
+            storePassword = "noteXP123"
+            keyAlias = "noteXP-key"
+            keyPassword = "noteXP123"
+        }
     }
 
     buildTypes {
@@ -27,8 +36,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Use debug signing for now (for development/testing)
-            signingConfig = signingConfigs.getByName("debug")
+            // Use proper release signing for production
+            signingConfig = signingConfigs.getByName("release")
             // Generate mapping file for crash reporting
             isDebuggable = false
         }
