@@ -1,18 +1,23 @@
 package com.notifiy.noticeboard.ui.screens
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -20,17 +25,22 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.utils.ShowErrorSnackbar
+import com.notifiy.noticeboard.utils.ValidationUtils
 import com.notifiy.noticeboard.utils.getErrorMessage
 
 @Composable
 fun LoginScreen(
     navController: NavController,
-    authViewModel: AuthViewModel = viewModel()
+    authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java)
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -38,9 +48,36 @@ fun LoginScreen(
     var isSignUp by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
     var validationError by remember { mutableStateOf("") }
+    var showPasswordResetDialog by remember { mutableStateOf(false) }
     
     val authState by authViewModel.authState.collectAsState()
+    val passwordResetSent by authViewModel.passwordResetSent.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    
+    // Google Sign-In launcher
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        try {
+            val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            val account: GoogleSignInAccount? = task.getResult(ApiException::class.java)
+            account?.idToken?.let { idToken ->
+                authViewModel.signInWithGoogle(idToken)
+            }
+        } catch (e: ApiException) {
+            when (e.statusCode) {
+                10 -> validationError = "Google Sign-In configuration error. Please contact support."
+                12501 -> {
+                    // User cancelled - don't show error message
+                    // This is normal user behavior
+                }
+                7 -> validationError = "Network error. Please check your internet connection."
+                8 -> validationError = "Internal error. Please try again later."
+                else -> validationError = "Google Sign-In failed. Please try again."
+            }
+        }
+    }
     
     // Handle successful authentication
     LaunchedEffect(authState.data, authState.isLoading) {
@@ -63,6 +100,15 @@ fun LoginScreen(
         if (validationError.isNotEmpty()) {
             snackbarHostState.showSnackbar(validationError)
             validationError = ""
+        }
+    }
+    
+    // Handle password reset success
+    LaunchedEffect(passwordResetSent) {
+        if (passwordResetSent) {
+            snackbarHostState.showSnackbar("Password reset email sent! Check your inbox and spam folder.")
+            showPasswordResetDialog = false
+            authViewModel.clearPasswordResetSent()
         }
     }
     
@@ -159,7 +205,7 @@ fun LoginScreen(
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
-                            if (passwordVisible) Icons.Default.CheckCircle else Icons.Default.Lock,
+                            if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                             contentDescription = if (passwordVisible) "Hide password" else "Show password"
                         )
                     }
@@ -175,8 +221,14 @@ fun LoginScreen(
             // Sign in/up button
             Button(
                 onClick = {
-                    if (email.isBlank() || password.isBlank() || (isSignUp && name.isBlank())) {
-                        validationError = "Please fill all fields"
+                    val validation = if (isSignUp) {
+                        ValidationUtils.validateSignupFields(name, email, password)
+                    } else {
+                        ValidationUtils.validateLoginFields(email, password)
+                    }
+                    
+                    if (!validation.isValid) {
+                        validationError = validation.errorMessage
                         return@Button
                     }
                     
@@ -220,19 +272,36 @@ fun LoginScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Skip button
-            TextButton(
+            // Google Sign-In button
+            OutlinedButton(
                 onClick = {
-                    authViewModel.skipLogin()
-                    navController.navigate(Screen.MainContainer.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                }
+                    val signInIntent = authViewModel.googleSignInClient.signInIntent
+                    googleSignInLauncher.launch(signInIntent)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !authState.isLoading
             ) {
                 Text(
-                    text = "Skip for now",
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                    text = "Continue with Google",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
                 )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Password reset button (only for sign in)
+            if (!isSignUp) {
+                TextButton(
+                    onClick = { showPasswordResetDialog = true }
+                ) {
+                    Text(
+                        text = "Forgot Password?",
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
         
@@ -242,4 +311,91 @@ fun LoginScreen(
             modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
+    
+    // Password Reset Dialog
+    if (showPasswordResetDialog) {
+        PasswordResetDialog(
+            onDismiss = { showPasswordResetDialog = false },
+            onSendReset = { email ->
+                authViewModel.sendPasswordResetEmail(email)
+            },
+            isLoading = authState.isLoading
+        )
+    }
+}
+
+@Composable
+fun PasswordResetDialog(
+    onDismiss: () -> Unit,
+    onSendReset: (String) -> Unit,
+    isLoading: Boolean
+) {
+    var email by remember { mutableStateOf("") }
+    var validationError by remember { mutableStateOf("") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Reset Password") },
+        text = {
+            Column {
+                Text("Enter your email address and we'll send you a link to reset your password.")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "💡 Tip: Check your spam/junk folder if you don't receive the email within a few minutes.",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    leadingIcon = {
+                        Icon(Icons.Default.Email, contentDescription = null)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    isError = validationError.isNotEmpty()
+                )
+                
+                if (validationError.isNotEmpty()) {
+                    Text(
+                        text = validationError,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (!ValidationUtils.isValidEmailGeneric(email)) {
+                        validationError = "Please enter a valid email address"
+                        return@Button
+                    }
+                    onSendReset(email)
+                },
+                enabled = !isLoading
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        color = Color.White
+                    )
+                } else {
+                    Text("Send Reset Link")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

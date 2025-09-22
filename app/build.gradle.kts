@@ -13,21 +13,36 @@ android {
         applicationId = "com.notifiy.noticeboard"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("noteXP-release-key.keystore")
+            storePassword = "noteXP123"
+            keyAlias = "noteXP-key"
+            keyPassword = "noteXP123"
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            // Use proper release signing for production
+            signingConfig = signingConfigs.getByName("release")
+            // Generate mapping file for crash reporting
+            isDebuggable = false
+        }
+        debug {
+            isDebuggable = true
         }
     }
     compileOptions {
@@ -39,6 +54,18 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    
+    bundle {
+        storeArchive {
+            enable = false
+        }
+    }
+    
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
@@ -69,6 +96,19 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    
+    // Gson for JSON serialization
+    implementation(libs.gson)
+    
+    // QR Code dependencies
+    implementation(libs.core)
+    implementation(libs.zxing.android.embedded)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
     
     // Testing
     testImplementation(libs.junit)

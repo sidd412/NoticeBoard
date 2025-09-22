@@ -12,7 +12,12 @@
           "package_name": "com.notifiy.noticeboard"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1020177538461-1j75djeebl4gmm7g0ok1pit25eutm25l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyChwf_8Hp3sEbfD9LqHVCZyQT-tzKsVYqk"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1020177538461-1j75djeebl4gmm7g0ok1pit25eutm25l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

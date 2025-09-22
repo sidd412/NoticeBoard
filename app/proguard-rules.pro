@@ -36,3 +36,28 @@
 # kept. Suspend functions are wrapped in continuations where the type argument
 # is used.
 -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
+
+# Keep ZXing QR code library classes
+-keep class com.google.zxing.** { *; }
+-keep class com.journeyapps.barcodescanner.** { *; }
+-dontwarn com.google.zxing.**
+
+# Keep Gson classes for JSON parsing
+-keep class com.google.gson.** { *; }
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
+-keepclassmembers,allowobfuscation class * {
+  @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Keep data models for Gson serialization
+-keep class com.notifiy.noticeboard.data.model.** { <fields>; }
+-keep class com.notifiy.noticeboard.utils.QRCodeUtils$QRBoardData { <fields>; }
+
+# Keep Camera and ActivityResult APIs
+-keep class androidx.activity.result.** { *; }
+-keep class androidx.camera.** { *; }
+
+# Prevent obfuscation of custom QR scanner activity
+-keep class com.notifiy.noticeboard.ui.components.PortraitCaptureActivity { *; }

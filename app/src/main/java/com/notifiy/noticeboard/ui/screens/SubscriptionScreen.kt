@@ -21,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.ui.viewmodel.SubscriptionViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,7 +30,7 @@ import java.util.*
 fun SubscriptionScreen(
     navController: NavController,
     boardId: String,
-    subscriptionViewModel: SubscriptionViewModel = viewModel()
+    subscriptionViewModel: SubscriptionViewModel = cachedViewModel(SubscriptionViewModel::class.java)
 ) {
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }

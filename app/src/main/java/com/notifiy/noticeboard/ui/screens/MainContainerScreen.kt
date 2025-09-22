@@ -2,7 +2,9 @@ package com.notifiy.noticeboard.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DashboardCustomize
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.NoteAlt
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -20,6 +22,8 @@ import androidx.navigation.compose.rememberNavController
 import com.notifiy.noticeboard.navigation.BottomNavScreen
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
+import com.notifiy.noticeboard.ui.viewmodel.ViewModelFactory
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,14 +31,15 @@ import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
 fun MainContainerScreen(
     navController: NavController,
     themeViewModel: ThemeViewModel,
-    onBottomNavBarVisibilityChanged: (Boolean) -> Unit = {}
+    onBottomNavBarVisibilityChanged: (Boolean) -> Unit = {},
+    onHomeTabChanged: (Boolean) -> Unit = {}
 ) {
     val bottomNavController = rememberNavController()
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     
     // Create a shared AuthViewModel instance
-    val authViewModel: AuthViewModel = viewModel()
+    val authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java)
     
     // Hide navigation bar on YourBoards screen
     val showBottomBar = currentDestination?.route != BottomNavScreen.YourBoards.route
@@ -42,6 +47,14 @@ fun MainContainerScreen(
     // Notify parent about bottom nav bar visibility changes
     LaunchedEffect(showBottomBar) {
         onBottomNavBarVisibilityChanged(showBottomBar)
+    }
+    
+    // Notify parent about home tab changes
+    LaunchedEffect(currentDestination?.route) {
+        val isHomeTab = currentDestination?.route == BottomNavScreen.Home.route
+        println("backLogging: MainContainerScreen - Current destination: ${currentDestination?.route}")
+        println("backLogging: MainContainerScreen - Is home tab: $isHomeTab")
+        onHomeTabChanged(isHomeTab)
     }
     
     Scaffold(
@@ -61,7 +74,7 @@ fun MainContainerScreen(
                                     imageVector = when (screen) {
                                         BottomNavScreen.Home -> Icons.Default.Home
                                         BottomNavScreen.Profile -> Icons.Default.Person
-                                        BottomNavScreen.YourBoards -> Icons.Default.Settings
+                                        BottomNavScreen.YourBoards -> Icons.Default.NoteAlt
                                     },
                                     contentDescription = screen.title
                                 )

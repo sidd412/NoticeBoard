@@ -1,5 +1,6 @@
 package com.notifiy.noticeboard.ui.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.notifiy.noticeboard.data.model.NoticeBoard
@@ -10,9 +11,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class YourBoardsViewModel : ViewModel() {
+class YourBoardsViewModel(private val context: Context) : ViewModel() {
     
-    private val repository: FirebaseRepository = FirebaseRepository()
+    private val repository: FirebaseRepository = FirebaseRepository(context)
     
     private val _userBoards = MutableStateFlow(UiState<List<NoticeBoard>>())
     val userBoards: StateFlow<UiState<List<NoticeBoard>>> = _userBoards.asStateFlow()
@@ -95,6 +96,36 @@ class YourBoardsViewModel : ViewModel() {
                     }
                 )
             } catch (e: Exception) {
+                _errorMessage.value = e.message
+                onResult(false)
+            }
+        }
+    }
+    
+    fun deleteNoticeBoard(boardId: String, userId: String, onResult: (Boolean) -> Unit) {
+        println("DEBUG: YourBoardsViewModel.deleteNoticeBoard called for board: $boardId")
+        _userBoards.value = _userBoards.value.copy(isLoading = true, error = null)
+        viewModelScope.launch {
+            try {
+                val result = repository.deleteNoticeBoard(boardId)
+                result.fold(
+                    onSuccess = {
+                        println("DEBUG: Board deleted successfully, reloading boards")
+                        // Reload user boards to reflect the deletion
+                        loadUserBoards(userId)
+                        _errorMessage.value = null
+                        onResult(true)
+                    },
+                    onFailure = { exception ->
+                        println("DEBUG: Failed to delete board: ${exception.message}")
+                        _userBoards.value = UiState(isLoading = false, error = exception.message)
+                        _errorMessage.value = exception.message
+                        onResult(false)
+                    }
+                )
+            } catch (e: Exception) {
+                println("DEBUG: Exception in deleteNoticeBoard: ${e.message}")
+                _userBoards.value = UiState(isLoading = false, error = e.message)
                 _errorMessage.value = e.message
                 onResult(false)
             }

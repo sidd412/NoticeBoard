@@ -1,285 +1,253 @@
 package com.notifiy.noticeboard.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.notifiy.noticeboard.data.model.Notice
+import android.widget.Toast
+import androidx.compose.foundation.border
 import com.notifiy.noticeboard.data.model.NoticeBoard
-import com.notifiy.noticeboard.data.model.NoticePriority
 import com.notifiy.noticeboard.data.model.Page
-import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.components.HorizontalPagesCarousel
+import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.HomeViewModel
-import kotlinx.coroutines.launch
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 
 @Composable
 fun NoticeViewerScreen(
     navController: NavController,
     boardId: String,
-    homeViewModel: HomeViewModel = viewModel()
+    homeViewModel: HomeViewModel = cachedViewModel(HomeViewModel::class.java),
+    authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java)
 ) {
     var pages by remember { mutableStateOf<List<Page>>(emptyList()) }
     var noticeBoard by remember { mutableStateOf<NoticeBoard?>(null) }
     var isLoading by remember { mutableStateOf(true) }
-    var errorMessage by remember { mutableStateOf("") }
-    
+    var showUnsubscribeDialog by remember { mutableStateOf(false) }
+
+    val authState by authViewModel.authState.collectAsState()
+    val currentUser = authState.data
+    val context = LocalContext.current
+
     LaunchedEffect(boardId) {
         try {
             isLoading = true
             println("DEBUG: NoticeViewerScreen - Loading pages for boardId: $boardId")
-            
+
             // Load board details first
             noticeBoard = homeViewModel.getNoticeBoardById(boardId)
             println("DEBUG: NoticeViewerScreen - Loaded board: $noticeBoard")
-            
+
             if (noticeBoard != null) {
                 val boardCode = noticeBoard!!.organizationCode.toIntOrNull() ?: 0
                 println("DEBUG: NoticeViewerScreen - Board code: $boardCode")
-                
+
                 // Load pages for this board
                 pages = homeViewModel.getPagesByBoardCode(boardCode)
                 println("DEBUG: NoticeViewerScreen - Loaded ${pages.size} pages")
+
+                // Mark notification as read when user views the board
+                currentUser?.let { user ->
+                    homeViewModel.markNotificationAsRead(user.id, boardId)
+                }
             }
-            
+
             isLoading = false
         } catch (e: Exception) {
             println("DEBUG: NoticeViewerScreen - Error: ${e.message}")
-            errorMessage = e.message ?: "Failed to load pages"
             isLoading = false
         }
     }
-    
-    Box(
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.9f))
-    ) {
-        // Close button
-        IconButton(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp)
-        ) {
-            Icon(
-                Icons.Default.Close,
-                contentDescription = "Close",
-                tint = Color.White,
-                modifier = Modifier.size(32.dp)
-            )
-        }
-        
+            .padding(vertical = 50.dp)
+    )
+    {
+
         if (isLoading) {
             Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(color = Color.White)
             }
-        } else if (pages.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "No Pages Available",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "There are no pages available for this board at the moment.",
-                        fontSize = 16.sp,
-                        color = Color.White.copy(alpha = 0.7f),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        } else {
+        }
+        else {
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
+                if (pages.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxHeight(.65f)
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "No Pages Available",
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "There are no pages available for this board at the moment.",
+                                    fontSize = 16.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                }
+                else {// Horizontal Pages Carousel
+                    HorizontalPagesCarousel(
+                        pages = pages,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 16.dp),
+                        onPageClick = { page ->
+                            // Navigate to page details or do something with the page
+                            println("DEBUG: NoticeViewerScreen - Page clicked: ${page.title}")
+                        })
+                }
+
                 // Header with board info
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
-                    )
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text(
-                            text = noticeBoard?.organizationName ?: "Notice Board",
+                            text = "${noticeBoard?.organizationName} Notice Board",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "${pages.size} pages available",
+                            text = "Total ${pages.size} Notice available",
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
                 }
-                
-                // Horizontal Pages Carousel
-                HorizontalPagesCarousel(
-                    pages = pages,
+
+                // Unsubscribe button
+                Button(
+                    onClick = { showUnsubscribeDialog = true },
                     modifier = Modifier
-                        .weight(1f)
+                        .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    onPageClick = { page ->
-                        // Navigate to page details or do something with the page
-                        println("DEBUG: NoticeViewerScreen - Page clicked: ${page.title}")
-                    }
-                )
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) { Text(
+                        text = "Unsubscribe from Board",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    ) }
+
+                // Close button
+                Button(
+                    onClick = { navController.popBackStack() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text(
+                        text = "Back To Home", fontSize = 16.sp, fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
     }
-}
 
-@Composable
-fun NoticeCard(
-    notice: Notice,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxSize(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(24.dp)
-        ) {
-            // Priority indicator
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            when (notice.priority) {
-                                NoticePriority.URGENT -> Color.Red
-                                NoticePriority.HIGH -> Color(0xFFFF9800)
-                                NoticePriority.NORMAL -> Color(0xFF4CAF50)
-                                NoticePriority.LOW -> Color(0xFF2196F3)
+    
+    // Unsubscribe confirmation dialog
+    if (showUnsubscribeDialog) {
+        AlertDialog(
+            onDismissRequest = { showUnsubscribeDialog = false },
+            title = { Text("Unsubscribe from Board") },
+            text = { 
+                Text("Are you sure you want to unsubscribe from \"${noticeBoard?.organizationName}\"? You will no longer receive updates from this board.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = { 
+                        showUnsubscribeDialog = false
+                        currentUser?.let { user ->
+                            noticeBoard?.let { board ->
+                                homeViewModel.unsubscribeFromBoard(user.id, board.organizationCode) { result ->
+                                    result.fold(
+                                        onSuccess = {
+                                            println("DEBUG: Successfully unsubscribed from ${board.organizationName}")
+                                            Toast.makeText(context, "Successfully unsubscribed from ${board.organizationName}!", Toast.LENGTH_LONG).show()
+                                            navController.popBackStack()
+                                        },
+                                        onFailure = { exception ->
+                                            println("DEBUG: Failed to unsubscribe: ${exception.message}")
+                                            Toast.makeText(context, "Failed to unsubscribe. Please try again.", Toast.LENGTH_SHORT).show()
+                                        }
+                                    )
+                                }
                             }
-                        )
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = notice.priority.name.uppercase(),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
                     )
+                ) {
+                    Text("Unsubscribe")
                 }
-                
-                Spacer(modifier = Modifier.width(12.dp))
-                
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = notice.subtitle.uppercase(),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+            },
+            dismissButton = {
+                TextButton(onClick = { showUnsubscribeDialog = false }) {
+                    Text("Cancel")
                 }
             }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Title
-            Text(
-                text = notice.title,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Content
-            Text(
-                text = notice.content,
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                lineHeight = 24.sp
-            )
-            
-            // Info Points
-            if (notice.infoPoints.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Key Points:",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                notice.infoPoints.forEach { point ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Text(
-                            text = "• ",
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = point,
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Date info
-            Text(
-                text = "Posted on ${java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date(notice.createdAt))}",
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        }
+        )
     }
 }

@@ -20,11 +20,12 @@ import androidx.navigation.NavController
 import com.notifiy.noticeboard.R
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(
-    navController: NavController, authViewModel: AuthViewModel = viewModel()
+    navController: NavController, authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java)
 ) {
     val authState by authViewModel.authState.collectAsState()
 

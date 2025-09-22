@@ -1,5 +1,6 @@
 package com.notifiy.noticeboard.ui.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.notifiy.noticeboard.data.model.Notice
@@ -12,9 +13,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class BoardEditorViewModel : ViewModel() {
+class BoardEditorViewModel(private val context: Context) : ViewModel() {
     
-    private val repository: FirebaseRepository = FirebaseRepository()
+    private val repository: FirebaseRepository = FirebaseRepository(context)
     
     private val _authState = MutableStateFlow(UiState<com.notifiy.noticeboard.data.model.User?>())
     val authState: StateFlow<UiState<com.notifiy.noticeboard.data.model.User?>> = _authState.asStateFlow()
@@ -148,6 +149,18 @@ class BoardEditorViewModel : ViewModel() {
                     onSuccess = { savedPage ->
                         println("DEBUG: BoardEditorViewModel.savePage - Success: $savedPage")
                         _errorMessage.value = null
+                        
+                        // Increment notification count for subscribed users
+                        val boardId = getBoardIdByCode(savedPage.code)
+                        if (boardId != null) {
+                            repository.incrementNotificationCount(boardId, savedPage.code.toString())
+                            
+                            // Send local notification to subscribers
+                            val title = "New Notice Update"
+                            val body = "A new notice has been added to ${getNoticeBoardById(boardId)?.organizationName ?: "a notice board"} you're subscribed to"
+                            repository.sendLocalNotificationToSubscribers(boardId, savedPage.code.toString(), title, body)
+                        }
+                        
                         onResult(true)
                     },
                     onFailure = { exception ->
@@ -164,7 +177,50 @@ class BoardEditorViewModel : ViewModel() {
         }
     }
     
+    private suspend fun getBoardIdByCode(code: Int): String? {
+        return try {
+            repository.getNoticeBoardByCode(code.toString())?.id
+        } catch (e: Exception) {
+            println("DEBUG: BoardEditorViewModel.getBoardIdByCode - Error: ${e.message}")
+            null
+        }
+    }
+    
+    private suspend fun getNoticeBoardById(boardId: String): NoticeBoard? {
+        return try {
+            repository.getNoticeBoardById(boardId)
+        } catch (e: Exception) {
+            println("DEBUG: BoardEditorViewModel.getNoticeBoardById - Error: ${e.message}")
+            null
+        }
+    }
+    
     fun clearError() {
         _errorMessage.value = null
+    }
+    
+    fun deletePage(pageId: String, onResult: (Boolean) -> Unit) {
+        println("DEBUG: BoardEditorViewModel.deletePage called for page: $pageId")
+        viewModelScope.launch {
+            try {
+                val result = repository.deletePage(pageId)
+                result.fold(
+                    onSuccess = {
+                        println("DEBUG: Page deleted successfully")
+                        _errorMessage.value = null
+                        onResult(true)
+                    },
+                    onFailure = { exception ->
+                        println("DEBUG: Failed to delete page: ${exception.message}")
+                        _errorMessage.value = exception.message
+                        onResult(false)
+                    }
+                )
+            } catch (e: Exception) {
+                println("DEBUG: Exception in deletePage: ${e.message}")
+                _errorMessage.value = e.message
+                onResult(false)
+            }
+        }
     }
 }

@@ -25,13 +25,16 @@ import androidx.navigation.NavController
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
+import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
+import com.notifiy.noticeboard.utils.ValidationUtils
+import com.notifiy.noticeboard.utils.isValidPhoneNumber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdateBoardScreen(
     navController: NavController,
     boardId: String,
-    authViewModel: AuthViewModel = viewModel()
+    authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java)
 ) {
     var organizationName by remember { mutableStateOf("") }
     var organizationCode by remember { mutableStateOf("") }
@@ -54,7 +57,7 @@ fun UpdateBoardScreen(
         organizationCode = "SAMPLE001"
         organizationEmail = "contact@sample.edu"
         organizationLocation = "Sample City"
-        organizationWhatsapp = "+1234567890"
+        organizationWhatsapp = "1234567890"
         isDataLoaded = true
     }
     
@@ -192,7 +195,7 @@ fun UpdateBoardScreen(
                         value = organizationWhatsapp,
                         onValueChange = { organizationWhatsapp = it },
                         label = { Text("WhatsApp Number") },
-                        placeholder = { Text("+1234567890") },
+                        placeholder = { Text("1234567890") },
                         leadingIcon = {
                             Icon(Icons.Default.Phone, contentDescription = null)
                         },
@@ -252,14 +255,14 @@ fun UpdateBoardScreen(
                             }
                             
                             // Validate email format
-                            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(organizationEmail).matches()) {
+                            if (!ValidationUtils.isValidEmail(organizationEmail)) {
                                 errorMessage = "Please enter a valid email address"
                                 return@Button
                             }
                             
                             // Validate WhatsApp number format
-                            if (!organizationWhatsapp.startsWith("+") || organizationWhatsapp.length < 10) {
-                                errorMessage = "Please enter a valid WhatsApp number with country code"
+                            if (!isValidPhoneNumber(organizationWhatsapp)) {
+                                errorMessage = "Please enter a valid 10-digit WhatsApp number"
                                 return@Button
                             }
                             

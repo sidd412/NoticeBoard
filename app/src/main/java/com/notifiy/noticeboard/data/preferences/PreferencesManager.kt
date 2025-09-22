@@ -12,6 +12,9 @@ class PreferencesManager(context: Context) {
     companion object {
         private const val PREFS_NAME = "noticeboard_preferences"
         private const val KEY_THEME_MODE = "theme_mode"
+        private const val KEY_PUSH_NOTIFICATIONS = "push_notifications"
+        private const val KEY_EMAIL_NOTIFICATIONS = "email_notifications"
+        private const val KEY_MARKETING_EMAILS = "marketing_emails"
         
         // Theme mode constants
         const val THEME_SYSTEM = 0
@@ -40,5 +43,36 @@ class PreferencesManager(context: Context) {
     
     fun shouldUseSystemTheme(): Boolean {
         return getThemeMode() == THEME_SYSTEM
+    }
+    
+    // Notification preferences
+    fun getPushNotifications(): Boolean {
+        return sharedPreferences.getBoolean(KEY_PUSH_NOTIFICATIONS, true)
+    }
+    
+    fun setPushNotifications(enabled: Boolean) {
+        sharedPreferences.edit {
+            putBoolean(KEY_PUSH_NOTIFICATIONS, enabled)
+        }
+    }
+    
+    fun getEmailNotifications(): Boolean {
+        return sharedPreferences.getBoolean(KEY_EMAIL_NOTIFICATIONS, false)
+    }
+    
+    fun setEmailNotifications(enabled: Boolean) {
+        sharedPreferences.edit {
+            putBoolean(KEY_EMAIL_NOTIFICATIONS, enabled)
+        }
+    }
+    
+    fun getMarketingEmails(): Boolean {
+        return sharedPreferences.getBoolean(KEY_MARKETING_EMAILS, false)
+    }
+    
+    fun setMarketingEmails(enabled: Boolean) {
+        sharedPreferences.edit {
+            putBoolean(KEY_MARKETING_EMAILS, enabled)
+        }
     }
 }
