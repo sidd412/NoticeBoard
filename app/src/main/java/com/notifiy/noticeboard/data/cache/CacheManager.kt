@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken
 import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Page
+import com.notifiy.noticeboard.data.model.UpdateConfig
 import com.notifiy.noticeboard.data.model.User
 
 class CacheManager(private val context: Context) {
@@ -43,6 +44,7 @@ class CacheManager(private val context: Context) {
         private const val KEY_PAGES_LIST_PREFIX = "pages_list_"
         private const val KEY_ALL_PAGES = "all_pages"
         private const val KEY_NOTIFICATION_COUNT_PREFIX = "notification_count_"
+        private const val KEY_UPDATE_CONFIG = "update_config"
     }
     
     // Cache data models
@@ -305,6 +307,38 @@ class CacheManager(private val context: Context) {
     
     fun invalidateNotificationCount(key: String) {
         prefs.edit().remove("$KEY_NOTIFICATION_COUNT_PREFIX$key").apply()
+    }
+    
+    // Update config caching methods
+    fun cacheUpdateConfig(updateConfig: UpdateConfig) {
+        val cacheEntry = CacheEntry(updateConfig, System.currentTimeMillis(), updateConfig.updatedAt)
+        val json = gson.toJson(cacheEntry)
+        prefs.edit().putString(KEY_UPDATE_CONFIG, json).apply()
+    }
+    
+    fun getCachedUpdateConfig(): UpdateConfig? {
+        val json = prefs.getString(KEY_UPDATE_CONFIG, null) ?: return null
+        return try {
+            val type = object : TypeToken<CacheEntry<UpdateConfig>>() {}.type
+            val cacheEntry: CacheEntry<UpdateConfig> = gson.fromJson(json, type)
+            
+            // Check if cache is still valid (not expired and data hasn't been updated)
+            if (isCacheValid(cacheEntry.timestamp) && !hasDataChanged(cacheEntry.lastUpdated, cacheEntry.data.updatedAt)) {
+                cacheEntry.data
+            } else {
+                // Cache is stale, remove it
+                prefs.edit().remove(KEY_UPDATE_CONFIG).apply()
+                null
+            }
+        } catch (e: Exception) {
+            // Invalid cache data, remove it
+            prefs.edit().remove(KEY_UPDATE_CONFIG).apply()
+            null
+        }
+    }
+    
+    fun invalidateUpdateConfig() {
+        prefs.edit().remove(KEY_UPDATE_CONFIG).apply()
     }
     
     fun invalidateNoticeBoardsList(key: String) {

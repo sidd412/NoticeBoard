@@ -29,6 +29,8 @@ import androidx.navigation.compose.rememberNavController
 import com.notifiy.noticeboard.navigation.BottomNavScreen
 import com.notifiy.noticeboard.navigation.NoticeBoardNavigation
 import com.notifiy.noticeboard.navigation.Screen
+import com.notifiy.noticeboard.services.UpdateService
+import com.notifiy.noticeboard.ui.components.UpdateDialog
 import com.notifiy.noticeboard.ui.theme.NoticeBoardTheme
 import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
 import kotlinx.coroutines.delay
@@ -157,6 +159,12 @@ fun NoticeBoardApp(
     val navController = rememberNavController()
     val context = LocalContext.current
     
+    // Update check state
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    var updateConfig by remember { mutableStateOf<com.notifiy.noticeboard.data.model.UpdateConfig?>(null) }
+    var isForceUpdate by remember { mutableStateOf(false) }
+    var isSkipable by remember { mutableStateOf(false) }
+    
     // Get current back stack entry to determine current screen
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -169,10 +177,77 @@ fun NoticeBoardApp(
         onHomeScreenChanged(isHomeScreen)
     }
     
+    // Check for updates when app starts
+    LaunchedEffect(Unit) {
+        try {
+            println("DEBUG: Starting update check...")
+            val updateService = UpdateService(context)
+            val updateResult = updateService.checkForUpdate()
+            
+            println("DEBUG: Update check result: $updateResult")
+            
+            if (updateResult.needsUpdate && updateResult.updateConfig != null) {
+                println("DEBUG: Update needed! Showing popup...")
+                updateConfig = updateResult.updateConfig
+                isForceUpdate = updateResult.isForceUpdate
+                isSkipable = updateResult.isSkipable
+                showUpdateDialog = true
+            } else {
+                println("DEBUG: No update needed or update config is null")
+                println("DEBUG: needsUpdate: ${updateResult.needsUpdate}")
+                println("DEBUG: updateConfig: ${updateResult.updateConfig}")
+            }
+        } catch (e: Exception) {
+            println("DEBUG: Error checking for updates: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
     NoticeBoardNavigation(
         navController = navController, 
         themeViewModel = themeViewModel,
         onBottomNavBarVisibilityChanged = onBottomNavBarVisibilityChanged,
         onHomeTabChanged = onHomeTabChanged
     )
+    
+    // Show update dialog if needed
+    updateConfig?.let { config ->
+        UpdateDialog(
+            updateConfig = config,
+            isForceUpdate = isForceUpdate,
+            isSkipable = isSkipable,
+            onDismiss = { 
+                showUpdateDialog = false
+                updateConfig = null
+            },
+            onUpdate = {
+                showUpdateDialog = false
+                updateConfig = null
+            }
+        )
+    }
+    
+    // Debug: Add a test button to manually trigger update check
+    // Remove this after debugging
+    LaunchedEffect(Unit) {
+        delay(2000) // Wait 2 seconds after app start
+        println("DEBUG: Manual update check triggered for debugging...")
+        
+        // Clear update config cache to ensure fresh data
+        try {
+            val cacheManager = com.notifiy.noticeboard.data.cache.CacheManager(context)
+            cacheManager.invalidateUpdateConfig()
+            println("DEBUG: Cleared update config cache")
+        } catch (e: Exception) {
+            println("DEBUG: Error clearing cache: ${e.message}")
+        }
+        
+        try {
+            val updateService = UpdateService(context)
+            val updateResult = updateService.checkForUpdate()
+            println("DEBUG: Manual update check result: $updateResult")
+        } catch (e: Exception) {
+            println("DEBUG: Manual update check error: ${e.message}")
+        }
+    }
 }

@@ -9,6 +9,7 @@ import com.notifiy.noticeboard.data.model.DataExportRequest
 import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Page
+import com.notifiy.noticeboard.data.model.UpdateConfig
 import com.notifiy.noticeboard.data.model.User
 import com.notifiy.noticeboard.data.model.UserNotification
 import com.notifiy.noticeboard.services.LocalNotificationService
@@ -1275,6 +1276,77 @@ class FirebaseRepository(private val context: Context? = null) {
         } catch (e: Exception) {
             println("DEBUG: Error updating data export request status: ${e.message}")
             Result.failure(e)
+        }
+    }
+    
+    // Update config operations
+    suspend fun getUpdateConfig(): UpdateConfig? {
+        return try {
+            println("DEBUG: FirebaseRepository - Getting update config from Firebase")
+            
+            // Check cache first
+            val cachedConfig = cacheManager?.getCachedUpdateConfig()
+            if (cachedConfig != null) {
+                println("DEBUG: FirebaseRepository - Returning cached update config: $cachedConfig")
+                return cachedConfig
+            }
+            
+            println("DEBUG: FirebaseRepository - Cache miss, fetching from Firebase...")
+            val document = firestore.collection("noteXpConfig")
+                .document("JaPhY3e1ohDp1r5sDugs") // Using the document ID from your Firebase
+                .get()
+                .await()
+            
+            println("DEBUG: FirebaseRepository - Document exists: ${document.exists()}")
+            println("DEBUG: FirebaseRepository - Document data: ${document.data}")
+            
+            if (document.exists()) {
+                println("DEBUG: FirebaseRepository - Raw document data: ${document.data}")
+                
+                // Try both approaches: automatic mapping and manual mapping
+                val updateConfig = document.toObject(UpdateConfig::class.java)
+                println("DEBUG: FirebaseRepository - Parsed update config (auto): $updateConfig")
+                
+                // Manual mapping as fallback
+                val data = document.data ?: emptyMap()
+                val manualConfig = UpdateConfig(
+                    updateLink = data["update_link"] as? String ?: "",
+                    latestVersionCode = (data["latest_version_code"] as? Long)?.toInt() ?: 0,
+                    latestVersionName = data["latest_version_name"] as? String ?: "",
+                    forceUpdate = data["force_update"] as? Boolean ?: false,
+                    skipableUpdate = data["skipable_update"] as? Boolean ?: true,
+                    updatedAt = System.currentTimeMillis()
+                )
+                println("DEBUG: FirebaseRepository - Parsed update config (manual): $manualConfig")
+                
+                // Use manual config if auto config has default values
+                val finalConfig = if (updateConfig?.latestVersionCode == 0 && manualConfig.latestVersionCode > 0) {
+                    println("DEBUG: FirebaseRepository - Using manual config due to auto mapping issues")
+                    manualConfig
+                } else {
+                    updateConfig ?: manualConfig
+                }
+                
+                // Debug individual field values
+                finalConfig?.let { config ->
+                    println("DEBUG: FirebaseRepository - updateLink: '${config.updateLink}'")
+                    println("DEBUG: FirebaseRepository - latestVersionCode: ${config.latestVersionCode}")
+                    println("DEBUG: FirebaseRepository - latestVersionName: '${config.latestVersionName}'")
+                    println("DEBUG: FirebaseRepository - forceUpdate: ${config.forceUpdate}")
+                    println("DEBUG: FirebaseRepository - skipableUpdate: ${config.skipableUpdate}")
+                }
+                
+                // Cache the update config
+                finalConfig?.let { cacheManager?.cacheUpdateConfig(it) }
+                finalConfig
+            } else {
+                println("DEBUG: FirebaseRepository - No update config document found")
+                null
+            }
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository - Error getting update config: ${e.message}")
+            e.printStackTrace()
+            null
         }
     }
 }
