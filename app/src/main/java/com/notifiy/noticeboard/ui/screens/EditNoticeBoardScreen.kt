@@ -375,7 +375,7 @@ fun EditNoticeBoardScreen(
                             )
                         ) {
                             Text(
-                                text = "Request Board Deletion",
+                                text = "Delete Notice Board",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -386,93 +386,59 @@ fun EditNoticeBoardScreen(
 
         }
 
-        // Delete Request Confirmation Dialog
+        // Delete Board Confirmation Dialog
         if (showDeleteRequestDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteRequestDialog = false },
-                title = { Text("Request Board Deletion") },
+                title = { Text("Delete Notice Board") },
                 text = {
-                    Text("Are you sure you want to request deletion of this notice board? This action will send a deletion request to the administrators. The board will remain active until the request is approved.")
+                    Text("Are you sure you want to delete this notice board? This action cannot be undone and will permanently remove the board and all its data. All subscribers will lose access to this board and its notices.")
                 },
                 confirmButton = {
                     Button(
-                    onClick = {
-                        showDeleteRequestDialog = false
-                        
-                        // Check if request already exists
-                        coroutineScope.launch {
-                            try {
-                                val existingRequest = firebaseRepository.getBoardDeletionRequestByBoardId(boardId)
-                                
-                                if (existingRequest != null) {
-                                    // Request already exists
-                                    Toast.makeText(
-                                        context,
-                                        "Your request already exists! We will sort it soon.",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                } else {
-                                    // Create new deletion request
-                                    val board = boardState.data
-                                    if (board != null && currentUser != null) {
-                                        val deletionRequest = BoardDeletionRequest(
-                                            id = UUID.randomUUID().toString(),
-                                            boardId = boardId,
-                                            organizationName = board.organizationName,
-                                            organizationCode = board.organizationCode,
-                                            organizationEmail = board.organizationEmail,
-                                            organizationLocation = board.organizationLocation,
-                                            organizationWhatsapp = board.organizationWhatsapp,
-                                            requestedBy = currentUser.id,
-                                            requestReason = "User requested board deletion",
-                                            status = com.notifiy.noticeboard.data.model.DeletionRequestStatus.PENDING,
-                                            createdAt = System.currentTimeMillis(),
-                                            updatedAt = System.currentTimeMillis()
-                                        )
-                                        
-                                        val result = firebaseRepository.createBoardDeletionRequest(deletionRequest)
-                                        if (result.isSuccess) {
-                                            Toast.makeText(
-                                                context,
-                                                "Your request has been raised successfully! Soon we will contact you.",
-                                                Toast.LENGTH_LONG
-                                            ).show()
-                                            navController.popBackStack()
-                                        } else {
-                                            Toast.makeText(
-                                                context,
-                                                "Failed to submit request. Please try again.",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
+                        onClick = {
+                            showDeleteRequestDialog = false
+                            
+                            // Delete the board directly
+                            coroutineScope.launch {
+                                try {
+                                    val result = firebaseRepository.deleteNoticeBoard(boardId)
+                                    if (result.isSuccess) {
+                                        Toast.makeText(
+                                            context,
+                                            "Notice board deleted successfully!",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                        navController.popBackStack()
                                     } else {
                                         Toast.makeText(
                                             context,
-                                            "Unable to process request. Please try again.",
+                                            "Failed to delete board. Please try again.",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
+                                } catch (e: Exception) {
+                                    Toast.makeText(
+                                        context,
+                                        "Error deleting board: ${e.message}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
-                            } catch (e: Exception) {
-                                Toast.makeText(
-                                    context,
-                                    "Error processing request: ${e.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
                             }
-                        }
-                    }, colors = ButtonDefaults.buttonColors(
+                        },
+                        colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error
                         )
                     ) {
-                        Text("Submit Request")
+                        Text("Delete Permanently")
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDeleteRequestDialog = false }) {
                         Text("Cancel")
                     }
-                })
+                }
+            )
         }
     }
 }

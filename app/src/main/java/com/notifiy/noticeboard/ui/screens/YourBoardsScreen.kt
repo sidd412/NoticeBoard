@@ -831,7 +831,7 @@ fun YourBoardCard(
                 onDismissRequest = { showDeleteDialog = false },
                 title = { Text("Delete Notice Board") },
                 text = { 
-                    Text("Are you sure you want to delete \"${board.organizationName}\"? This action cannot be undone and will permanently remove the board and all its data.")
+                    Text("Are you sure you want to delete \"${board.organizationName}\"? This action cannot be undone and will permanently remove the board and all its data. All subscribers will lose access to this board and its notices.")
                 },
                 confirmButton = {
                     Button(

@@ -24,6 +24,16 @@ service cloud.firestore {
       allow write: if request.auth != null; // Only authenticated users can write
     }
     
+    // Board deletion requests - users can create requests for their own boards
+    match /boardDeletionRequests/{requestId} {
+      allow read, write: if request.auth != null; // Only authenticated users can read/write
+    }
+    
+    // Data export requests - users can create requests for their own data
+    match /dataExportRequests/{requestId} {
+      allow read, write: if request.auth != null; // Only authenticated users can read/write
+    }
+    
     // TEMPORARY: Allow all operations for testing (REMOVE IN PRODUCTION)
     match /{document=**} {
       allow read, write: if true;

@@ -25,36 +25,74 @@ import androidx.navigation.NavController
 import android.content.Intent
 import android.widget.Toast
 import com.notifiy.noticeboard.data.preferences.PreferencesManager
+import com.notifiy.noticeboard.data.model.DataExportRequest
+import com.notifiy.noticeboard.data.repository.FirebaseRepository
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.MainActivity
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrivacySettingsScreen(navController: NavController) {
     var showDataDeletionDialog by remember { mutableStateOf(false) }
     var showDataExportDialog by remember { mutableStateOf(false) }
+    var shouldRequestExport by remember { mutableStateOf(false) }
     
     // Initialize preferences manager and auth view model
     val context = androidx.compose.ui.platform.LocalContext.current
     val preferencesManager = remember { PreferencesManager(context) }
     val authViewModel: AuthViewModel = cachedViewModel(AuthViewModel::class.java)
+    val repository = remember { FirebaseRepository(context) }
+    
+    // Get current user
+    val currentUser = authViewModel.authState.value.data
+    
+    // Handle data export request when triggered
+    LaunchedEffect(shouldRequestExport) {
+        if (shouldRequestExport && currentUser != null) {
+            try {
+                val exportRequest = DataExportRequest(
+                    id = UUID.randomUUID().toString(),
+                    userId = currentUser.id,
+                    userEmail = currentUser.email,
+                    userName = currentUser.name,
+                    requestReason = "User requested data export",
+                    status = com.notifiy.noticeboard.data.model.ExportRequestStatus.PENDING,
+                    requestedDataTypes = listOf("profile", "notices", "boards", "subscriptions")
+                )
+                
+                val result = repository.createDataExportRequest(exportRequest)
+                if (result.isSuccess) {
+                    Toast.makeText(context, "Data export request submitted successfully. You will receive an email when ready.", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(context, "Failed to submit export request: ${result.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(context, "Error submitting export request: ${e.message}", Toast.LENGTH_LONG).show()
+            } finally {
+                shouldRequestExport = false
+            }
+        }
+    }
     
     // Load notification preferences
     var pushNotifications by remember { mutableStateOf(preferencesManager.getPushNotifications()) }
     var emailNotifications by remember { mutableStateOf(preferencesManager.getEmailNotifications()) }
     var marketingEmails by remember { mutableStateOf(preferencesManager.getMarketingEmails()) }
     
-    // Observe account deletion state
+    // Observe account deletion state and loading state
     val accountDeleted by authViewModel.accountDeleted.collectAsState()
+    val authState by authViewModel.authState.collectAsState()
+    val isDeletingAccount = authState.isLoading
     
     // Handle successful account deletion
     LaunchedEffect(accountDeleted) {
         if (accountDeleted) {
             println("accountdeletion: PrivacySettingsScreen - Account deletion success detected")
             // Show success toast
-            Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Account deleted successfully. Restarting app...", Toast.LENGTH_LONG).show()
             println("accountdeletion: PrivacySettingsScreen - Success toast shown")
             
             // Restart the app by navigating to MainActivity
@@ -482,10 +520,18 @@ fun PrivacySettingsScreen(navController: NavController) {
                 onDismissRequest = { showDataExportDialog = false },
                 title = { Text("Export Your Data") },
                 text = {
-                    Text("We will prepare a downloadable file containing all your data. This may take a few minutes. You will receive an email with the download link.")
+                    Text("We will prepare a downloadable file containing all your data including your profile, notices, boards, and subscriptions. This may take a few minutes. You will receive an email with the download link when ready.")
                 },
                 confirmButton = {
-                    Button(onClick = { showDataExportDialog = false }) {
+                    Button(
+                        onClick = { 
+                            showDataExportDialog = false
+                            shouldRequestExport = true
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary
+                        )
+                    ) {
                         Text("Request Export")
                     }
                 },
@@ -500,10 +546,31 @@ fun PrivacySettingsScreen(navController: NavController) {
         // Data Deletion Confirmation Dialog
         if (showDataDeletionDialog) {
             AlertDialog(
-                onDismissRequest = { showDataDeletionDialog = false },
+                onDismissRequest = { if (!isDeletingAccount) showDataDeletionDialog = false },
                 title = { Text("Delete Account & Data") },
                 text = {
-                    Text("This action is permanent and cannot be undone. All your data, including notices, boards, and account information will be permanently deleted from our servers.")
+                    Column {
+                        Text("This action is permanent and cannot be undone. All your data, including notices, boards, and account information will be permanently deleted from our servers. All notice boards you have created will also be deleted, and their subscribers will lose access to them.")
+                        if (isDeletingAccount) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Deleting account...",
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
                 },
                 confirmButton = {
                     Button(
@@ -513,6 +580,7 @@ fun PrivacySettingsScreen(navController: NavController) {
                             println("accountdeletion: PrivacySettingsScreen - Calling authViewModel.deleteAccount()")
                             authViewModel.deleteAccount()
                         },
+                        enabled = !isDeletingAccount,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error
                         )
@@ -521,7 +589,10 @@ fun PrivacySettingsScreen(navController: NavController) {
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showDataDeletionDialog = false }) {
+                    TextButton(
+                        onClick = { showDataDeletionDialog = false },
+                        enabled = !isDeletingAccount
+                    ) {
                         Text("Cancel")
                     }
                 }

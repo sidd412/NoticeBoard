@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeout
 
 class AuthViewModel(private val context: Context) : ViewModel() {
     
@@ -134,35 +135,61 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                 if (currentUser != null) {
                     println("accountdeletion: Current user found: ${currentUser.uid}")
                     
-                    // Delete user data from Firestore first
-                    println("accountdeletion: Deleting user data from Firestore")
+                    // Step 1: Delete all user's notice boards first
+                    println("accountdeletion: Step 1 - Deleting all user's notice boards")
+                    val boardsDeleteResult = repository.deleteAllUserNoticeBoards(currentUser.uid)
+                    if (boardsDeleteResult.isSuccess) {
+                        val deletedCount = boardsDeleteResult.getOrNull() ?: 0
+                        println("accountdeletion: Successfully deleted $deletedCount notice boards")
+                    } else {
+                        println("accountdeletion: Failed to delete some notice boards: ${boardsDeleteResult.exceptionOrNull()?.message}")
+                        // Continue with user deletion even if some boards fail
+                    }
+                    
+                    // Step 2: Delete user data from Firestore
+                    println("accountdeletion: Step 2 - Deleting user data from Firestore")
                     val deleteResult = repository.deleteUser(currentUser.uid)
                     if (deleteResult.isSuccess) {
                         println("accountdeletion: User data deleted from Firestore successfully")
                     } else {
                         println("accountdeletion: Failed to delete user data from Firestore: ${deleteResult.exceptionOrNull()?.message}")
+                        // Continue with auth deletion even if Firestore deletion fails
                     }
                     
-                    // Delete the Firebase Auth account
-                    println("accountdeletion: Deleting Firebase Auth account")
-                    currentUser.delete().await()
-                    println("accountdeletion: Firebase Auth account deleted successfully")
-                    
-                    // Clear all cache
-                    println("accountdeletion: Clearing all cache")
+                    // Step 3: Clear all cache before auth deletion
+                    println("accountdeletion: Step 3 - Clearing all cache")
                     val cacheResult = repository.clearAllCache()
                     if (cacheResult.isSuccess) {
                         println("accountdeletion: All cache cleared successfully")
                     } else {
                         println("accountdeletion: Failed to clear cache: ${cacheResult.exceptionOrNull()?.message}")
+                        // Continue with auth deletion even if cache clearing fails
                     }
                     
-                    // Clear the auth state and set success flag
-                    println("accountdeletion: Setting success state")
-                    _authState.value = UiState(data = null, isLoading = false)
-                    logAuthState(_authState.value)
-                    _accountDeleted.value = true
-                    println("accountdeletion: Account deletion completed successfully")
+                    // Step 4: Delete the Firebase Auth account with timeout
+                    println("accountdeletion: Step 4 - Deleting Firebase Auth account")
+                    try {
+                        // Add timeout to prevent hanging
+                        withTimeout(30000) { // 30 seconds timeout
+                            currentUser.delete().await()
+                        }
+                        println("accountdeletion: Firebase Auth account deleted successfully")
+                        
+                        // Step 5: Clear the auth state and set success flag
+                        println("accountdeletion: Step 5 - Setting success state")
+                        _authState.value = UiState(data = null, isLoading = false)
+                        logAuthState(_authState.value)
+                        _accountDeleted.value = true
+                        println("accountdeletion: Account deletion completed successfully")
+                        
+                    } catch (e: Exception) {
+                        println("accountdeletion: Error deleting Firebase Auth account: ${e.message}")
+                        // If auth deletion fails, still clear local state
+                        _authState.value = UiState(data = null, isLoading = false)
+                        _accountDeleted.value = true
+                        println("accountdeletion: Account deletion completed with auth error - user will be logged out")
+                    }
+                    
                 } else {
                     println("accountdeletion: No user logged in")
                     _authState.value = UiState(isLoading = false, error = "No user logged in")
@@ -171,7 +198,11 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                 println("accountdeletion: Error during account deletion: ${e.message}")
                 println("accountdeletion: Exception type: ${e.javaClass.simpleName}")
                 e.printStackTrace()
-                _authState.value = UiState(isLoading = false, error = e.message)
+                
+                // Even if there's an error, clear the auth state to log out the user
+                _authState.value = UiState(data = null, isLoading = false, error = e.message)
+                _accountDeleted.value = true
+                println("accountdeletion: Account deletion completed with error - user will be logged out")
             }
         }
     }

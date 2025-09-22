@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.notifiy.noticeboard.data.cache.CacheManager
 import com.notifiy.noticeboard.data.model.BoardDeletionRequest
+import com.notifiy.noticeboard.data.model.DataExportRequest
 import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Page
@@ -105,6 +106,42 @@ class FirebaseRepository(private val context: Context? = null) {
             println("accountdeletion: FirebaseRepository - Error deleting user: ${e.message}")
             println("accountdeletion: FirebaseRepository - Exception type: ${e.javaClass.simpleName}")
             e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun deleteAllUserNoticeBoards(userId: String): Result<Int> {
+        return try {
+            println("accountdeletion: FirebaseRepository - Starting deletion of all notice boards for user: $userId")
+            
+            // Get all boards created by this user
+            val userBoards = getUserNoticeBoards(userId)
+            println("accountdeletion: FirebaseRepository - Found ${userBoards.size} boards to delete")
+            
+            var deletedCount = 0
+            var failedCount = 0
+            
+            // Delete each board
+            for (board in userBoards) {
+                try {
+                    val deleteResult = deleteNoticeBoard(board.id)
+                    if (deleteResult.isSuccess) {
+                        deletedCount++
+                        println("accountdeletion: FirebaseRepository - Successfully deleted board: ${board.organizationName}")
+                    } else {
+                        failedCount++
+                        println("accountdeletion: FirebaseRepository - Failed to delete board: ${board.organizationName}")
+                    }
+                } catch (e: Exception) {
+                    failedCount++
+                    println("accountdeletion: FirebaseRepository - Exception deleting board ${board.organizationName}: ${e.message}")
+                }
+            }
+            
+            println("accountdeletion: FirebaseRepository - Board deletion completed: $deletedCount deleted, $failedCount failed")
+            Result.success(deletedCount)
+        } catch (e: Exception) {
+            println("accountdeletion: FirebaseRepository - Error deleting user notice boards: ${e.message}")
             Result.failure(e)
         }
     }
@@ -1148,6 +1185,95 @@ class FirebaseRepository(private val context: Context? = null) {
             Result.success(true)
         } catch (e: Exception) {
             println("DEBUG: Error updating board deletion request status: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    // Data Export Request operations
+    suspend fun createDataExportRequest(request: DataExportRequest): Result<DataExportRequest> {
+        return try {
+            println("DEBUG: Creating data export request for user: ${request.userId}")
+            firestore.collection("dataExportRequests")
+                .document(request.id)
+                .set(request)
+                .await()
+            println("DEBUG: Data export request created successfully")
+            Result.success(request)
+        } catch (e: Exception) {
+            println("DEBUG: Error creating data export request: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun getDataExportRequestByUserId(userId: String): DataExportRequest? {
+        return try {
+            println("DEBUG: Checking for existing export request for user: $userId")
+            val querySnapshot = firestore.collection("dataExportRequests")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("status", "PENDING")
+                .get()
+                .await()
+            
+            if (!querySnapshot.isEmpty) {
+                val request = querySnapshot.documents.first().toObject(DataExportRequest::class.java)
+                println("DEBUG: Found existing export request: $request")
+                request
+            } else {
+                println("DEBUG: No existing export request found for user: $userId")
+                null
+            }
+        } catch (e: Exception) {
+            println("DEBUG: Error checking for existing export request: ${e.message}")
+            null
+        }
+    }
+    
+    suspend fun getAllDataExportRequests(): List<DataExportRequest> {
+        return try {
+            println("DEBUG: Getting all data export requests")
+            val querySnapshot = firestore.collection("dataExportRequests")
+                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            val requests = querySnapshot.documents.mapNotNull { it.toObject(DataExportRequest::class.java) }
+            println("DEBUG: Found ${requests.size} data export requests")
+            requests
+        } catch (e: Exception) {
+            println("DEBUG: Error getting all data export requests: ${e.message}")
+            emptyList()
+        }
+    }
+    
+    suspend fun updateDataExportRequestStatus(requestId: String, status: String, downloadUrl: String = "", fileSize: Long = 0L, adminNotes: String = ""): Result<Boolean> {
+        return try {
+            println("DEBUG: Updating data export request status: $requestId to $status")
+            val updateData = mutableMapOf<String, Any>(
+                "status" to status,
+                "updatedAt" to System.currentTimeMillis()
+            )
+            
+            if (downloadUrl.isNotEmpty()) {
+                updateData["downloadUrl"] = downloadUrl
+            }
+            if (fileSize > 0) {
+                updateData["fileSize"] = fileSize
+            }
+            if (adminNotes.isNotEmpty()) {
+                updateData["adminNotes"] = adminNotes
+            }
+            if (status == "COMPLETED") {
+                updateData["processedAt"] = System.currentTimeMillis()
+            }
+            
+            firestore.collection("dataExportRequests")
+                .document(requestId)
+                .update(updateData)
+                .await()
+            println("DEBUG: Data export request status updated successfully")
+            Result.success(true)
+        } catch (e: Exception) {
+            println("DEBUG: Error updating data export request status: ${e.message}")
             Result.failure(e)
         }
     }
