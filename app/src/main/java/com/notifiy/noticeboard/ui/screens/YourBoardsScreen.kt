@@ -430,28 +430,22 @@ fun YourBoardsScreen(
 
     // Load user boards when screen is displayed
     LaunchedEffect(currentUser) {
-        println("DEBUG: YourBoardsScreen - LaunchedEffect triggered")
         try {
             currentUser?.let { user ->
-                println("DEBUG: YourBoardsScreen - Loading boards for user: ${user.id}")
                 yourBoardsViewModel.loadUserBoards(user.id)
-            } ?: run {
-                println("DEBUG: YourBoardsScreen - No current user found")
             }
         } catch (e: Exception) {
-            println("DEBUG: YourBoardsScreen - Error in LaunchedEffect: ${e.message}")
-            // Don't crash the app, just log the error
+            // Don't crash the app, just handle the error silently
         }
     }
 
     // Cleanup when navigating away
     DisposableEffect(Unit) {
         onDispose {
-            println("DEBUG: YourBoardsScreen - Disposing screen")
             try {
                 yourBoardsViewModel.clearError()
             } catch (e: Exception) {
-                println("DEBUG: YourBoardsScreen - Error during cleanup: ${e.message}")
+                // Handle cleanup error silently
             }
         }
     }

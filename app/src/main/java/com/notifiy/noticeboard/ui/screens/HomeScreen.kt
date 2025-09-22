@@ -105,14 +105,14 @@ fun HomeScreen(
                         modifier = Modifier.padding(20.dp)
                     ) {
                         Text(
-                            text = "Welcome! To NoteXP",
+                            text = "Welcome to NoteXP!",
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Subscribe your institute! Stay updated with your subscribed notice boards",
+                            text = "Subscribe to your institute's notice board and stay updated with the latest announcements",
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         )

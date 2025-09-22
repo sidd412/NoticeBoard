@@ -1,7 +1,7 @@
-# Update System Implementation Guide
+# NoteXP Update System Implementation Guide
 
 ## Overview
-This implementation provides a custom update mechanism for the NoticeBoard app that checks for updates from Firebase Firestore and displays appropriate popups based on configuration.
+This implementation provides a custom update mechanism for the NoteXP app that checks for updates from Firebase Firestore and displays appropriate popups based on configuration.
 
 ## Features
 - ✅ Firebase Firestore integration with caching
@@ -28,7 +28,7 @@ noteXpConfig/
 ```
 
 ### Field Descriptions
-- **update_link**: Play Store URL for the app update
+- **update_link**: Play Store URL for the NoteXP app update
 - **latest_version_code**: Integer version code (must be higher than current app version)
 - **latest_version_name**: String version name (e.g., "1.0.0")
 - **force_update**: Boolean - if true, user cannot dismiss the popup

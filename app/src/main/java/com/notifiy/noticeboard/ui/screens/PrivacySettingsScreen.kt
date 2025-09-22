@@ -185,7 +185,7 @@ fun PrivacySettingsScreen(navController: NavController) {
                         Spacer(modifier = Modifier.height(16.dp))
                         
                         Text(
-                            text = "Notice Board requests the following permissions:",
+                            text = "NoteXP requests the following permissions:",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface

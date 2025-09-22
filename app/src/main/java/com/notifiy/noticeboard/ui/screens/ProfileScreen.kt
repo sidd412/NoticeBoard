@@ -279,7 +279,7 @@ fun ProfileScreen(
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
-                                text = "About Notice Board",
+                                text = "About NoteXP",
                                 fontSize = 16.sp,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f)

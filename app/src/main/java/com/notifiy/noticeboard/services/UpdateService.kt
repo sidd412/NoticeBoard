@@ -5,7 +5,9 @@ import android.content.pm.PackageManager
 import com.notifiy.noticeboard.data.model.UpdateConfig
 import com.notifiy.noticeboard.data.repository.FirebaseRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 
 class UpdateService(private val context: Context) {
     
@@ -15,42 +17,56 @@ class UpdateService(private val context: Context) {
         val needsUpdate: Boolean,
         val updateConfig: UpdateConfig?,
         val isForceUpdate: Boolean,
-        val isSkipable: Boolean
+        val isSkipable: Boolean,
+        val errorMessage: String? = null
     )
     
     suspend fun checkForUpdate(): UpdateCheckResult = withContext(Dispatchers.IO) {
         try {
-            println("DEBUG: UpdateService - Starting update check...")
-            val updateConfig = firebaseRepository.getUpdateConfig()
+            // Add timeout to prevent hanging
+            val updateConfig = withTimeout(10000) { // 10 seconds timeout
+                firebaseRepository.getUpdateConfig()
+            }
             
             if (updateConfig == null) {
-                println("DEBUG: UpdateService - No update config found")
                 return@withContext UpdateCheckResult(
                     needsUpdate = false,
                     updateConfig = null,
                     isForceUpdate = false,
-                    isSkipable = false
+                    isSkipable = false,
+                    errorMessage = "Unable to check for updates. Please check your internet connection."
                 )
             }
             
-            println("DEBUG: UpdateService - Retrieved update config: $updateConfig")
+            // Validate update config data
+            if (updateConfig.updateLink.isBlank() || updateConfig.latestVersionCode <= 0) {
+                return@withContext UpdateCheckResult(
+                    needsUpdate = false,
+                    updateConfig = null,
+                    isForceUpdate = false,
+                    isSkipable = false,
+                    errorMessage = "Update information is not available. Please try again later."
+                )
+            }
             
             val currentVersionCode = getCurrentVersionCode()
             val currentVersionName = getCurrentVersionName()
             
-            println("DEBUG: UpdateService - Current version: $currentVersionName ($currentVersionCode)")
-            println("DEBUG: UpdateService - Latest version: ${updateConfig.latestVersionName} (${updateConfig.latestVersionCode})")
+            // Additional validation
+            if (currentVersionCode <= 0) {
+                return@withContext UpdateCheckResult(
+                    needsUpdate = false,
+                    updateConfig = null,
+                    isForceUpdate = false,
+                    isSkipable = false,
+                    errorMessage = "Unable to determine current app version. Please restart the app."
+                )
+            }
             
             // Check if update is needed based on version code or version name
             val versionCodeCheck = currentVersionCode < updateConfig.latestVersionCode
             val versionNameCheck = currentVersionCode == updateConfig.latestVersionCode && currentVersionName != updateConfig.latestVersionName
             val needsUpdate = versionCodeCheck || versionNameCheck
-            
-            println("DEBUG: UpdateService - Version code check (current < latest): $versionCodeCheck")
-            println("DEBUG: UpdateService - Version name check (same code, different name): $versionNameCheck")
-            println("DEBUG: UpdateService - Needs update: $needsUpdate")
-            println("DEBUG: UpdateService - Force update: ${updateConfig.forceUpdate}")
-            println("DEBUG: UpdateService - Skipable update: ${updateConfig.skipableUpdate}")
             
             UpdateCheckResult(
                 needsUpdate = needsUpdate,
@@ -59,14 +75,23 @@ class UpdateService(private val context: Context) {
                 isSkipable = updateConfig.skipableUpdate
             )
             
-        } catch (e: Exception) {
-            println("DEBUG: UpdateService - Error checking for update: ${e.message}")
-            e.printStackTrace()
+        } catch (e: TimeoutCancellationException) {
+            // Handle timeout gracefully
             UpdateCheckResult(
                 needsUpdate = false,
                 updateConfig = null,
                 isForceUpdate = false,
-                isSkipable = false
+                isSkipable = false,
+                errorMessage = "Update check timed out. Please check your internet connection and try again."
+            )
+        } catch (e: Exception) {
+            // Handle any other exceptions
+            UpdateCheckResult(
+                needsUpdate = false,
+                updateConfig = null,
+                isForceUpdate = false,
+                isSkipable = false,
+                errorMessage = "Unable to check for updates. Please try again later."
             )
         }
     }
@@ -74,20 +99,24 @@ class UpdateService(private val context: Context) {
     private fun getCurrentVersionCode(): Int {
         return try {
             val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-            packageInfo.longVersionCode.toInt()
+            val versionCode = packageInfo.longVersionCode.toInt()
+            // Ensure version code is positive
+            if (versionCode > 0) versionCode else 1
         } catch (e: PackageManager.NameNotFoundException) {
-            println("DEBUG: UpdateService - Error getting version code: ${e.message}")
-            0
+            1 // Default fallback version
+        } catch (e: Exception) {
+            1 // Handle any other package manager errors
         }
     }
     
     private fun getCurrentVersionName(): String {
         return try {
             val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-            packageInfo.versionName ?: "1.0.0"
+            packageInfo.versionName?.takeIf { it.isNotBlank() } ?: "1.0.0"
         } catch (e: PackageManager.NameNotFoundException) {
-            println("DEBUG: UpdateService - Error getting version name: ${e.message}")
-            "1.0.0"
+            "1.0.0" // Default fallback version
+        } catch (e: Exception) {
+            "1.0.0" // Handle any other package manager errors
         }
     }
 }

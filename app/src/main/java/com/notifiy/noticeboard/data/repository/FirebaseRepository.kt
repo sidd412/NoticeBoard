@@ -14,6 +14,8 @@ import com.notifiy.noticeboard.data.model.User
 import com.notifiy.noticeboard.data.model.UserNotification
 import com.notifiy.noticeboard.services.LocalNotificationService
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.withTimeout
 
 class FirebaseRepository(private val context: Context? = null) {
     
@@ -25,12 +27,9 @@ class FirebaseRepository(private val context: Context? = null) {
     suspend fun getCurrentUser(): User? {
         return try {
             val currentUser = auth.currentUser ?: return null
-            println("DEBUG: Firebase Auth current user: ${currentUser.uid}")
-            
             // Check cache first
             val cachedUser = cacheManager?.getCachedUser(currentUser.uid)
             if (cachedUser != null) {
-                println("DEBUG: Returning cached user: $cachedUser")
                 return cachedUser
             }
             
@@ -41,16 +40,13 @@ class FirebaseRepository(private val context: Context? = null) {
             
             if (document.exists()) {
                 val user = document.toObject(User::class.java)
-                println("DEBUG: Found user document: $user")
                 // Cache the user
                 user?.let { cacheManager?.cacheUser(currentUser.uid, it) }
                 user
             } else {
-                println("DEBUG: No user document found for ${currentUser.uid}")
                 null
             }
         } catch (e: Exception) {
-            println("DEBUG: Error getting current user: ${e.message}")
             null
         }
     }
@@ -86,27 +82,17 @@ class FirebaseRepository(private val context: Context? = null) {
     
     suspend fun deleteUser(userId: String): Result<Unit> {
         return try {
-            println("accountdeletion: FirebaseRepository - Starting user deletion for ID: $userId")
-            
             // Delete user document from Firestore
-            println("accountdeletion: FirebaseRepository - Deleting user document from Firestore")
             firestore.collection("users")
                 .document(userId)
                 .delete()
                 .await()
-            println("accountdeletion: FirebaseRepository - User document deleted from Firestore successfully")
             
             // Clear user from cache
-            println("accountdeletion: FirebaseRepository - Invalidating user cache")
             cacheManager?.invalidateUser(userId)
-            println("accountdeletion: FirebaseRepository - User cache invalidated")
             
-            println("accountdeletion: FirebaseRepository - User deletion completed successfully")
             Result.success(Unit)
         } catch (e: Exception) {
-            println("accountdeletion: FirebaseRepository - Error deleting user: ${e.message}")
-            println("accountdeletion: FirebaseRepository - Exception type: ${e.javaClass.simpleName}")
-            e.printStackTrace()
             Result.failure(e)
         }
     }
@@ -168,7 +154,6 @@ class FirebaseRepository(private val context: Context? = null) {
             // Check cache first
             val cachedBoard = cacheManager?.getCachedNoticeBoard(boardId)
             if (cachedBoard != null) {
-                println("DEBUG: Returning cached notice board: $cachedBoard")
                 return cachedBoard
             }
             
@@ -192,12 +177,9 @@ class FirebaseRepository(private val context: Context? = null) {
     
     suspend fun getNoticeBoardByCode(code: String): NoticeBoard? {
         return try {
-            println("DEBUG: Searching for board with code: $code")
-            
             // Check cache first - we'll use code as cache key for this method
             val cachedBoard = cacheManager?.getCachedNoticeBoard("code_$code")
             if (cachedBoard != null) {
-                println("DEBUG: Returning cached board by code: $cachedBoard")
                 return cachedBoard
             }
             
@@ -207,10 +189,8 @@ class FirebaseRepository(private val context: Context? = null) {
                 .get()
                 .await()
             
-            println("DEBUG: Query returned ${querySnapshot.size()} documents")
             if (!querySnapshot.isEmpty) {
                 val board = querySnapshot.documents.first().toObject(NoticeBoard::class.java)
-                println("DEBUG: Found board by code: $board")
                 // Cache the board with both ID and code keys
                 board?.let { 
                     cacheManager?.cacheNoticeBoard(board.id, it)
@@ -218,11 +198,9 @@ class FirebaseRepository(private val context: Context? = null) {
                 }
                 board
             } else {
-                println("DEBUG: No board found with code: $code")
                 null
             }
         } catch (e: Exception) {
-            println("DEBUG: Error finding board by code $code: ${e.message}")
             null
         }
     }
@@ -263,20 +241,16 @@ class FirebaseRepository(private val context: Context? = null) {
     
     suspend fun createNoticeBoard(noticeBoard: NoticeBoard): Result<NoticeBoard> {
         return try {
-            println("DEBUG: Creating notice board with ID: ${noticeBoard.id}")
-            println("DEBUG: Board data: $noticeBoard")
             firestore.collection("noticeBoards")
                 .document(noticeBoard.id)
                 .set(noticeBoard)
                 .await()
-            println("DEBUG: Notice board created successfully in Firestore")
             // Cache the created board and invalidate related caches
             cacheManager?.cacheNoticeBoard(noticeBoard.id, noticeBoard)
             cacheManager?.cacheNoticeBoard("code_${noticeBoard.organizationCode}", noticeBoard)
             cacheManager?.invalidateNoticeBoard(noticeBoard.id)
             Result.success(noticeBoard)
         } catch (e: Exception) {
-            println("DEBUG: Error creating notice board: ${e.message}")
             Result.failure(e)
         }
     }
@@ -1282,30 +1256,27 @@ class FirebaseRepository(private val context: Context? = null) {
     // Update config operations
     suspend fun getUpdateConfig(): UpdateConfig? {
         return try {
-            println("DEBUG: FirebaseRepository - Getting update config from Firebase")
-            
             // Check cache first
             val cachedConfig = cacheManager?.getCachedUpdateConfig()
             if (cachedConfig != null) {
-                println("DEBUG: FirebaseRepository - Returning cached update config: $cachedConfig")
                 return cachedConfig
             }
             
-            println("DEBUG: FirebaseRepository - Cache miss, fetching from Firebase...")
-            val document = firestore.collection("noteXpConfig")
-                .document("JaPhY3e1ohDp1r5sDugs") // Using the document ID from your Firebase
-                .get()
-                .await()
-            
-            println("DEBUG: FirebaseRepository - Document exists: ${document.exists()}")
-            println("DEBUG: FirebaseRepository - Document data: ${document.data}")
+            // Add timeout to prevent hanging
+            val document = withTimeout(8000) { // 8 seconds timeout
+                firestore.collection("noteXpConfig")
+                    .document("JaPhY3e1ohDp1r5sDugs") // Using the document ID from your Firebase
+                    .get()
+                    .await()
+            }
             
             if (document.exists()) {
-                println("DEBUG: FirebaseRepository - Raw document data: ${document.data}")
-                
                 // Try both approaches: automatic mapping and manual mapping
-                val updateConfig = document.toObject(UpdateConfig::class.java)
-                println("DEBUG: FirebaseRepository - Parsed update config (auto): $updateConfig")
+                val updateConfig = try {
+                    document.toObject(UpdateConfig::class.java)
+                } catch (e: Exception) {
+                    null // If automatic mapping fails, use manual mapping
+                }
                 
                 // Manual mapping as fallback
                 val data = document.data ?: emptyMap()
@@ -1317,35 +1288,30 @@ class FirebaseRepository(private val context: Context? = null) {
                     skipableUpdate = data["skipable_update"] as? Boolean ?: true,
                     updatedAt = System.currentTimeMillis()
                 )
-                println("DEBUG: FirebaseRepository - Parsed update config (manual): $manualConfig")
                 
-                // Use manual config if auto config has default values
+                // Use manual config if auto config has default values or is null
                 val finalConfig = if (updateConfig?.latestVersionCode == 0 && manualConfig.latestVersionCode > 0) {
-                    println("DEBUG: FirebaseRepository - Using manual config due to auto mapping issues")
                     manualConfig
                 } else {
                     updateConfig ?: manualConfig
                 }
                 
-                // Debug individual field values
-                finalConfig?.let { config ->
-                    println("DEBUG: FirebaseRepository - updateLink: '${config.updateLink}'")
-                    println("DEBUG: FirebaseRepository - latestVersionCode: ${config.latestVersionCode}")
-                    println("DEBUG: FirebaseRepository - latestVersionName: '${config.latestVersionName}'")
-                    println("DEBUG: FirebaseRepository - forceUpdate: ${config.forceUpdate}")
-                    println("DEBUG: FirebaseRepository - skipableUpdate: ${config.skipableUpdate}")
+                // Validate the final config before caching
+                if (finalConfig.latestVersionCode > 0 && finalConfig.updateLink.isNotBlank()) {
+                    // Cache the update config
+                    cacheManager?.cacheUpdateConfig(finalConfig)
+                    finalConfig
+                } else {
+                    null // Invalid config, don't cache
                 }
-                
-                // Cache the update config
-                finalConfig?.let { cacheManager?.cacheUpdateConfig(it) }
-                finalConfig
             } else {
-                println("DEBUG: FirebaseRepository - No update config document found")
                 null
             }
+        } catch (e: TimeoutCancellationException) {
+            // Handle timeout gracefully
+            null
         } catch (e: Exception) {
-            println("DEBUG: FirebaseRepository - Error getting update config: ${e.message}")
-            e.printStackTrace()
+            // Handle any other exceptions (network, parsing, etc.)
             null
         }
     }

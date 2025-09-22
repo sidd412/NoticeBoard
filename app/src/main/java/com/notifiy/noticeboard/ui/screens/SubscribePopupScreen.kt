@@ -107,7 +107,7 @@ fun SubscribePopupScreen(
                         )
                     }
                     Text(
-                        text = "Subscribe A Board",
+                        text = "Subscribe to a Board",
                         fontWeight = FontWeight.Bold,
                         fontSize = 22.sp
                     )

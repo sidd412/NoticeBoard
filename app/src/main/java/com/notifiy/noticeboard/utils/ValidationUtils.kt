@@ -42,7 +42,7 @@ object ValidationUtils {
      */
     fun validateSignupFields(name: String, email: String, password: String): ValidationResult {
         return when {
-            !isValidName(name) -> ValidationResult(false, "Name cannot be empty")
+            !isValidName(name) -> ValidationResult(false, "Please enter your name")
             !isValidEmail(email) -> ValidationResult(false, "Please enter a valid Gmail address")
             !isValidPassword(password) -> ValidationResult(false, "Password must be at least 6 characters long")
             else -> ValidationResult(true, "")
@@ -65,7 +65,7 @@ object ValidationUtils {
      */
     fun validateProfileUpdateFields(name: String, email: String): ValidationResult {
         return when {
-            !isValidName(name) -> ValidationResult(false, "Name cannot be empty")
+            !isValidName(name) -> ValidationResult(false, "Please enter your name")
             !isValidEmail(email) -> ValidationResult(false, "Please enter a valid Gmail address")
             else -> ValidationResult(true, "")
         }

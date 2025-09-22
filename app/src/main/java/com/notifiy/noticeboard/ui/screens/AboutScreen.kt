@@ -27,7 +27,7 @@ fun AboutScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("About Notice Board") },
+                title = { Text("About NoteXP") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -63,7 +63,7 @@ fun AboutScreen(navController: NavController) {
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Notice Board",
+                            text = "NoteXP",
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -89,7 +89,7 @@ fun AboutScreen(navController: NavController) {
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Notice Board is a modern, user-friendly application designed to help organizations and communities share important announcements, updates, and information efficiently. Our platform enables seamless communication between administrators and members, ensuring everyone stays informed and connected.",
+                            text = "NoteXP is a modern, user-friendly application designed to help educational institutes, organizations, and communities share important announcements, updates, and information efficiently. Our platform enables seamless communication between administrators and members, ensuring everyone stays informed and connected.",
                             fontSize = 16.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                             lineHeight = 24.sp
@@ -112,12 +112,12 @@ fun AboutScreen(navController: NavController) {
                         
                         val features = listOf(
                             "📢 Real-time notifications",
-                            "📱 Cross-platform compatibility",
+                            "📱 Cross-platform compatibility", 
                             "🔒 Secure user authentication",
                             "🎨 Customizable themes",
-                            "📊 Analytics and insights",
+                            "🔍 QR code scanning for easy subscription",
                             "👥 Multi-user management",
-                            "🔍 Advanced search functionality",
+                            "📊 Board analytics and insights",
                             "📤 Easy content sharing"
                         )
                         
@@ -146,7 +146,7 @@ fun AboutScreen(navController: NavController) {
                         Spacer(modifier = Modifier.height(16.dp))
                         
                         Text(
-                            text = "© 2024 Notice Board. All rights reserved.",
+                            text = "© 2024 NoteXP. All rights reserved.",
                             fontSize = 16.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                         )
@@ -169,12 +169,13 @@ fun AboutScreen(navController: NavController) {
                         val shareIntent = Intent().apply {
                             action = Intent.ACTION_SEND
                             putExtra(Intent.EXTRA_TEXT, 
-                                "Check out Notice Board - A modern app for sharing announcements and updates! " +
-                                "Download it from the Play Store."
+                                "Check out NoteXP - A modern app for sharing announcements and updates!\n\n" +
+                                "Download it from Google Play Store:\n" +
+                                "https://play.google.com/store/apps/details?id=com.notifiy.noticeboard&pcampaignid=web_share"
                             )
                             type = "text/plain"
                         }
-                        context.startActivity(Intent.createChooser(shareIntent, "Share Notice Board"))
+                        context.startActivity(Intent.createChooser(shareIntent, "Share NoteXP"))
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(

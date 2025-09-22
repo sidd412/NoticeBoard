@@ -76,37 +76,27 @@ class MainActivity : ComponentActivity() {
     }
     
     override fun onBackPressed() {
-        println("backLogging: onBackPressed triggered!")
-        println("backLogging: isOnHomeScreen: $isOnHomeScreen")
-        println("backLogging: isOnHomeTab: $isOnHomeTab")
-        
         // If not on main container, allow normal navigation
         if (!isOnHomeScreen) {
-            println("backLogging: Not on main container, allowing normal navigation")
             super.onBackPressed()
             return
         }
         
         // If on main container but not on home tab, allow normal navigation
         if (!isOnHomeTab) {
-            println("backLogging: Not on home tab, allowing normal navigation")
             super.onBackPressed()
             return
         }
         
         // Only handle double-back-press when on home tab
-        println("backLogging: On home tab, checking for double-back-press")
         val currentTime = System.currentTimeMillis()
-        println("backLogging: Current time: $currentTime, Last back press time: $backPressTime")
         
         if (currentTime - backPressTime > 3000) {
             // First back press - show toast
-            println("backLogging: First back press - showing toast")
             Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show()
             backPressTime = currentTime
         } else {
             // Second back press within 3 seconds - exit app
-            println("backLogging: Second back press - exiting app")
             finishAffinity()
         }
     }
@@ -164,6 +154,7 @@ fun NoticeBoardApp(
     var updateConfig by remember { mutableStateOf<com.notifiy.noticeboard.data.model.UpdateConfig?>(null) }
     var isForceUpdate by remember { mutableStateOf(false) }
     var isSkipable by remember { mutableStateOf(false) }
+    var updateErrorMessage by remember { mutableStateOf<String?>(null) }
     
     // Get current back stack entry to determine current screen
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -172,34 +163,33 @@ fun NoticeBoardApp(
     // Update isOnHomeScreen based on current route
     LaunchedEffect(currentRoute) {
         val isHomeScreen = currentRoute == Screen.MainContainer.route
-        println("backLogging: Current route changed to: $currentRoute")
-        println("backLogging: isOnHomeScreen set to: $isHomeScreen")
         onHomeScreenChanged(isHomeScreen)
     }
     
     // Check for updates when app starts
     LaunchedEffect(Unit) {
         try {
-            println("DEBUG: Starting update check...")
             val updateService = UpdateService(context)
             val updateResult = updateService.checkForUpdate()
             
-            println("DEBUG: Update check result: $updateResult")
-            
-            if (updateResult.needsUpdate && updateResult.updateConfig != null) {
-                println("DEBUG: Update needed! Showing popup...")
+            // Additional validation before showing dialog
+            if (updateResult.needsUpdate && 
+                updateResult.updateConfig != null && 
+                updateResult.updateConfig.updateLink.isNotBlank() &&
+                updateResult.updateConfig.latestVersionCode > 0) {
+                
                 updateConfig = updateResult.updateConfig
                 isForceUpdate = updateResult.isForceUpdate
                 isSkipable = updateResult.isSkipable
+                updateErrorMessage = updateResult.errorMessage
                 showUpdateDialog = true
-            } else {
-                println("DEBUG: No update needed or update config is null")
-                println("DEBUG: needsUpdate: ${updateResult.needsUpdate}")
-                println("DEBUG: updateConfig: ${updateResult.updateConfig}")
+            } else if (updateResult.errorMessage != null) {
+                // Show error message if there's an error but no update needed
+                updateErrorMessage = updateResult.errorMessage
+                // You could show a toast or snackbar here if needed
             }
         } catch (e: Exception) {
-            println("DEBUG: Error checking for updates: ${e.message}")
-            e.printStackTrace()
+            // Silently handle update check errors - app continues normally
         }
     }
     
@@ -212,42 +202,21 @@ fun NoticeBoardApp(
     
     // Show update dialog if needed
     updateConfig?.let { config ->
-        UpdateDialog(
-            updateConfig = config,
-            isForceUpdate = isForceUpdate,
-            isSkipable = isSkipable,
-            onDismiss = { 
-                showUpdateDialog = false
-                updateConfig = null
-            },
-            onUpdate = {
-                showUpdateDialog = false
-                updateConfig = null
-            }
-        )
-    }
-    
-    // Debug: Add a test button to manually trigger update check
-    // Remove this after debugging
-    LaunchedEffect(Unit) {
-        delay(2000) // Wait 2 seconds after app start
-        println("DEBUG: Manual update check triggered for debugging...")
-        
-        // Clear update config cache to ensure fresh data
-        try {
-            val cacheManager = com.notifiy.noticeboard.data.cache.CacheManager(context)
-            cacheManager.invalidateUpdateConfig()
-            println("DEBUG: Cleared update config cache")
-        } catch (e: Exception) {
-            println("DEBUG: Error clearing cache: ${e.message}")
-        }
-        
-        try {
-            val updateService = UpdateService(context)
-            val updateResult = updateService.checkForUpdate()
-            println("DEBUG: Manual update check result: $updateResult")
-        } catch (e: Exception) {
-            println("DEBUG: Manual update check error: ${e.message}")
+        // Additional safety check
+        if (config.updateLink.isNotBlank() && config.latestVersionCode > 0) {
+            UpdateDialog(
+                updateConfig = config,
+                isForceUpdate = isForceUpdate,
+                isSkipable = isSkipable,
+                onDismiss = { 
+                    showUpdateDialog = false
+                    updateConfig = null
+                },
+                onUpdate = {
+                    showUpdateDialog = false
+                    updateConfig = null
+                }
+            )
         }
     }
 }

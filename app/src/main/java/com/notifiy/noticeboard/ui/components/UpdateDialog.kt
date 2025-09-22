@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Update
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +31,8 @@ fun UpdateDialog(
     onUpdate: () -> Unit
 ) {
     val context = LocalContext.current
+    var showError by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
     
     Dialog(
         onDismissRequest = if (isForceUpdate) { {} } else { onDismiss },
@@ -53,7 +56,7 @@ fun UpdateDialog(
                 // Update Icon
                 Icon(
                     imageVector = Icons.Default.Update,
-                    contentDescription = "Update Available",
+                    contentDescription = "NoteXP Update Available",
                     modifier = Modifier.size(48.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -62,7 +65,7 @@ fun UpdateDialog(
                 
                 // Title
                 Text(
-                    text = if (isForceUpdate) "Update Required" else "Update Available",
+                    text = if (isForceUpdate) "Update Required" else "New Version Available",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -74,9 +77,9 @@ fun UpdateDialog(
                 // Description
                 Text(
                     text = if (isForceUpdate) {
-                        "A new version of the app is available and must be installed to continue using the app."
+                        "A new version of NoteXP is available and must be installed to continue using the app."
                     } else {
-                        "A new version of the app is available with improvements and bug fixes."
+                        "A new version of NoteXP is available with new features, improvements, and bug fixes."
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
@@ -98,14 +101,14 @@ fun UpdateDialog(
                         modifier = Modifier.padding(16.dp),
                     ) {
                         Text(
-                            text = "New Version Details",
+                            text = "Version Information",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold,
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Name - ${updateConfig.latestVersionName} | Code - ${updateConfig.latestVersionCode} ",
+                            text = "Version ${updateConfig.latestVersionName} (Build ${updateConfig.latestVersionCode})",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Normal,
                             color = MaterialTheme.colorScheme.onSurface
@@ -129,7 +132,7 @@ fun UpdateDialog(
                                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         ) {
-                            Text("Skip")
+                            Text("Skip for Now")
                         }
                     }
                     
@@ -137,14 +140,27 @@ fun UpdateDialog(
                     Button(
                         onClick = {
                             onUpdate()
-                            // Open Play Store
+                            // Open Play Store with user-friendly error handling
                             try {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(updateConfig.updateLink))
-                                context.startActivity(intent)
+                                if (updateConfig.updateLink.isNotBlank()) {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(updateConfig.updateLink))
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    context.startActivity(intent)
+                                } else {
+                                    showError = true
+                                    errorMessage = "Update link is not available. Please check your internet connection and try again."
+                                }
                             } catch (e: Exception) {
                                 // Fallback to browser if Play Store app is not available
-                                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(updateConfig.updateLink))
-                                context.startActivity(browserIntent)
+                                try {
+                                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(updateConfig.updateLink))
+                                    browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    context.startActivity(browserIntent)
+                                } catch (e2: Exception) {
+                                    // Show user-friendly error message
+                                    showError = true
+                                    errorMessage = "Unable to open Play Store. Please manually search for 'NoteXP' in Google Play Store to update the app."
+                                }
                             }
                         },
                         modifier = Modifier.weight(1f),
@@ -153,16 +169,56 @@ fun UpdateDialog(
                         )
                     ) {
                         Text(
-                            text = "Update",
+                            text = "Update Now",
                             fontWeight = FontWeight.Medium
                         )
+                    }
+                }
+                
+                // Error message display
+                if (showError) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = "Error",
+                                tint = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = errorMessage,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            TextButton(
+                                onClick = { showError = false },
+                                colors = ButtonDefaults.textButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            ) {
+                                Text("Dismiss", style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
                     }
                 }
                 
                 if (isForceUpdate) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "This update is required to continue using the app",
+                        text = "This update is required to continue using NoteXP",
                         style = MaterialTheme.typography.bodySmall,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.error
