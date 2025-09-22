@@ -106,7 +106,7 @@ fun LoginScreen(
     // Handle password reset success
     LaunchedEffect(passwordResetSent) {
         if (passwordResetSent) {
-            snackbarHostState.showSnackbar("Password reset email sent! Check your inbox.")
+            snackbarHostState.showSnackbar("Password reset email sent! Check your inbox and spam folder.")
             showPasswordResetDialog = false
             authViewModel.clearPasswordResetSent()
         }
@@ -339,6 +339,13 @@ fun PasswordResetDialog(
         text = {
             Column {
                 Text("Enter your email address and we'll send you a link to reset your password.")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "💡 Tip: Check your spam/junk folder if you don't receive the email within a few minutes.",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 OutlinedTextField(
