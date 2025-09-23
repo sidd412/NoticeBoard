@@ -16,6 +16,7 @@ import com.notifiy.noticeboard.services.LocalNotificationService
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
+import kotlin.random.Random
 
 class FirebaseRepository(private val context: Context? = null) {
     
@@ -241,10 +242,25 @@ class FirebaseRepository(private val context: Context? = null) {
     
     suspend fun createNoticeBoard(noticeBoard: NoticeBoard): Result<NoticeBoard> {
         return try {
+            // Check if organization code already exists in noticeBoards collection
+            if (noticeBoard.organizationCode.isNotBlank()) {
+                val existingBoard = getNoticeBoardByCode(noticeBoard.organizationCode)
+                if (existingBoard != null) {
+                    return Result.failure(Exception("Organization code '${noticeBoard.organizationCode}' already exists. Please generate a new code."))
+                }
+            }
+            
+            // Create the notice board
             firestore.collection("noticeBoards")
                 .document(noticeBoard.id)
                 .set(noticeBoard)
                 .await()
+            
+            // Add the organization code to NotexpCOded collection
+            if (noticeBoard.organizationCode.isNotBlank()) {
+                addCodeToNotexpCOded(noticeBoard.organizationCode, noticeBoard.id)
+            }
+            
             // Cache the created board and invalidate related caches
             cacheManager?.cacheNoticeBoard(noticeBoard.id, noticeBoard)
             cacheManager?.cacheNoticeBoard("code_${noticeBoard.organizationCode}", noticeBoard)
@@ -252,6 +268,78 @@ class FirebaseRepository(private val context: Context? = null) {
             Result.success(noticeBoard)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+    
+    private suspend fun generateUniqueOrganizationCode(): String {
+        var code: String
+        var isUnique = false
+        var attempts = 0
+        val maxAttempts = 10
+        
+        do {
+            code = generateRandomCode()
+            val existingBoard = getNoticeBoardByCode(code)
+            isUnique = (existingBoard == null)
+            attempts++
+            
+            if (attempts >= maxAttempts) {
+                throw Exception("Unable to generate unique organization code after $maxAttempts attempts")
+            }
+        } while (!isUnique)
+        
+        return code
+    }
+    
+    private fun generateRandomCode(): String {
+        val letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        val numbers = "0123456789"
+        
+        // Generate 3 random letters
+        val randomLetters = (1..3).map { letters.random() }.joinToString("")
+        
+        // Generate 3 random numbers
+        val randomNumbers = (1..3).map { numbers.random() }.joinToString("")
+        
+        return randomLetters + randomNumbers
+    }
+    
+    suspend fun addCodeToNotexpCOded(code: String, boardId: String): Result<Boolean> {
+        return try {
+            val codeData = mapOf(
+                "code" to code,
+                "boardId" to boardId,
+                "createdAt" to System.currentTimeMillis(),
+                "isActive" to true
+            )
+            
+            firestore.collection("noteXpCodes")
+                .document(code) // Use code as document ID for easy lookup
+                .set(codeData)
+                .await()
+            
+            println("DEBUG: Successfully added code '$code' to noteXpCodes collection")
+            Result.success(true)
+        } catch (e: Exception) {
+            println("DEBUG: Error adding code to noteXpCodes collection: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun getNotexpCodeByCode(code: String): Any? {
+        return try {
+            val document = firestore.collection("noteXpCodes")
+                .document(code)
+                .get()
+                .await()
+            
+            if (document.exists()) {
+                document.data
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
         }
     }
     

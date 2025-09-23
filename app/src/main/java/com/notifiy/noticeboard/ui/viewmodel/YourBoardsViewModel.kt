@@ -39,7 +39,7 @@ class YourBoardsViewModel(private val context: Context) : ViewModel() {
         }
     }
     
-    fun createNoticeBoard(noticeBoard: NoticeBoard, onResult: (Boolean) -> Unit) {
+    fun createNoticeBoard(noticeBoard: NoticeBoard, onResult: (Boolean, NoticeBoard?) -> Unit) {
         println("DEBUG: YourBoardsViewModel.createNoticeBoard called")
         _userBoards.value = _userBoards.value.copy(isLoading = true, error = null)
         viewModelScope.launch {
@@ -47,7 +47,7 @@ class YourBoardsViewModel(private val context: Context) : ViewModel() {
                 val result = repository.createNoticeBoard(noticeBoard)
                 result.fold(
                     onSuccess = { createdBoard ->
-                        println("DEBUG: Board created successfully: ${createdBoard.id}")
+                        println("DEBUG: Board created successfully: ${createdBoard.id} with code: ${createdBoard.organizationCode}")
                         // Add the institute code to the user's profile
                         val addCodeResult = repository.addInstituteCodeToUser(noticeBoard.createdBy, createdBoard.organizationCode)
                         addCodeResult.fold(
@@ -56,12 +56,12 @@ class YourBoardsViewModel(private val context: Context) : ViewModel() {
                                 // Reload user boards to show the new board
                                 loadUserBoards(noticeBoard.createdBy)
                                 _errorMessage.value = null
-                                onResult(true)
+                                onResult(true, createdBoard)
                             },
                             onFailure = { exception ->
                                 println("DEBUG: Failed to add institute code: ${exception.message}")
                                 _errorMessage.value = "Board created but failed to update user profile: ${exception.message}"
-                                onResult(false)
+                                onResult(false, null)
                             }
                         )
                     },
@@ -69,14 +69,14 @@ class YourBoardsViewModel(private val context: Context) : ViewModel() {
                         println("DEBUG: Failed to create board: ${exception.message}")
                         _userBoards.value = UiState(isLoading = false, error = exception.message)
                         _errorMessage.value = exception.message
-                        onResult(false)
+                        onResult(false, null)
                     }
                 )
             } catch (e: Exception) {
                 println("DEBUG: Exception in createNoticeBoard: ${e.message}")
                 _userBoards.value = UiState(isLoading = false, error = e.message)
                 _errorMessage.value = e.message
-                onResult(false)
+                onResult(false, null)
             }
         }
     }
