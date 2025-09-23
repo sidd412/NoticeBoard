@@ -30,6 +30,7 @@ android {
 
     buildTypes {
         release {
+            applicationIdSuffix = ""
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -40,9 +41,14 @@ android {
             signingConfig = signingConfigs.getByName("release")
             // Generate mapping file for crash reporting
             isDebuggable = false
+            // Add release app name
+            manifestPlaceholders["appName"] = "NoteXP"
         }
         debug {
+            applicationIdSuffix = ".debug"
             isDebuggable = true
+            // Add debug-specific app name
+            manifestPlaceholders["appName"] = "NoteXP Debug"
         }
     }
     compileOptions {
