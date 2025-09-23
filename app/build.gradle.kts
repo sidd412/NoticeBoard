@@ -121,4 +121,7 @@ dependencies {
 
     // Extended material icon
     implementation(libs.androidx.compose.material.icons.extended)
+    
+    // WebView for privacy policy
+    implementation("androidx.webkit:webkit:1.8.0")
 }

@@ -85,6 +85,10 @@ fun NoticeBoardNavigation(navController: NavHostController, themeViewModel: Them
             AboutScreen(navController = navController)
         }
         
+        composable(Screen.PrivacyPolicy.route) {
+            PrivacyPolicyScreen(navController = navController)
+        }
+        
         composable(Screen.PrivacySettings.route) {
             PrivacySettingsScreen(navController = navController)
         }
