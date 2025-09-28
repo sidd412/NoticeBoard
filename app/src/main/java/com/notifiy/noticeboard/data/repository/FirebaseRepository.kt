@@ -667,7 +667,7 @@ class FirebaseRepository(private val context: Context? = null) {
             println("DEBUG: Successfully added institute code to user")
             // Invalidate user cache and user boards cache
             cacheManager?.invalidateUser(userId)
-            Result.success(true)
+            return Result.success(true)
         } catch (e: Exception) {
             println("DEBUG: Error adding institute code to user: ${e.message}")
             Result.failure(e)

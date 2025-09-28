@@ -48,8 +48,6 @@ fun BoardDetailsScreen(
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
 
-    // Subscription popup state
-    var showSubscriptionDialog by remember { mutableStateOf(false) }
 
     // Load board details and pages
     LaunchedEffect(boardId) {
@@ -80,7 +78,7 @@ fun BoardDetailsScreen(
         if (isSubscriptionActive()) {
             navController.navigate(Screen.BoardEditor.createRoute(pageId))
         } else {
-            showSubscriptionDialog = true
+            navController.navigate(Screen.Subscription.createRoute(boardId))
         }
     }
 
@@ -91,7 +89,7 @@ fun BoardDetailsScreen(
             println("DEBUG: BoardDetailsScreen - Creating new page with boardCode: $boardCode")
             navController.navigate(Screen.BoardEditor.createRoute("new_${boardCode}"))
         } else {
-            showSubscriptionDialog = true
+            navController.navigate(Screen.Subscription.createRoute(boardId))
         }
     }
 
@@ -288,16 +286,6 @@ fun BoardDetailsScreen(
             hostState = snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter)
         )
 
-        // Subscription Required Dialog
-        SubscriptionRequiredDialog(
-            isVisible = showSubscriptionDialog,
-            onDismiss = { showSubscriptionDialog = false },
-            onSubscribe = {
-                showSubscriptionDialog = false
-                navController.navigate(Screen.Subscription.createRoute(boardId))
-            },
-            boardName = boardState.data?.organizationName ?: "Notice Board"
-        )
     }
 }
 

@@ -13,3 +13,14 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Security: Keystore files and sensitive configuration
+*.keystore
+*.jks
+keystore.properties
+release.properties
+
+# Security: Environment-specific configuration
+gradle.properties.local
+.env
+.env.local

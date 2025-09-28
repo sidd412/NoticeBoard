@@ -16,35 +16,10 @@
         {
           "client_id": "1020177538461-1j75djeebl4gmm7g0ok1pit25eutm25l.apps.googleusercontent.com",
           "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyChwf_8Hp3sEbfD9LqHVCZyQT-tzKsVYqk"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1020177538461-1j75djeebl4gmm7g0ok1pit25eutm25l.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:1020177538461:android:82f63af5b20bd1a1432374",
-        "android_client_info": {
-          "package_name": "com.notifiy.noticeboard.debug"
-        }
-      },
-      "oauth_client": [
+        },
         {
           "client_id": "1020177538461-1j75djeebl4gmm7g0ok1pit25eutm25l.apps.googleusercontent.com",
-          "client_type": 3
+          "client_type": 1
         }
       ],
       "api_key": [
@@ -66,3 +41,4 @@
   ],
   "configuration_version": "1"
 }
+

@@ -21,10 +21,10 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("noteXP-release-key.keystore")
-            storePassword = "noteXP123"
-            keyAlias = "noteXP-key"
-            keyPassword = "noteXP123"
+            storeFile = file(project.findProperty("RELEASE_STORE_FILE") ?: "noteXP-release-key.keystore")
+            storePassword = project.findProperty("RELEASE_STORE_PASSWORD") as String?
+            keyAlias = project.findProperty("RELEASE_KEY_ALIAS") as String?
+            keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as String?
         }
     }
 
@@ -43,12 +43,14 @@ android {
             isDebuggable = false
             // Add release app name
             manifestPlaceholders["appName"] = "NoteXP"
+            resValue("string", "app_name", "NoteXP")
         }
         debug {
             applicationIdSuffix = ".debug"
             isDebuggable = true
             // Add debug-specific app name
             manifestPlaceholders["appName"] = "NoteXP Debug"
+            resValue("string", "app_name", "NoteXP Debug")
         }
     }
     compileOptions {
