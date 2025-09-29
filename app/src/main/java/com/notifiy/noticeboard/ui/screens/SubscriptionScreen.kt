@@ -16,8 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -85,7 +86,7 @@ fun SubscriptionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 45.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
 
             // header
@@ -116,7 +117,7 @@ fun SubscriptionScreen(
                 boardState.data?.let { board ->
                     Card(
                         modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(.3f)
                         )
                     ) {
                         Column(
@@ -141,32 +142,28 @@ fun SubscriptionScreen(
 
             // Monthly/Annually Toggle
             item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.onSurface,
-                            shape = RoundedCornerShape(30.dp)
-                        ), colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
                 ) {
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface.copy(.3f),
+                                shape = RoundedCornerShape(30.dp)
+                            )
+                            .padding(vertical = 5.dp, horizontal = 6.dp), horizontalArrangement = Arrangement.Center
                     ) {
                         // Monthly Button
                         Button(
                             onClick = { isMonthly = true },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.height(35.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (isMonthly) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.surface
                             ),
-                            shape = RoundedCornerShape(30.dp)
+                            shape = RoundedCornerShape(35.dp)
                         ) {
                             Text(
                                 text = "Monthly",
@@ -175,17 +172,17 @@ fun SubscriptionScreen(
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
 
                         // Annually Button
                         Button(
                             onClick = { isMonthly = false },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.height(35.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (!isMonthly) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.surface
                             ),
-                            shape = RoundedCornerShape(30.dp)
+                            shape = RoundedCornerShape(35.dp)
                         ) {
                             Text(
                                 text = "Annually",
@@ -197,12 +194,37 @@ fun SubscriptionScreen(
                 }
             }
 
-            // Plans Carousel
+            // Plans LazyRow
             item {
-                if (boardState.plans.isNotEmpty()) {
-                    PlansCarousel(
-                        plans = boardState.plans,
+                val filteredPlans = if (isMonthly) {
+                    boardState.plans
+                } else {
+                    boardState.plans.filter { it.planName.lowercase() != "free" }
+                }
+
+                // Sort plans by amount (free first, then by price)
+                val sortedPlans = filteredPlans.sortedWith(compareBy<Plan> { plan ->
+                    when {
+                        plan.planName.lowercase() == "free" -> 0.0
+                        isMonthly -> {
+                            // Extract numeric value from amount string for monthly
+                            val amountStr = plan.amount.replace(Regex("[^0-9.]"), "")
+                            amountStr.toDoubleOrNull() ?: Double.MAX_VALUE
+                        }
+
+                        else -> {
+                            // Extract numeric value from annualPrice string for annual
+                            val amountStr = plan.annualPrice.replace(Regex("[^0-9.]"), "")
+                            amountStr.toDoubleOrNull() ?: Double.MAX_VALUE
+                        }
+                    }
+                })
+
+                if (sortedPlans.isNotEmpty()) {
+                    PlansLazyRow(
+                        plans = sortedPlans,
                         selectedPlan = boardState.selectedPlan,
+                        isMonthly = isMonthly,
                         onPlanSelected = { plan -> subscriptionViewModel.selectPlan(plan) })
                 }
             }
@@ -283,34 +305,51 @@ fun SubscriptionScreen(
 }
 
 @Composable
-fun PlansCarousel(
-    plans: List<Plan>, selectedPlan: Plan?, onPlanSelected: (Plan) -> Unit
+fun PlansLazyRow(
+    plans: List<Plan>, selectedPlan: Plan?, isMonthly: Boolean, onPlanSelected: (Plan) -> Unit
 ) {
-    val pagerState = rememberPagerState(pageCount = { plans.size }, initialPage = 2)
+    val listState = rememberLazyListState()
 
-    HorizontalPager(
-        state = pagerState,
-        contentPadding = PaddingValues(start = 65.dp, end = 65.dp),
-        pageSpacing = 5.dp
-    ) { page ->
-        val plan = plans[page]
-        val isSelected = selectedPlan?.id == plan.id
+    // Auto-scroll to selected plan
+    LaunchedEffect(selectedPlan) {
+        selectedPlan?.let { plan ->
+            val selectedIndex = plans.indexOfFirst { it.id == plan.id }
+            if (selectedIndex != -1) {
+                listState.animateScrollToItem(selectedIndex)
+            }
+        }
+    }
 
-        PlanCard(
-            plan = plan,
-            isSelected = isSelected,
-            onClick = { onPlanSelected(plan) },
-            modifier = Modifier
-                .height(if (pagerState.currentPage == page) 120.dp else 100.dp)
-                .width(200.dp)
-                .alpha(if (pagerState.currentPage == page) 1f else .5f)
-        )
+    LazyRow(
+        state = listState,
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        items(plans) { plan ->
+            val isSelected = selectedPlan?.id == plan.id
+
+            PlanCard(
+                plan = plan,
+                isSelected = isSelected,
+                isMonthly = isMonthly,
+                onClick = { onPlanSelected(plan) },
+                modifier = Modifier
+                    .height(if (isSelected) 125.dp else 120.dp)
+                    .width(100.dp)
+                    .alpha(if (isSelected) 1f else 0.7f)
+            )
+        }
     }
 }
 
 @Composable
 fun PlanCard(
-    plan: Plan, isSelected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier
+    plan: Plan,
+    isSelected: Boolean,
+    isMonthly: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(modifier = modifier
         .clickable { onClick() }
@@ -352,7 +391,7 @@ fun PlanCard(
 
                 // Price
                 Text(
-                    text = plan.amount,
+                    text = if (isMonthly) plan.amount else plan.annualPrice,
                     fontSize = 10.sp,
                     color = if (isSelected) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -393,7 +432,7 @@ fun PlanDetailsCard(plan: Plan) {
             modifier = Modifier.padding(20.dp)
         ) {
             Text(
-                text = "What's included in ${plan.planName}",
+                text = "Benefits included in ${plan.planName} plan",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -413,19 +452,19 @@ fun PlanDetailsCard(plan: Plan) {
 
                 if (plan.images > 0) {
                     SubscriptionFeature(
-                        text = "Upload up to ${plan.images} images per page", isIncluded = true
+                        text = "Upload up to ${plan.images} images", isIncluded = true
                     )
                 }
 
                 if (plan.pdfs > 0) {
                     SubscriptionFeature(
-                        text = "Upload up to ${plan.pdfs} PDF files per page", isIncluded = true
+                        text = "Upload up to ${plan.pdfs} PDF files", isIncluded = true
                     )
                 }
 
                 if (plan.links > 0) {
                     SubscriptionFeature(
-                        text = "Add up to ${plan.links} links per page", isIncluded = true
+                        text = "Add up to ${plan.links} links", isIncluded = true
                     )
                 }
 
@@ -456,7 +495,7 @@ fun PlanDetailsCard(plan: Plan) {
 
                 if (plan.queryByUser) {
                     SubscriptionFeature(
-                        text = "Allow users to send queries", isIncluded = true
+                        text = "Allow subscribers to send queries", isIncluded = true
                     )
                 }
 

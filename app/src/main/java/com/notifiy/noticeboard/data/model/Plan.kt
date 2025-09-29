@@ -7,6 +7,7 @@ data class Plan(
     val id: String = "",
     val planName: String = "",
     val amount: String = "",
+    val annualPrice: String = "",
     val pages: Int = 0,
     val images: Int = 0,
     val pdfs: Int = 0,
