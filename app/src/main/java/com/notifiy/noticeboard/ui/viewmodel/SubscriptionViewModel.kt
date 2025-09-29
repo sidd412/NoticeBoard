@@ -102,6 +102,15 @@ class SubscriptionViewModel(
                     
                     println("DEBUG: SubscriptionViewModel - Creating board with planId: '$planId', planName: '${plan.planName}'")
                     
+                    // Calculate proper expiry date based on subscription period
+                    val calendar = Calendar.getInstance()
+                    if (isMonthly) {
+                        calendar.add(Calendar.MONTH, 1) // Add 1 month
+                    } else {
+                        calendar.add(Calendar.YEAR, 1) // Add 1 year
+                    }
+                    val expiryTime = calendar.timeInMillis
+                    
                     // Create a new board with the subscription
                     val newBoard = com.notifiy.noticeboard.data.model.NoticeBoard(
                         id = java.util.UUID.randomUUID().toString(),
@@ -112,7 +121,7 @@ class SubscriptionViewModel(
                         organizationWhatsapp = "",
                         createdBy = userId,
                         subscriptionPeriod = if (isMonthly) "monthly" else "annual",
-                        subscriptionExpiry = Calendar.getInstance().apply { set(2026, 11, 31) }.timeInMillis,
+                        subscriptionExpiry = expiryTime,
                         currentPlanId = planId,
                         planName = plan.planName
                     )
@@ -138,8 +147,13 @@ class SubscriptionViewModel(
                     )
                 } else {
                     // Existing board - update subscription
+                    // Calculate proper expiry date based on subscription period
                     val calendar = Calendar.getInstance()
-                    calendar.set(2026, 11, 31) // December 31, 2026
+                    if (isMonthly) {
+                        calendar.add(Calendar.MONTH, 1) // Add 1 month
+                    } else {
+                        calendar.add(Calendar.YEAR, 1) // Add 1 year
+                    }
                     val expiryTime = calendar.timeInMillis
                     
                     // Get the plan ID for this subscription
@@ -193,10 +207,8 @@ class SubscriptionViewModel(
     fun subscribeToFreePlan(boardId: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             try {
-                // Set subscription to "free" and expiry to 2026
-                val calendar = Calendar.getInstance()
-                calendar.set(2026, 11, 31) // December 31, 2026
-                val expiryTime = calendar.timeInMillis
+                // Set subscription to "free" with no expiry (unlimited)
+                val expiryTime = 0L // 0 means unlimited/no expiry
                 
                 val result = repository.updateNoticeBoardSubscription(
                     boardId = boardId,

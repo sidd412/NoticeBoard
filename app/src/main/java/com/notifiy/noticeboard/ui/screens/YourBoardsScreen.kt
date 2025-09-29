@@ -73,6 +73,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import java.io.File
+import java.util.concurrent.TimeUnit
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.navigation.BottomNavScreen
 import com.notifiy.noticeboard.navigation.Screen
@@ -89,6 +90,33 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+
+// Helper function to calculate plan validity
+fun getPlanValidityText(subscriptionExpiry: Long, subscriptionPeriod: String = ""): String {
+    if (subscriptionExpiry <= 0) {
+        return "Unlimited"
+    }
+    
+    val currentTime = System.currentTimeMillis()
+    val timeDiff = subscriptionExpiry - currentTime
+    
+    if (timeDiff <= 0) {
+        return "Expired"
+    }
+    
+    val days = TimeUnit.MILLISECONDS.toDays(timeDiff)
+    val months = days / 30
+    val remainingDays = days % 30
+    
+    // For annual plans, show maximum 12 months
+    return when {
+        subscriptionPeriod.lowercase() == "annual" -> "12 Month"
+        months > 0 && remainingDays > 0 -> "$months Month $remainingDays Days"
+        months > 0 -> "$months Month"
+        days > 0 -> "$days Days"
+        else -> "Expired"
+    }
+}
 
 // Top-level function for showing download notification
 private fun showDownloadNotification(context: android.content.Context, boardName: String, filePath: String) {
@@ -813,13 +841,16 @@ fun YourBoardCard(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = if (board.isActive) {
-                            if (board.planName.isNotEmpty()) {
-                                "Active | ${board.planName} Plan"
+                            val planName = if (board.planName.isNotEmpty()) {
+                                board.planName
                             } else if (currentPlan != null) {
-                                "Active | ${currentPlan!!.planName} Plan"
+                                currentPlan!!.planName
                             } else {
-                                "Active"
+                                "Free"
                             }
+                            
+                            val validityText = getPlanValidityText(board.subscriptionExpiry, board.subscriptionPeriod)
+                            "Active | $planName Plan | $validityText"
                         } else {
                             "Inactive"
                         },
