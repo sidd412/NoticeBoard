@@ -9,6 +9,7 @@ import com.notifiy.noticeboard.data.model.DataExportRequest
 import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Page
+import com.notifiy.noticeboard.data.model.Plan
 import com.notifiy.noticeboard.data.model.UpdateConfig
 import com.notifiy.noticeboard.data.model.User
 import com.notifiy.noticeboard.data.model.UserNotification
@@ -1068,6 +1069,36 @@ class FirebaseRepository(private val context: Context? = null) {
             filteredBoards
         } catch (e: Exception) {
             println("DEBUG: FirebaseRepository.searchNoticeBoards - Error: ${e.message}")
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+    
+    suspend fun getAllPlans(): List<Plan> {
+        return try {
+            println("DEBUG: FirebaseRepository.getAllPlans - Getting all plans")
+            
+            val querySnapshot = firestore.collection("plans")
+                .get()
+                .await()
+            
+            println("DEBUG: FirebaseRepository.getAllPlans - Query returned ${querySnapshot.size()} documents")
+            
+            val plans = querySnapshot.documents.mapNotNull { doc ->
+                try {
+                    val plan = doc.toObject(Plan::class.java)
+                    println("DEBUG: FirebaseRepository.getAllPlans - Document ${doc.id}: $plan")
+                    plan
+                } catch (e: Exception) {
+                    println("DEBUG: FirebaseRepository.getAllPlans - Error converting document ${doc.id}: ${e.message}")
+                    null
+                }
+            }
+            
+            println("DEBUG: FirebaseRepository.getAllPlans - Successfully converted ${plans.size} plans")
+            plans
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository.getAllPlans - Error: ${e.message}")
             e.printStackTrace()
             emptyList()
         }
