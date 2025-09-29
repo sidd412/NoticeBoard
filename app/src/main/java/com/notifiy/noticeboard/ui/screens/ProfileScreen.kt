@@ -32,6 +32,7 @@ import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
+import com.notifiy.noticeboard.data.repository.FirebaseRepository
 import com.notifiy.noticeboard.utils.ValidationUtils
 import android.widget.Toast
 
@@ -48,7 +49,7 @@ fun ProfileScreen(
     var showSignOutDialog by remember { mutableStateOf(false) }
     var showEditProfileDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    
+    val repository = remember { FirebaseRepository(context) }
     // Handle profile update success
     LaunchedEffect(profileUpdated) {
         if (profileUpdated) {
@@ -160,11 +161,19 @@ fun ProfileScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "Freemium",
-                                fontSize = 16.sp,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+//                            Column {
+                                Text(
+                                    text = "Freemium",
+                                    fontSize = 16.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                
+//                                Text(
+//                                    text = "Unlimited",
+//                                    fontSize = 12.sp,
+//                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+//                                )
+//                            }
 
                             if (currentUser != null) {
                                 Text(

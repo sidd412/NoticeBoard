@@ -38,12 +38,20 @@ class SubscriptionViewModel(
                 
                 val board = repository.getNoticeBoardById(boardId)
                 val plans = repository.getAllPlans()
+                val currentUser = repository.getCurrentUser()
+                
+                // Find current board's plan and preselect it
+                val currentPlan = board?.currentPlanId?.let { planId ->
+                    plans.find { plan ->
+                        plan.planId.contains(planId) || plan.id == planId
+                    }
+                }
                 
                 _boardState.value = _boardState.value.copy(
                     isLoading = false,
                     data = board,
                     plans = plans,
-                    selectedPlan = plans.firstOrNull(),
+                    selectedPlan = currentPlan ?: plans.firstOrNull(),
                     error = null
                 )
                 
@@ -61,35 +69,125 @@ class SubscriptionViewModel(
         _boardState.value = _boardState.value.copy(selectedPlan = plan)
     }
     
-    fun subscribeToPlan(boardId: String, plan: Plan, onResult: (Boolean) -> Unit) {
+    fun subscribeToPlan(boardId: String, plan: Plan, isMonthly: Boolean, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             try {
-                // Set subscription to selected plan and expiry to 2026
-                val calendar = Calendar.getInstance()
-                calendar.set(2026, 11, 31) // December 31, 2026
-                val expiryTime = calendar.timeInMillis
+                println("DEBUG: SubscriptionViewModel - Starting subscription process for plan: ${plan.planName}, isMonthly: $isMonthly")
                 
-                val result = repository.updateNoticeBoardSubscription(
-                    boardId = boardId,
-                    subscriptionType = plan.planName.lowercase(),
-                    subscriptionExpiry = expiryTime
-                )
+                // Get current user ID first
+                val userId = getCurrentUserId()
+                if (userId.isEmpty()) {
+                    println("DEBUG: SubscriptionViewModel - No authenticated user found")
+                    _errorMessage.value = "User not authenticated"
+                    onResult(false)
+                    return@launch
+                }
                 
-                result.fold(
-                    onSuccess = {
-                        _errorMessage.value = null
-                        onResult(true)
-                    },
-                    onFailure = { exception ->
-                        _errorMessage.value = exception.message
-                        onResult(false)
+                println("DEBUG: SubscriptionViewModel - Current user ID: $userId")
+                
+                // Check if this is a new board that needs to be created first
+                var actualBoardId = boardId
+                if (boardId.startsWith("new_")) {
+                    println("DEBUG: SubscriptionViewModel - Board ID starts with 'new_', creating board first")
+                    val boardCode = boardId.substringAfter("new_")
+                    
+                    // Get the plan ID for this subscription
+                    val planId = if (isMonthly && plan.planId.isNotEmpty()) {
+                        plan.planId[0] // First element is monthly plan ID
+                    } else if (!isMonthly && plan.planId.size > 1) {
+                        plan.planId[1] // Second element is annual plan ID
+                    } else {
+                        plan.id // Fallback to plan document ID
                     }
-                )
+                    
+                    println("DEBUG: SubscriptionViewModel - Creating board with planId: '$planId', planName: '${plan.planName}'")
+                    
+                    // Create a new board with the subscription
+                    val newBoard = com.notifiy.noticeboard.data.model.NoticeBoard(
+                        id = java.util.UUID.randomUUID().toString(),
+                        organizationName = "New Board",
+                        organizationCode = boardCode,
+                        organizationEmail = "",
+                        organizationLocation = "",
+                        organizationWhatsapp = "",
+                        createdBy = userId,
+                        subscriptionPeriod = if (isMonthly) "monthly" else "annual",
+                        subscriptionExpiry = Calendar.getInstance().apply { set(2026, 11, 31) }.timeInMillis,
+                        currentPlanId = planId,
+                        planName = plan.planName
+                    )
+                    
+                    val createResult = repository.createNoticeBoard(newBoard)
+                    createResult.fold(
+                        onSuccess = { createdBoard ->
+                            println("DEBUG: SubscriptionViewModel - Board created successfully: ${createdBoard.id}")
+                            actualBoardId = createdBoard.id
+                            
+                            // Add institute code to user
+                            repository.addInstituteCodeToUser(userId, createdBoard.organizationCode)
+                            
+                            // Board plan is already set, just complete
+                            _errorMessage.value = null
+                            onResult(true)
+                        },
+                        onFailure = { exception ->
+                            println("DEBUG: SubscriptionViewModel - Board creation failed: ${exception.message}")
+                            _errorMessage.value = "Failed to create board: ${exception.message}"
+                            onResult(false)
+                        }
+                    )
+                } else {
+                    // Existing board - update subscription
+                    val calendar = Calendar.getInstance()
+                    calendar.set(2026, 11, 31) // December 31, 2026
+                    val expiryTime = calendar.timeInMillis
+                    
+                    // Get the plan ID for this subscription
+                    val planId = if (isMonthly && plan.planId.isNotEmpty()) {
+                        plan.planId[0] // First element is monthly plan ID
+                    } else if (!isMonthly && plan.planId.size > 1) {
+                        plan.planId[1] // Second element is annual plan ID
+                    } else {
+                        plan.id // Fallback to plan document ID
+                    }
+                    
+                    println("DEBUG: SubscriptionViewModel - Updating board subscription for boardId: $boardId with planId: '$planId', planName: '${plan.planName}'")
+                    val result = repository.updateNoticeBoardSubscription(
+                        boardId = boardId,
+                        subscriptionExpiry = expiryTime,
+                        currentPlanId = planId,
+                        subscriptionPeriod = if (isMonthly) "monthly" else "annual",
+                        planName = plan.planName
+                    )
+                    
+                    result.fold(
+                        onSuccess = {
+                            println("DEBUG: SubscriptionViewModel - Board subscription updated successfully")
+                            _errorMessage.value = null
+                            onResult(true)
+                        },
+                        onFailure = { exception ->
+                            println("DEBUG: SubscriptionViewModel - updateNoticeBoardSubscription failed: ${exception.message}")
+                            exception.printStackTrace()
+                            _errorMessage.value = exception.message
+                            onResult(false)
+                        }
+                    )
+                }
             } catch (e: Exception) {
+                println("DEBUG: SubscriptionViewModel - Exception in subscribeToPlan: ${e.message}")
+                e.printStackTrace()
                 _errorMessage.value = e.message
                 onResult(false)
             }
         }
+    }
+    
+    
+    private suspend fun getCurrentUserId(): String {
+        val user = repository.getCurrentUser()
+        println("DEBUG: SubscriptionViewModel - getCurrentUserId: ${user?.id}")
+        return user?.id ?: ""
     }
     
     fun subscribeToFreePlan(boardId: String, onResult: (Boolean) -> Unit) {
@@ -102,8 +200,10 @@ class SubscriptionViewModel(
                 
                 val result = repository.updateNoticeBoardSubscription(
                     boardId = boardId,
-                    subscriptionType = "free",
-                    subscriptionExpiry = expiryTime
+                    subscriptionExpiry = expiryTime,
+                    currentPlanId = "",
+                    subscriptionPeriod = "",
+                    planName = "Free"
                 )
                 
                 result.fold(

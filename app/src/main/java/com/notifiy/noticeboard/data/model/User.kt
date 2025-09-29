@@ -12,6 +12,7 @@ data class User(
     val subscribedBoards: List<String> = emptyList(), // List of notice board IDs
     val subscribedCodes: List<String> = emptyList(), // List of institute codes user subscribed to
     val instituteCodes: List<String> = emptyList(), // List of institute codes user owns
+    val currentPlanId: String = "", // Current subscribed plan ID
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )

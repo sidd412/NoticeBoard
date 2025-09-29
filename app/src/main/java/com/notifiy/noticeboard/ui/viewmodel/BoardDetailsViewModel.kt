@@ -55,15 +55,15 @@ class BoardDetailsViewModel(
                 
                 // Load pages for this board
                 if (board != null) {
-                    val boardCode = board.organizationCode.toIntOrNull() ?: 0
-                    println("DEBUG: BoardDetailsViewModel.loadBoardDetails - Board code: $boardCode")
+                    val boardCode = board.organizationCode
+                    println("DEBUG: BoardDetailsViewModel.loadBoardDetails - Board code: '$boardCode'")
                     
                     // Debug: Get all pages first to see what's in the database
                     val allPages = repository.getAllPages()
                     println("DEBUG: BoardDetailsViewModel.loadBoardDetails - All pages in database: ${allPages.size}")
                     
                     val pages = repository.getPagesByBoardCode(boardCode)
-                    println("DEBUG: BoardDetailsViewModel.loadBoardDetails - Loaded ${pages.size} pages for board code $boardCode")
+                    println("DEBUG: BoardDetailsViewModel.loadBoardDetails - Loaded ${pages.size} pages for board code '$boardCode'")
                     _pagesState.value = _pagesState.value.copy(
                         isLoading = false,
                         data = pages,

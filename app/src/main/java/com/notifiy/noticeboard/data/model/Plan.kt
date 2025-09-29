@@ -8,6 +8,7 @@ data class Plan(
     val planName: String = "",
     val amount: String = "",
     val annualPrice: String = "",
+    val planId: List<String> = emptyList(), // [monthlyPlanId, annualPlanId]
     val pages: Int = 0,
     val images: Int = 0,
     val pdfs: Int = 0,

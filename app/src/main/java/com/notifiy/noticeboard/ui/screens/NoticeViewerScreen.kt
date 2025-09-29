@@ -67,8 +67,8 @@ fun NoticeViewerScreen(
             println("DEBUG: NoticeViewerScreen - Loaded board: $noticeBoard")
 
             if (noticeBoard != null) {
-                val boardCode = noticeBoard!!.organizationCode.toIntOrNull() ?: 0
-                println("DEBUG: NoticeViewerScreen - Board code: $boardCode")
+                val boardCode = noticeBoard!!.organizationCode
+                println("DEBUG: NoticeViewerScreen - Board code: '$boardCode'")
 
                 // Load pages for this board
                 pages = homeViewModel.getPagesByBoardCode(boardCode)

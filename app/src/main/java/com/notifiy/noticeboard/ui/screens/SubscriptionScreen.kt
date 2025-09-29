@@ -245,18 +245,18 @@ fun SubscriptionScreen(
                     .fillMaxWidth()
                     .padding(bottom = 25.dp)
             ) {
-                Button(
-                    onClick = {
-                        isLoading = true
-                        subscriptionViewModel.subscribeToPlan(boardId, plan) { success ->
-                            isLoading = false
-                            if (success) {
-                                navController.popBackStack()
-                            } else {
-                                errorMessage = "Failed to subscribe. Please try again."
-                            }
-                        }
-                    },
+                 Button(
+                     onClick = {
+                         isLoading = true
+                         subscriptionViewModel.subscribeToPlan(boardId, plan, isMonthly) { success ->
+                             isLoading = false
+                             if (success) {
+                                 navController.popBackStack()
+                             } else {
+                                 errorMessage = "Failed to subscribe. Please try again."
+                             }
+                         }
+                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
@@ -540,5 +540,5 @@ private fun SubscriptionFeature(
 
 private fun isSubscriptionActive(board: NoticeBoard): Boolean {
     val currentTime = System.currentTimeMillis()
-    return board.subscriptionType.isNotEmpty() && board.subscriptionType != "null" && board.subscriptionExpiry > currentTime
+    return board.currentPlanId.isNotEmpty() && board.subscriptionExpiry > currentTime
 }

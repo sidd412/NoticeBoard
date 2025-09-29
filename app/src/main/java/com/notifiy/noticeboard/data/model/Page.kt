@@ -9,7 +9,7 @@ data class Page(
     val subtitle: String = "",
     val infoPoints: List<String> = emptyList(), // Array of info points
     val additionalInfo: String = "",
-    val code: Int = 0, // Notice board code
+    val code: String = "", // Notice board code
     val priority: String = "LOW", // LOW, NORMAL, HIGH, URGENT
     val userId: String = "", // User ID who created this page
     val createdAt: Long = System.currentTimeMillis(),

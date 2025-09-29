@@ -439,6 +439,17 @@ fun YourBoardsScreen(
         }
     }
 
+    // Refresh boards when returning to this screen (e.g., from subscription)
+    LaunchedEffect(Unit) {
+        try {
+            currentUser?.let { user ->
+                yourBoardsViewModel.loadUserBoards(user.id)
+            }
+        } catch (e: Exception) {
+            // Don't crash the app, just handle the error silently
+        }
+    }
+
     // Cleanup when navigating away
     DisposableEffect(Unit) {
         onDispose {
@@ -663,6 +674,35 @@ fun YourBoardCard(
     onDownloadClick: (NoticeBoard) -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var currentPlan by remember { mutableStateOf<com.notifiy.noticeboard.data.model.Plan?>(null) }
+    val context = LocalContext.current
+    val repository = remember { com.notifiy.noticeboard.data.repository.FirebaseRepository(context) }
+    
+    // Load plan details
+    LaunchedEffect(board) {
+        println("DEBUG: YourBoardsScreen.YourBoardCard - Loading plan for board: ${board.organizationName}")
+        println("DEBUG: YourBoardsScreen.YourBoardCard - Board currentPlanId: '${board.currentPlanId}'")
+        println("DEBUG: YourBoardsScreen.YourBoardCard - Board planName: '${board.planName}'")
+        
+        if (board.currentPlanId.isNotEmpty() || board.planName.isNotEmpty()) {
+            try {
+                val plans = repository.getAllPlans()
+                println("DEBUG: YourBoardsScreen.YourBoardCard - Available plans: ${plans.map { it.planName }}")
+                
+                currentPlan = if (board.currentPlanId.isNotEmpty()) {
+                    plans.find { plan ->
+                        plan.planId.contains(board.currentPlanId) || plan.id == board.currentPlanId
+                    }
+                } else {
+                    plans.find { it.planName.equals(board.planName, ignoreCase = true) }
+                }
+                
+                println("DEBUG: YourBoardsScreen.YourBoardCard - Found plan: ${currentPlan?.planName}")
+            } catch (e: Exception) {
+                println("DEBUG: Error loading plan details: ${e.message}")
+            }
+        }
+    }
     
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -772,7 +812,17 @@ fun YourBoardCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (board.isActive) "Active" else "Inactive",
+                        text = if (board.isActive) {
+                            if (board.planName.isNotEmpty()) {
+                                "Active | ${board.planName} Plan"
+                            } else if (currentPlan != null) {
+                                "Active | ${currentPlan!!.planName} Plan"
+                            } else {
+                                "Active"
+                            }
+                        } else {
+                            "Inactive"
+                        },
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
