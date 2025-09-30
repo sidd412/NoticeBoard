@@ -210,34 +210,26 @@ class BoardEditorViewModel(private val context: Context) : ViewModel() {
                     return@launch
                 }
                 
-                // Get board's current plan
-                val board = repository.getNoticeBoardByCode(boardCode)
-                if (board == null) {
-                    android.util.Log.d("sidxp", "checkPageLimit - Board not found for code: '$boardCode'")
-                    onResult(false, 0)
-                    return@launch
-                }
-                
-                android.util.Log.d("sidxp", "checkPageLimit - Found board: ${board.organizationName}")
+                android.util.Log.d("sidxp", "checkPageLimit - Found user: ${currentUser.name}")
                 
                 val plans = repository.getAllPlans()
-                android.util.Log.d("sidxp", "checkPageLimit - Board currentPlanId: '${board.currentPlanId}'")
-                android.util.Log.d("sidxp", "checkPageLimit - Board planName: '${board.planName}'")
+                android.util.Log.d("sidxp", "checkPageLimit - User currentPlanId: '${currentUser.currentPlanId}'")
+                android.util.Log.d("sidxp", "checkPageLimit - User planName: '${currentUser.planName}'")
                 android.util.Log.d("sidxp", "checkPageLimit - Available plans: ${plans.map { "${it.planName} (${it.pages} pages)" }}")
                 
-                val boardPlan = if (board.currentPlanId.isNotEmpty()) {
+                val userPlan = if (currentUser.currentPlanId.isNotEmpty()) {
                     // Find plan by currentPlanId
                     val foundPlan = plans.find { plan ->
-                        plan.planId.contains(board.currentPlanId) || plan.id == board.currentPlanId
+                        plan.planId.contains(currentUser.currentPlanId) || plan.id == currentUser.currentPlanId
                     }
                     android.util.Log.d("sidxp", "checkPageLimit - Found plan by currentPlanId: ${foundPlan?.planName} with ${foundPlan?.pages} pages")
                     foundPlan
-                } else if (board.planName.isNotEmpty()) {
+                } else if (currentUser.planName.isNotEmpty()) {
                     // Find plan by planName (case-insensitive)
-                    android.util.Log.d("sidxp", "checkPageLimit - Searching for plan with name: '${board.planName}'")
+                    android.util.Log.d("sidxp", "checkPageLimit - Searching for plan with name: '${currentUser.planName}'")
                     val foundPlan = plans.find { plan ->
-                        val matches = plan.planName.equals(board.planName, ignoreCase = true)
-                        android.util.Log.d("sidxp", "checkPageLimit - Comparing '${plan.planName}' with '${board.planName}': $matches")
+                        val matches = plan.planName.equals(currentUser.planName, ignoreCase = true)
+                        android.util.Log.d("sidxp", "checkPageLimit - Comparing '${plan.planName}' with '${currentUser.planName}': $matches")
                         matches
                     }
                     android.util.Log.d("sidxp", "checkPageLimit - Found plan by planName: ${foundPlan?.planName} with ${foundPlan?.pages} pages")
@@ -249,8 +241,8 @@ class BoardEditorViewModel(private val context: Context) : ViewModel() {
                     foundPlan
                 }
                 
-                android.util.Log.d("sidxp", "checkPageLimit - Final board plan: ${boardPlan?.planName} with ${boardPlan?.pages} pages")
-                val planPages = boardPlan?.pages ?: 0
+                android.util.Log.d("sidxp", "checkPageLimit - Final user plan: ${userPlan?.planName} with ${userPlan?.pages} pages")
+                val planPages = userPlan?.pages ?: 0
                 android.util.Log.d("sidxp", "checkPageLimit - Plan pages limit: $planPages")
                 
                 // Get current page count for this board

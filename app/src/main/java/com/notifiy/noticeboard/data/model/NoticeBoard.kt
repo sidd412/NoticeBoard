@@ -13,10 +13,6 @@ data class NoticeBoard(
     val qrCodeUrl: String = "",
     val pageUrl: String = "",
     val isActive: Boolean = true,
-    val subscriptionPeriod: String = "", // monthly, annual
-    val subscriptionExpiry: Long = 0,
-    val currentPlanId: String = "", // Current subscribed plan ID for this board
-    val planName: String = "", // Current plan name (e.g., "Basic", "Premium")
     val createdBy: String = "", // User ID who created this board
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()

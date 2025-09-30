@@ -84,6 +84,7 @@ import com.notifiy.noticeboard.utils.QRCodeUtils
 import com.notifiy.noticeboard.utils.ShowErrorSnackbar
 import com.notifiy.noticeboard.utils.getErrorMessage
 import com.notifiy.noticeboard.utils.PDFGenerator
+import com.notifiy.noticeboard.ui.components.BoardLimitDialog
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -91,32 +92,6 @@ import androidx.core.content.ContextCompat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 
-// Helper function to calculate plan validity
-fun getPlanValidityText(subscriptionExpiry: Long, subscriptionPeriod: String = ""): String {
-    if (subscriptionExpiry <= 0) {
-        return "Unlimited"
-    }
-    
-    val currentTime = System.currentTimeMillis()
-    val timeDiff = subscriptionExpiry - currentTime
-    
-    if (timeDiff <= 0) {
-        return "Expired"
-    }
-    
-    val days = TimeUnit.MILLISECONDS.toDays(timeDiff)
-    val months = days / 30
-    val remainingDays = days % 30
-    
-    // For annual plans, show maximum 12 months
-    return when {
-        subscriptionPeriod.lowercase() == "annual" -> "12 Month"
-        months > 0 && remainingDays > 0 -> "$months Month $remainingDays Days"
-        months > 0 -> "$months Month"
-        days > 0 -> "$days Days"
-        else -> "Expired"
-    }
-}
 
 // Top-level function for showing download notification
 private fun showDownloadNotification(context: android.content.Context, boardName: String, filePath: String) {
@@ -228,6 +203,8 @@ fun YourBoardsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var downloadedFilePath by remember { mutableStateOf<String?>(null) }
     var showSnackbar by remember { mutableStateOf(false) }
+    var showBoardLimitDialog by remember { mutableStateOf(false) }
+    var currentBoardLimit by remember { mutableStateOf(1) }
     val coroutineScope = rememberCoroutineScope()
     
     // Function to show dialog suggesting PDF viewer installation
@@ -666,7 +643,22 @@ fun YourBoardsScreen(
 
         // Fixed Create New Board Button
         Button(
-            onClick = { mainNavController.navigate(Screen.CreateBoard.route) },
+            onClick = { 
+                currentUser?.let { user ->
+                    android.util.Log.d("board limit", "YourBoardsScreen - Create board button clicked for user: ${user.name}")
+                    yourBoardsViewModel.checkBoardLimit(user.id) { canCreate, boardLimit ->
+                        android.util.Log.d("board limit", "YourBoardsScreen - Board limit check result: canCreate=$canCreate, limit=$boardLimit")
+                        if (canCreate) {
+                            android.util.Log.d("board limit", "YourBoardsScreen - Can create board, navigating to create screen")
+                            mainNavController.navigate(Screen.CreateBoard.route)
+                        } else {
+                            android.util.Log.d("board limit", "YourBoardsScreen - Cannot create board, showing limit dialog")
+                            currentBoardLimit = boardLimit
+                            showBoardLimitDialog = true
+                        }
+                    }
+                }
+            },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
@@ -691,6 +683,19 @@ fun YourBoardsScreen(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter)
         )
+        
+        // Board Limit Dialog
+        BoardLimitDialog(
+            isVisible = showBoardLimitDialog,
+            currentBoardLimit = currentBoardLimit,
+            onUpgrade = {
+                showBoardLimitDialog = false
+                mainNavController.navigate(Screen.Subscription.route)
+            },
+            onBack = {
+                showBoardLimitDialog = false
+            }
+        )
     }
 }
 
@@ -702,35 +707,6 @@ fun YourBoardCard(
     onDownloadClick: (NoticeBoard) -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
-    var currentPlan by remember { mutableStateOf<com.notifiy.noticeboard.data.model.Plan?>(null) }
-    val context = LocalContext.current
-    val repository = remember { com.notifiy.noticeboard.data.repository.FirebaseRepository(context) }
-    
-    // Load plan details
-    LaunchedEffect(board) {
-        println("DEBUG: YourBoardsScreen.YourBoardCard - Loading plan for board: ${board.organizationName}")
-        println("DEBUG: YourBoardsScreen.YourBoardCard - Board currentPlanId: '${board.currentPlanId}'")
-        println("DEBUG: YourBoardsScreen.YourBoardCard - Board planName: '${board.planName}'")
-        
-        if (board.currentPlanId.isNotEmpty() || board.planName.isNotEmpty()) {
-            try {
-                val plans = repository.getAllPlans()
-                println("DEBUG: YourBoardsScreen.YourBoardCard - Available plans: ${plans.map { it.planName }}")
-                
-                currentPlan = if (board.currentPlanId.isNotEmpty()) {
-                    plans.find { plan ->
-                        plan.planId.contains(board.currentPlanId) || plan.id == board.currentPlanId
-                    }
-                } else {
-                    plans.find { it.planName.equals(board.planName, ignoreCase = true) }
-                }
-                
-                println("DEBUG: YourBoardsScreen.YourBoardCard - Found plan: ${currentPlan?.planName}")
-            } catch (e: Exception) {
-                println("DEBUG: Error loading plan details: ${e.message}")
-            }
-        }
-    }
     
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -841,16 +817,7 @@ fun YourBoardCard(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = if (board.isActive) {
-                            val planName = if (board.planName.isNotEmpty()) {
-                                board.planName
-                            } else if (currentPlan != null) {
-                                currentPlan!!.planName
-                            } else {
-                                "Free"
-                            }
-                            
-                            val validityText = getPlanValidityText(board.subscriptionExpiry, board.subscriptionPeriod)
-                            "Active | $planName Plan | $validityText"
+                            "Active"
                         } else {
                             "Inactive"
                         },

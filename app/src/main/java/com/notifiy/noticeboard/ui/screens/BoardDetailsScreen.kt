@@ -64,30 +64,30 @@ fun BoardDetailsScreen(
     val pagesState by boardDetailsViewModel.pagesState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Check if subscription is active
+    // Check if subscription is active (now based on user's subscription)
     fun isSubscriptionActive(): Boolean {
-        val board = boardState.data
-        if (board == null) return false
+        val user = currentUser
+        if (user == null) return false
 
         val currentTime = System.currentTimeMillis()
-        return board.currentPlanId.isNotEmpty() && board.subscriptionExpiry > currentTime
+        return user.currentPlanId.isNotEmpty() && user.subscriptionExpiry > currentTime
     }
     
-    // Check if board has any plan (including free plan)
+    // Check if user has any plan (including free plan)
     fun hasPlan(): Boolean {
-        val board = boardState.data
-        if (board == null) {
-            println("DEBUG: BoardDetailsScreen.hasPlan - Board is null")
+        val user = currentUser
+        if (user == null) {
+            println("DEBUG: BoardDetailsScreen.hasPlan - User is null")
             return false
         }
         
-        println("DEBUG: BoardDetailsScreen.hasPlan - Board data:")
-        println("  - currentPlanId: '${board.currentPlanId}' (empty: ${board.currentPlanId.isEmpty()})")
-        println("  - planName: '${board.planName}' (empty: ${board.planName.isEmpty()})")
-        println("  - subscriptionExpiry: ${board.subscriptionExpiry}")
+        println("DEBUG: BoardDetailsScreen.hasPlan - User data:")
+        println("  - currentPlanId: '${user.currentPlanId}' (empty: ${user.currentPlanId.isEmpty()})")
+        println("  - planName: '${user.planName}' (empty: ${user.planName.isEmpty()})")
+        println("  - subscriptionExpiry: ${user.subscriptionExpiry}")
         
-        // Board has a plan if currentPlanId is not empty or planName is not empty
-        val hasPlan = board.currentPlanId.isNotEmpty() || board.planName.isNotEmpty()
+        // User has a plan if currentPlanId is not empty or planName is not empty
+        val hasPlan = user.currentPlanId.isNotEmpty() || user.planName.isNotEmpty()
         println("DEBUG: BoardDetailsScreen.hasPlan - Result: $hasPlan")
         return hasPlan
     }
@@ -97,7 +97,7 @@ fun BoardDetailsScreen(
         if (isSubscriptionActive()) {
             navController.navigate(Screen.BoardEditor.createRoute(pageId))
         } else {
-            navController.navigate(Screen.Subscription.createRoute(boardId))
+            navController.navigate(Screen.Subscription.route)
         }
     }
 
@@ -110,7 +110,7 @@ fun BoardDetailsScreen(
         if (!hasPlanResult) {
             // No plan at all - navigate to subscription screen
             println("DEBUG: BoardDetailsScreen.onCreateNewPageClick - No plan, navigating to subscription")
-            navController.navigate(Screen.Subscription.createRoute(boardId))
+            navController.navigate(Screen.Subscription.route)
         } else {
             // Has a plan - navigate to page editor (page limit check will happen there)
             val boardCode = boardState.data?.organizationCode ?: "0"
