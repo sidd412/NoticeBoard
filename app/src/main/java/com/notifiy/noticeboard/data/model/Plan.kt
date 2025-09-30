@@ -10,6 +10,7 @@ data class Plan(
     val annualPrice: String = "",
     val planId: List<String> = emptyList(), // [monthlyPlanId, annualPlanId]
     val pages: Int = 0,
+    val boards: Int = 0, // Number of boards user can create
     val images: Int = 0,
     val pdfs: Int = 0,
     val links: Int = 0,

@@ -73,11 +73,9 @@ fun NoticeBoardNavigation(navController: NavHostController, themeViewModel: Them
             )
         }
         
-        composable(Screen.Subscription.route) { backStackEntry ->
-            val boardId = backStackEntry.arguments?.getString("boardId") ?: ""
+        composable(Screen.Subscription.route) {
             SubscriptionScreen(
-                navController = navController,
-                boardId = boardId
+                navController = navController
             )
         }
         

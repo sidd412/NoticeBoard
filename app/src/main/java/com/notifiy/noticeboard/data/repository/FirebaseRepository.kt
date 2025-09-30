@@ -363,11 +363,19 @@ class FirebaseRepository(private val context: Context? = null) {
     
     suspend fun deleteNoticeBoard(boardId: String): Result<Boolean> {
         return try {
-            println("DEBUG: FirebaseRepository.deleteNoticeBoard - Starting deletion for board: $boardId")
+            android.util.Log.d("sidxp", "FirebaseRepository.deleteNoticeBoard - Starting deletion for board: $boardId")
             
-            // First, get the board to get the organization code for cache invalidation
+            // First, get the board to get the organization code and createdBy
             val board = getNoticeBoardById(boardId)
-            val organizationCode = board?.organizationCode
+            if (board == null) {
+                android.util.Log.e("sidxp", "FirebaseRepository.deleteNoticeBoard - Board not found: $boardId")
+                return Result.failure(Exception("Board not found"))
+            }
+            
+            val organizationCode = board.organizationCode
+            val createdBy = board.createdBy
+            
+            android.util.Log.d("sidxp", "FirebaseRepository.deleteNoticeBoard - Board details: code=$organizationCode, createdBy=$createdBy")
             
             // Delete the notice board document
             firestore.collection("noticeBoards")
@@ -375,20 +383,52 @@ class FirebaseRepository(private val context: Context? = null) {
                 .delete()
                 .await()
             
-            println("DEBUG: FirebaseRepository.deleteNoticeBoard - Board deleted successfully")
+            android.util.Log.d("sidxp", "FirebaseRepository.deleteNoticeBoard - Board deleted successfully")
+            
+            // Remove the institute code from user's instituteCodes array
+            if (createdBy.isNotEmpty() && organizationCode.isNotEmpty()) {
+                android.util.Log.d("sidxp", "FirebaseRepository.deleteNoticeBoard - Removing institute code $organizationCode from user $createdBy")
+                
+                val userDoc = firestore.collection("users")
+                    .document(createdBy)
+                    .get()
+                    .await()
+                
+                if (userDoc.exists()) {
+                    val currentCodes = userDoc.get("instituteCodes") as? List<String> ?: emptyList()
+                    val updatedCodes = currentCodes.filter { it != organizationCode }
+                    
+                    android.util.Log.d("sidxp", "FirebaseRepository.deleteNoticeBoard - Current codes: $currentCodes")
+                    android.util.Log.d("sidxp", "FirebaseRepository.deleteNoticeBoard - Updated codes: $updatedCodes")
+                    
+                    firestore.collection("users")
+                        .document(createdBy)
+                        .update(
+                            "instituteCodes", updatedCodes,
+                            "updatedAt", System.currentTimeMillis()
+                        )
+                        .await()
+                    
+                    android.util.Log.d("sidxp", "FirebaseRepository.deleteNoticeBoard - Institute code removed from user")
+                }
+            }
             
             // Invalidate all related caches
             cacheManager?.invalidateNoticeBoard(boardId)
-            organizationCode?.let { 
-                cacheManager?.invalidateNoticeBoard("code_$it")
-            }
-            cacheManager?.invalidateNoticeBoardsList("user_${auth.currentUser?.uid}")
-            cacheManager?.invalidateNoticeBoardsList("subscribed_${auth.currentUser?.uid}")
+            cacheManager?.invalidateNoticeBoard("code_$organizationCode")
+            cacheManager?.invalidateUser(createdBy)
+            cacheManager?.invalidateUser("current")
+            cacheManager?.invalidateNoticeBoardsList("user_$createdBy")
+            cacheManager?.invalidateNoticeBoardsList("subscribed_$createdBy")
             
-            println("DEBUG: FirebaseRepository.deleteNoticeBoard - Cache invalidated")
+            // Clear all cached data to force fresh fetch
+            cacheManager?.clearAllCache()
+            
+            android.util.Log.d("sidxp", "FirebaseRepository.deleteNoticeBoard - Cache invalidated and data reloaded")
             Result.success(true)
         } catch (e: Exception) {
-            println("DEBUG: FirebaseRepository.deleteNoticeBoard - Error: ${e.message}")
+            android.util.Log.e("sidxp", "FirebaseRepository.deleteNoticeBoard - Error: ${e.message}")
+            e.printStackTrace()
             Result.failure(e)
         }
     }
@@ -943,29 +983,29 @@ class FirebaseRepository(private val context: Context? = null) {
     }
     
     // Subscription operations
-    suspend fun updateNoticeBoardSubscription(
-        boardId: String, 
+    suspend fun updateUserSubscription(
+        userId: String, 
         subscriptionExpiry: Long, 
         currentPlanId: String = "",
         subscriptionPeriod: String = "",
         planName: String = ""
     ): Result<Boolean> {
         return try {
-            println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Updating subscription for board: $boardId")
-            println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Period: $subscriptionPeriod, expiry: $subscriptionExpiry, planId: $currentPlanId, planName: $planName")
+            android.util.Log.d("sidxp", "FirebaseRepository.updateUserSubscription - Updating subscription for user: $userId")
+            android.util.Log.d("sidxp", "FirebaseRepository.updateUserSubscription - Period: $subscriptionPeriod, expiry: $subscriptionExpiry, planId: $currentPlanId, planName: $planName")
             
-            // Check if board exists first
-            val boardDoc = firestore.collection("noticeBoards")
-                .document(boardId)
+            // Check if user exists first
+            val userDoc = firestore.collection("users")
+                .document(userId)
                 .get()
                 .await()
             
-            if (!boardDoc.exists()) {
-                println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Board $boardId does not exist")
-                return Result.failure(Exception("Board not found"))
+            if (!userDoc.exists()) {
+                android.util.Log.d("sidxp", "FirebaseRepository.updateUserSubscription - User $userId does not exist")
+                return Result.failure(Exception("User not found"))
             }
             
-            println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Board exists, updating subscription")
+            android.util.Log.d("sidxp", "FirebaseRepository.updateUserSubscription - User exists, updating subscription")
             val updateData = mutableMapOf<String, Any>(
                 "subscriptionExpiry" to subscriptionExpiry,
                 "updatedAt" to System.currentTimeMillis()
@@ -983,24 +1023,79 @@ class FirebaseRepository(private val context: Context? = null) {
                 updateData["planName"] = planName
             }
             
-            firestore.collection("noticeBoards")
-                .document(boardId)
+            firestore.collection("users")
+                .document(userId)
                 .update(updateData)
                 .await()
-            println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Subscription updated successfully")
-            // Invalidate board cache since subscription was updated
-            cacheManager?.invalidateNoticeBoard(boardId)
-            // Also invalidate by code if we have the board data
-            val updatedBoardDoc = firestore.collection("noticeBoards").document(boardId).get().await()
-            if (updatedBoardDoc.exists()) {
-                val board = updatedBoardDoc.toObject(NoticeBoard::class.java)
-                board?.let {
-                    cacheManager?.invalidateNoticeBoard("code_${it.organizationCode}")
-                }
-            }
+            
+            android.util.Log.d("sidxp", "FirebaseRepository.updateUserSubscription - Subscription updated successfully")
+            
+            // Invalidate all relevant caches
+            cacheManager?.invalidateUser(userId)
+            cacheManager?.invalidateUser("current")
+            cacheManager?.invalidateNoticeBoardsList("user_$userId")
+            cacheManager?.invalidateNoticeBoardsList("subscribed_$userId")
+            
+            // Clear all cached data to force fresh fetch
+            cacheManager?.clearAllCache()
+            
             Result.success(true)
         } catch (e: Exception) {
-            println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Error: ${e.message}")
+            android.util.Log.e("sidxp", "FirebaseRepository.updateUserSubscription - Error: ${e.message}")
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun checkBoardLimit(userId: String): Result<Pair<Boolean, Int>> {
+        return try {
+            android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - Checking board limit for user: $userId")
+            
+            // Get user's current plan
+            val user = getCurrentUser()
+            if (user == null) {
+                android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - User not found")
+                return Result.failure(Exception("User not found"))
+            }
+            
+            android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - User found: ${user.name}")
+            android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - User currentPlanId: '${user.currentPlanId}'")
+            android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - User planName: '${user.planName}'")
+            android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - User instituteCodes: ${user.instituteCodes}")
+            android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - User instituteCodes.size: ${user.instituteCodes.size}")
+            
+            // Get all plans to find user's plan
+            val plans = getAllPlans()
+            android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - Available plans: ${plans.map { "${it.planName} (${it.boards} boards)" }}")
+            
+            val userPlan = plans.find { plan ->
+                val nameMatch = plan.planName.equals(user.planName, ignoreCase = true)
+                val idMatch = plan.planId.contains(user.currentPlanId) || plan.id == user.currentPlanId
+                android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - Checking plan ${plan.planName}: nameMatch=$nameMatch, idMatch=$idMatch")
+                nameMatch || idMatch
+            }
+            
+            if (userPlan == null) {
+                android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - User plan not found, allowing 1 board without plan")
+                // Allow 1 board even without a plan
+                val currentBoardCount = user.instituteCodes.size
+                val canCreate = currentBoardCount < 1
+                android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - No plan: $currentBoardCount/1 boards, can create: $canCreate")
+                android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - Returning: canCreate=$canCreate, limit=1")
+                return Result.success(Pair(canCreate, 1))
+            }
+            
+            // Get current board count
+            val currentBoardCount = user.instituteCodes.size
+            val canCreate = currentBoardCount < userPlan.boards
+            
+            android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - User plan: ${userPlan.planName}, boards: ${userPlan.boards}")
+            android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - Current boards: $currentBoardCount, can create: $canCreate")
+            android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - Returning: canCreate=$canCreate, limit=${userPlan.boards}")
+            
+            Result.success(Pair(canCreate, userPlan.boards))
+        } catch (e: Exception) {
+            android.util.Log.e("board limit", "FirebaseRepository.checkBoardLimit - Error: ${e.message}")
             e.printStackTrace()
             Result.failure(e)
         }

@@ -13,6 +13,9 @@ data class User(
     val subscribedCodes: List<String> = emptyList(), // List of institute codes user subscribed to
     val instituteCodes: List<String> = emptyList(), // List of institute codes user owns
     val currentPlanId: String = "", // Current subscribed plan ID
+    val planName: String = "", // Current plan name (e.g., "Basic", "Premium")
+    val subscriptionPeriod: String = "", // monthly, annual
+    val subscriptionExpiry: Long = 0, // Subscription expiry timestamp
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )

@@ -35,6 +35,31 @@ import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.data.repository.FirebaseRepository
 import com.notifiy.noticeboard.utils.ValidationUtils
 import android.widget.Toast
+import java.util.concurrent.TimeUnit
+
+fun isSubscriptionActive(subscriptionExpiry: Long): Boolean {
+    if (subscriptionExpiry <= 0) return true // 0 means unlimited/no expiry
+    return System.currentTimeMillis() < subscriptionExpiry
+}
+
+fun getPlanValidityText(subscriptionExpiry: Long, subscriptionPeriod: String = ""): String {
+    if (subscriptionExpiry <= 0) return "Unlimited"
+    val currentTime = System.currentTimeMillis()
+    val timeDiff = subscriptionExpiry - currentTime
+    if (timeDiff <= 0) return "Expired"
+
+    val days = TimeUnit.MILLISECONDS.toDays(timeDiff)
+    val months = days / 30
+    val remainingDays = days % 30
+
+    return when {
+        subscriptionPeriod.lowercase() == "annual" -> "12 Month" // Cap annual at 12 months
+        months > 0 && remainingDays > 0 -> "$months Month $remainingDays Days"
+        months > 0 -> "$months Month"
+        days > 0 -> "$days Days"
+        else -> "Expired"
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +75,21 @@ fun ProfileScreen(
     var showEditProfileDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val repository = remember { FirebaseRepository(context) }
+    
+    // Reload user data when screen becomes active to get updated subscription info
+    LaunchedEffect(Unit) {
+        android.util.Log.d("sidxp", "ProfileScreen - Reloading user data to get updated subscription info")
+        authViewModel.refreshAuthState()
+    }
+    
+    // Also reload when the screen is recomposed (e.g., when returning from subscription screen)
+    LaunchedEffect(currentUser) {
+        if (currentUser != null) {
+            android.util.Log.d("sidxp", "ProfileScreen - User data changed, refreshing to get latest subscription info")
+            authViewModel.refreshAuthState()
+        }
+    }
+    
     // Handle profile update success
     LaunchedEffect(profileUpdated) {
         if (profileUpdated) {
@@ -161,30 +201,44 @@ fun ProfileScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-//                            Column {
+                            Column {
                                 Text(
-                                    text = "Freemium",
+                                    text = currentUser?.planName?.ifEmpty { "No Plan" } ?: "No Plan",
                                     fontSize = 16.sp,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 
-//                                Text(
-//                                    text = "Unlimited",
-//                                    fontSize = 12.sp,
-//                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-//                                )
-//                            }
+                                Text(
+                                    text = if (currentUser?.planName?.isNotEmpty() == true) {
+                                        getPlanValidityText(currentUser.subscriptionExpiry, currentUser.subscriptionPeriod)
+                                    } else {
+                                        "Not Subscribed"
+                                    },
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
+                            }
 
                             if (currentUser != null) {
-                                Text(
-                                    text = "✓ Active",
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Medium
-                                )
+                                val hasPlan = currentUser.planName.isNotEmpty() || currentUser.currentPlanId.isNotEmpty()
+                                if (hasPlan) {
+                                    val isActive = isSubscriptionActive(currentUser.subscriptionExpiry)
+                                    Text(
+                                        text = if (isActive) "✓ Active" else "Expired",
+                                        fontSize = 14.sp,
+                                        color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                } else {
+                                    Text(
+                                        text = "Not Subscribed",
+                                        fontSize = 14.sp,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
+                                }
                             } else {
                                 Text(
-                                    text = "Expired",
+                                    text = "Not Subscribed",
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )

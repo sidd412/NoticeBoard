@@ -466,20 +466,20 @@ fun BoardEditorScreen(
                             val board = boardEditorViewModel.repository.getNoticeBoardByCode(boardCode)
                             if (board != null) {
                                 android.util.Log.d("sidxp", "BoardEditorScreen - Found board for upgrade: ${board.id}")
-                                navController.navigate(Screen.Subscription.createRoute(board.id))
+                                navController.navigate(Screen.Subscription.route)
                             } else {
                                 android.util.Log.d("sidxp", "BoardEditorScreen - Board not found for code: $boardCode")
-                                // Fallback to using the board code
-                                navController.navigate(Screen.Subscription.createRoute("new_${boardCode}"))
+                                // Fallback to subscription screen
+                                navController.navigate(Screen.Subscription.route)
                             }
                         } catch (e: Exception) {
                             android.util.Log.e("sidxp", "BoardEditorScreen - Error finding board: ${e.message}")
-                            // Fallback to using the board code
-                            navController.navigate(Screen.Subscription.createRoute("new_${boardCode}"))
+                            // Fallback to subscription screen
+                            navController.navigate(Screen.Subscription.route)
                         }
                     }
                 } else {
-                    navController.navigate(Screen.Subscription.createRoute(boardId ?: ""))
+                    navController.navigate(Screen.Subscription.route)
                 }
             },
             onBack = {

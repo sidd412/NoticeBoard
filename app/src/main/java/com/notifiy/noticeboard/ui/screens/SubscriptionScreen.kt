@@ -61,7 +61,6 @@ import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 @Composable
 fun SubscriptionScreen(
     navController: NavController,
-    boardId: String,
     subscriptionViewModel: SubscriptionViewModel = cachedViewModel(SubscriptionViewModel::class.java)
 ) {
     var isLoading by remember { mutableStateOf(false) }
@@ -70,9 +69,9 @@ fun SubscriptionScreen(
 
     val boardState by subscriptionViewModel.boardState.collectAsState()
 
-    // Load board details and plans
-    LaunchedEffect(boardId) {
-        subscriptionViewModel.loadBoardDetails(boardId)
+    // Load user details and plans
+    LaunchedEffect(Unit) {
+        subscriptionViewModel.loadUserDetails()
     }
 
     Box(
@@ -112,9 +111,9 @@ fun SubscriptionScreen(
                         onClick = {}) {}
                 }
             }
-            // Board info
+            // User info
             item {
-                boardState.data?.let { board ->
+                boardState.data?.let { user ->
                     Card(
                         modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(.3f)
@@ -124,14 +123,14 @@ fun SubscriptionScreen(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                         ) {
                             Text(
-                                text = "Notice Board: ${board.organizationName}",
+                                text = "User Subscription",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Code: ${board.organizationCode}",
+                                text = "Manage your subscription plan",
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                             )
@@ -248,7 +247,7 @@ fun SubscriptionScreen(
                  Button(
                      onClick = {
                          isLoading = true
-                         subscriptionViewModel.subscribeToPlan(boardId, plan, isMonthly) { success ->
+                         subscriptionViewModel.subscribeToPlan(plan, isMonthly) { success ->
                              isLoading = false
                              if (success) {
                                  navController.popBackStack()
@@ -538,7 +537,7 @@ private fun SubscriptionFeature(
     }
 }
 
-private fun isSubscriptionActive(board: NoticeBoard): Boolean {
+private fun isSubscriptionActive(user: com.notifiy.noticeboard.data.model.User): Boolean {
     val currentTime = System.currentTimeMillis()
-    return board.currentPlanId.isNotEmpty() && board.subscriptionExpiry > currentTime
+    return user.currentPlanId.isNotEmpty() && user.subscriptionExpiry > currentTime
 }
