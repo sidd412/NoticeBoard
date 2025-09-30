@@ -13,7 +13,7 @@ android {
         applicationId = "com.notifiy.noticeboard"
         minSdk = 24
         targetSdk = 36
-        versionCode = 3
+        versionCode = 4
         versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -21,15 +21,16 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("noteXP-release-key.keystore")
-            storePassword = "noteXP123"
-            keyAlias = "noteXP-key"
-            keyPassword = "noteXP123"
+            storeFile = file(project.findProperty("RELEASE_STORE_FILE") ?: "noteXP-release-key.keystore")
+            storePassword = project.findProperty("RELEASE_STORE_PASSWORD") as String?
+            keyAlias = project.findProperty("RELEASE_KEY_ALIAS") as String?
+            keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as String?
         }
     }
 
     buildTypes {
         release {
+            applicationIdSuffix = ""
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -40,9 +41,16 @@ android {
             signingConfig = signingConfigs.getByName("release")
             // Generate mapping file for crash reporting
             isDebuggable = false
+            // Add release app name
+            manifestPlaceholders["appName"] = "NoteXP"
+            resValue("string", "app_name", "NoteXP")
         }
         debug {
+            applicationIdSuffix = ".debug"
             isDebuggable = true
+            // Add debug-specific app name
+            manifestPlaceholders["appName"] = "NoteXP Debug"
+            resValue("string", "app_name", "NoteXP Debug")
         }
     }
     compileOptions {
@@ -121,4 +129,7 @@ dependencies {
 
     // Extended material icon
     implementation(libs.androidx.compose.material.icons.extended)
+    
+    // WebView for privacy policy
+    implementation("androidx.webkit:webkit:1.8.0")
 }

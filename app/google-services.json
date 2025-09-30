@@ -16,6 +16,10 @@
         {
           "client_id": "1020177538461-1j75djeebl4gmm7g0ok1pit25eutm25l.apps.googleusercontent.com",
           "client_type": 3
+        },
+        {
+          "client_id": "1020177538461-1j75djeebl4gmm7g0ok1pit25eutm25l.apps.googleusercontent.com",
+          "client_type": 1
         }
       ],
       "api_key": [
@@ -37,3 +41,4 @@
   ],
   "configuration_version": "1"
 }
+

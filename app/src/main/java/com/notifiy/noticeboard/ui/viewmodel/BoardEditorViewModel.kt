@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 class BoardEditorViewModel(private val context: Context) : ViewModel() {
     
-    private val repository: FirebaseRepository = FirebaseRepository(context)
+    val repository: FirebaseRepository = FirebaseRepository(context)
     
     private val _authState = MutableStateFlow(UiState<com.notifiy.noticeboard.data.model.User?>())
     val authState: StateFlow<UiState<com.notifiy.noticeboard.data.model.User?>> = _authState.asStateFlow()
@@ -153,12 +153,12 @@ class BoardEditorViewModel(private val context: Context) : ViewModel() {
                         // Increment notification count for subscribed users
                         val boardId = getBoardIdByCode(savedPage.code)
                         if (boardId != null) {
-                            repository.incrementNotificationCount(boardId, savedPage.code.toString())
+                            repository.incrementNotificationCount(boardId, savedPage.code)
                             
                             // Send local notification to subscribers
                             val title = "New Notice Update"
                             val body = "A new notice has been added to ${getNoticeBoardById(boardId)?.organizationName ?: "a notice board"} you're subscribed to"
-                            repository.sendLocalNotificationToSubscribers(boardId, savedPage.code.toString(), title, body)
+                            repository.sendLocalNotificationToSubscribers(boardId, savedPage.code, title, body)
                         }
                         
                         onResult(true)
@@ -177,9 +177,9 @@ class BoardEditorViewModel(private val context: Context) : ViewModel() {
         }
     }
     
-    private suspend fun getBoardIdByCode(code: Int): String? {
+    private suspend fun getBoardIdByCode(code: String): String? {
         return try {
-            repository.getNoticeBoardByCode(code.toString())?.id
+            repository.getNoticeBoardByCode(code)?.id
         } catch (e: Exception) {
             println("DEBUG: BoardEditorViewModel.getBoardIdByCode - Error: ${e.message}")
             null
@@ -197,6 +197,78 @@ class BoardEditorViewModel(private val context: Context) : ViewModel() {
     
     fun clearError() {
         _errorMessage.value = null
+    }
+    
+    fun checkPageLimit(boardCode: String, onResult: (Boolean, Int) -> Unit) {
+        android.util.Log.d("sidxp", "checkPageLimit - Starting with boardCode: '$boardCode'")
+        viewModelScope.launch {
+            try {
+                val currentUser = repository.getCurrentUser()
+                if (currentUser == null) {
+                    android.util.Log.d("sidxp", "checkPageLimit - No current user found")
+                    onResult(false, 0)
+                    return@launch
+                }
+                
+                // Get board's current plan
+                val board = repository.getNoticeBoardByCode(boardCode)
+                if (board == null) {
+                    android.util.Log.d("sidxp", "checkPageLimit - Board not found for code: '$boardCode'")
+                    onResult(false, 0)
+                    return@launch
+                }
+                
+                android.util.Log.d("sidxp", "checkPageLimit - Found board: ${board.organizationName}")
+                
+                val plans = repository.getAllPlans()
+                android.util.Log.d("sidxp", "checkPageLimit - Board currentPlanId: '${board.currentPlanId}'")
+                android.util.Log.d("sidxp", "checkPageLimit - Board planName: '${board.planName}'")
+                android.util.Log.d("sidxp", "checkPageLimit - Available plans: ${plans.map { "${it.planName} (${it.pages} pages)" }}")
+                
+                val boardPlan = if (board.currentPlanId.isNotEmpty()) {
+                    // Find plan by currentPlanId
+                    val foundPlan = plans.find { plan ->
+                        plan.planId.contains(board.currentPlanId) || plan.id == board.currentPlanId
+                    }
+                    android.util.Log.d("sidxp", "checkPageLimit - Found plan by currentPlanId: ${foundPlan?.planName} with ${foundPlan?.pages} pages")
+                    foundPlan
+                } else if (board.planName.isNotEmpty()) {
+                    // Find plan by planName (case-insensitive)
+                    android.util.Log.d("sidxp", "checkPageLimit - Searching for plan with name: '${board.planName}'")
+                    val foundPlan = plans.find { plan ->
+                        val matches = plan.planName.equals(board.planName, ignoreCase = true)
+                        android.util.Log.d("sidxp", "checkPageLimit - Comparing '${plan.planName}' with '${board.planName}': $matches")
+                        matches
+                    }
+                    android.util.Log.d("sidxp", "checkPageLimit - Found plan by planName: ${foundPlan?.planName} with ${foundPlan?.pages} pages")
+                    foundPlan
+                } else {
+                    // Default to free plan if no plan is set
+                    val foundPlan = plans.find { it.planName.equals("free", ignoreCase = true) }
+                    android.util.Log.d("sidxp", "checkPageLimit - Found default free plan: ${foundPlan?.planName} with ${foundPlan?.pages} pages")
+                    foundPlan
+                }
+                
+                android.util.Log.d("sidxp", "checkPageLimit - Final board plan: ${boardPlan?.planName} with ${boardPlan?.pages} pages")
+                val planPages = boardPlan?.pages ?: 0
+                android.util.Log.d("sidxp", "checkPageLimit - Plan pages limit: $planPages")
+                
+                // Get current page count for this board
+                val existingPages = repository.getPagesByBoardCode(boardCode.toString())
+                val currentPageCount = existingPages.size
+                
+                android.util.Log.d("sidxp", "checkPageLimit - Current page count: $currentPageCount")
+                android.util.Log.d("sidxp", "checkPageLimit - Plan pages limit: $planPages")
+                android.util.Log.d("sidxp", "checkPageLimit - Can create: ${currentPageCount < planPages}")
+                
+                val canCreate = currentPageCount < planPages
+                onResult(canCreate, planPages)
+                
+            } catch (e: Exception) {
+                android.util.Log.e("sidxp", "Error checking page limit: ${e.message}")
+                onResult(false, 0)
+            }
+        }
     }
     
     fun deletePage(pageId: String, onResult: (Boolean) -> Unit) {

@@ -156,9 +156,9 @@ class HomeViewModel(private val context: Context) : ViewModel() {
         }
     }
     
-    suspend fun getPagesByBoardCode(boardCode: Int): List<Page> {
+    suspend fun getPagesByBoardCode(boardCode: String): List<Page> {
         return try {
-            println("DEBUG: HomeViewModel.getPagesByBoardCode - Getting pages for code: $boardCode")
+            println("DEBUG: HomeViewModel.getPagesByBoardCode - Getting pages for code: '$boardCode'")
             repository.getPagesByBoardCode(boardCode)
         } catch (e: Exception) {
             println("DEBUG: HomeViewModel.getPagesByBoardCode - Error: ${e.message}")

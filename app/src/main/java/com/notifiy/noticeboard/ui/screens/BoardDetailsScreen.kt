@@ -48,8 +48,6 @@ fun BoardDetailsScreen(
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
 
-    // Subscription popup state
-    var showSubscriptionDialog by remember { mutableStateOf(false) }
 
     // Load board details and pages
     LaunchedEffect(boardId) {
@@ -72,7 +70,26 @@ fun BoardDetailsScreen(
         if (board == null) return false
 
         val currentTime = System.currentTimeMillis()
-        return board.subscriptionType.isNotEmpty() && board.subscriptionType != "null" && board.subscriptionExpiry > currentTime
+        return board.currentPlanId.isNotEmpty() && board.subscriptionExpiry > currentTime
+    }
+    
+    // Check if board has any plan (including free plan)
+    fun hasPlan(): Boolean {
+        val board = boardState.data
+        if (board == null) {
+            println("DEBUG: BoardDetailsScreen.hasPlan - Board is null")
+            return false
+        }
+        
+        println("DEBUG: BoardDetailsScreen.hasPlan - Board data:")
+        println("  - currentPlanId: '${board.currentPlanId}' (empty: ${board.currentPlanId.isEmpty()})")
+        println("  - planName: '${board.planName}' (empty: ${board.planName.isEmpty()})")
+        println("  - subscriptionExpiry: ${board.subscriptionExpiry}")
+        
+        // Board has a plan if currentPlanId is not empty or planName is not empty
+        val hasPlan = board.currentPlanId.isNotEmpty() || board.planName.isNotEmpty()
+        println("DEBUG: BoardDetailsScreen.hasPlan - Result: $hasPlan")
+        return hasPlan
     }
 
     // Handle page card click
@@ -80,18 +97,26 @@ fun BoardDetailsScreen(
         if (isSubscriptionActive()) {
             navController.navigate(Screen.BoardEditor.createRoute(pageId))
         } else {
-            showSubscriptionDialog = true
+            navController.navigate(Screen.Subscription.createRoute(boardId))
         }
     }
 
     // Handle create new page click
     fun onCreateNewPageClick() {
-        if (isSubscriptionActive()) {
-            val boardCode = boardState.data?.organizationCode?.toIntOrNull() ?: 0
-            println("DEBUG: BoardDetailsScreen - Creating new page with boardCode: $boardCode")
-            navController.navigate(Screen.BoardEditor.createRoute("new_${boardCode}"))
+        println("DEBUG: BoardDetailsScreen.onCreateNewPageClick - Starting")
+        val hasPlanResult = hasPlan()
+        println("DEBUG: BoardDetailsScreen.onCreateNewPageClick - hasPlan(): $hasPlanResult")
+        
+        if (!hasPlanResult) {
+            // No plan at all - navigate to subscription screen
+            println("DEBUG: BoardDetailsScreen.onCreateNewPageClick - No plan, navigating to subscription")
+            navController.navigate(Screen.Subscription.createRoute(boardId))
         } else {
-            showSubscriptionDialog = true
+            // Has a plan - navigate to page editor (page limit check will happen there)
+            val boardCode = boardState.data?.organizationCode ?: "0"
+            println("DEBUG: BoardDetailsScreen - Creating new page with boardCode: '$boardCode' (length: ${boardCode.length})")
+            println("DEBUG: BoardDetailsScreen - Board data: ${boardState.data}")
+            navController.navigate(Screen.BoardEditor.createRoute("new_${boardCode}"))
         }
     }
 
@@ -288,16 +313,6 @@ fun BoardDetailsScreen(
             hostState = snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter)
         )
 
-        // Subscription Required Dialog
-        SubscriptionRequiredDialog(
-            isVisible = showSubscriptionDialog,
-            onDismiss = { showSubscriptionDialog = false },
-            onSubscribe = {
-                showSubscriptionDialog = false
-                navController.navigate(Screen.Subscription.createRoute(boardId))
-            },
-            boardName = boardState.data?.organizationName ?: "Notice Board"
-        )
     }
 }
 

@@ -9,6 +9,7 @@ import com.notifiy.noticeboard.data.model.DataExportRequest
 import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Page
+import com.notifiy.noticeboard.data.model.Plan
 import com.notifiy.noticeboard.data.model.UpdateConfig
 import com.notifiy.noticeboard.data.model.User
 import com.notifiy.noticeboard.data.model.UserNotification
@@ -16,6 +17,7 @@ import com.notifiy.noticeboard.services.LocalNotificationService
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
+import kotlin.random.Random
 
 class FirebaseRepository(private val context: Context? = null) {
     
@@ -241,10 +243,25 @@ class FirebaseRepository(private val context: Context? = null) {
     
     suspend fun createNoticeBoard(noticeBoard: NoticeBoard): Result<NoticeBoard> {
         return try {
+            // Check if organization code already exists in noticeBoards collection
+            if (noticeBoard.organizationCode.isNotBlank()) {
+                val existingBoard = getNoticeBoardByCode(noticeBoard.organizationCode)
+                if (existingBoard != null) {
+                    return Result.failure(Exception("Organization code '${noticeBoard.organizationCode}' already exists. Please generate a new code."))
+                }
+            }
+            
+            // Create the notice board
             firestore.collection("noticeBoards")
                 .document(noticeBoard.id)
                 .set(noticeBoard)
                 .await()
+            
+            // Add the organization code to NotexpCOded collection
+            if (noticeBoard.organizationCode.isNotBlank()) {
+                addCodeToNotexpCOded(noticeBoard.organizationCode, noticeBoard.id)
+            }
+            
             // Cache the created board and invalidate related caches
             cacheManager?.cacheNoticeBoard(noticeBoard.id, noticeBoard)
             cacheManager?.cacheNoticeBoard("code_${noticeBoard.organizationCode}", noticeBoard)
@@ -252,6 +269,78 @@ class FirebaseRepository(private val context: Context? = null) {
             Result.success(noticeBoard)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+    
+    private suspend fun generateUniqueOrganizationCode(): String {
+        var code: String
+        var isUnique = false
+        var attempts = 0
+        val maxAttempts = 10
+        
+        do {
+            code = generateRandomCode()
+            val existingBoard = getNoticeBoardByCode(code)
+            isUnique = (existingBoard == null)
+            attempts++
+            
+            if (attempts >= maxAttempts) {
+                throw Exception("Unable to generate unique organization code after $maxAttempts attempts")
+            }
+        } while (!isUnique)
+        
+        return code
+    }
+    
+    private fun generateRandomCode(): String {
+        val letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        val numbers = "0123456789"
+        
+        // Generate 3 random letters
+        val randomLetters = (1..3).map { letters.random() }.joinToString("")
+        
+        // Generate 3 random numbers
+        val randomNumbers = (1..3).map { numbers.random() }.joinToString("")
+        
+        return randomLetters + randomNumbers
+    }
+    
+    suspend fun addCodeToNotexpCOded(code: String, boardId: String): Result<Boolean> {
+        return try {
+            val codeData = mapOf(
+                "code" to code,
+                "boardId" to boardId,
+                "createdAt" to System.currentTimeMillis(),
+                "isActive" to true
+            )
+            
+            firestore.collection("noteXpCodes")
+                .document(code) // Use code as document ID for easy lookup
+                .set(codeData)
+                .await()
+            
+            println("DEBUG: Successfully added code '$code' to noteXpCodes collection")
+            Result.success(true)
+        } catch (e: Exception) {
+            println("DEBUG: Error adding code to noteXpCodes collection: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun getNotexpCodeByCode(code: String): Any? {
+        return try {
+            val document = firestore.collection("noteXpCodes")
+                .document(code)
+                .get()
+                .await()
+            
+            if (document.exists()) {
+                document.data
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
         }
     }
     
@@ -539,6 +628,61 @@ class FirebaseRepository(private val context: Context? = null) {
         }
     }
     
+    suspend fun updateUserPlan(userId: String, planId: String): Result<Boolean> {
+        return try {
+            println("DEBUG: FirebaseRepository.updateUserPlan - Updating user plan to $planId for user $userId")
+            
+            if (userId.isEmpty()) {
+                println("DEBUG: FirebaseRepository.updateUserPlan - User ID is empty")
+                return Result.failure(Exception("User ID is empty"))
+            }
+            
+            if (planId.isEmpty()) {
+                println("DEBUG: FirebaseRepository.updateUserPlan - Plan ID is empty")
+                return Result.failure(Exception("Plan ID is empty"))
+            }
+            
+            val userRef = firestore.collection("users").document(userId)
+            firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(userRef)
+                val user = snapshot.toObject(User::class.java)
+                
+                if (user != null) {
+                    // User document exists, update it
+                    val updatedUser = user.copy(
+                        currentPlanId = planId,
+                        updatedAt = System.currentTimeMillis()
+                    )
+                    println("DEBUG: FirebaseRepository.updateUserPlan - Updating existing user with plan ID: $planId")
+                    transaction.set(userRef, updatedUser)
+                } else {
+                    // User document doesn't exist, create it with the plan ID
+                    val newUser = User(
+                        id = userId,
+                        name = "User",
+                        email = "",
+                        phoneNumber = "",
+                        instituteCodes = emptyList(),
+                        subscribedCodes = emptyList(),
+                        currentPlanId = planId,
+                        createdAt = System.currentTimeMillis(),
+                        updatedAt = System.currentTimeMillis()
+                    )
+                    println("DEBUG: FirebaseRepository.updateUserPlan - Creating new user with plan ID: $planId")
+                    transaction.set(userRef, newUser)
+                }
+            }.await()
+            println("DEBUG: FirebaseRepository.updateUserPlan - Successfully updated user plan")
+            // Invalidate user cache
+            cacheManager?.invalidateUser(userId)
+            return Result.success(true)
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository.updateUserPlan - Error updating user plan: ${e.message}")
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+    
     suspend fun addInstituteCodeToUser(userId: String, instituteCode: String): Result<Boolean> {
         return try {
             println("DEBUG: Adding institute code $instituteCode to user $userId")
@@ -579,7 +723,7 @@ class FirebaseRepository(private val context: Context? = null) {
             println("DEBUG: Successfully added institute code to user")
             // Invalidate user cache and user boards cache
             cacheManager?.invalidateUser(userId)
-            Result.success(true)
+            return Result.success(true)
         } catch (e: Exception) {
             println("DEBUG: Error adding institute code to user: ${e.message}")
             Result.failure(e)
@@ -610,12 +754,23 @@ class FirebaseRepository(private val context: Context? = null) {
     }
     
     // Page operations
-    suspend fun getPagesByBoardCode(boardCode: Int): List<Page> {
+    suspend fun getPagesByBoardCode(boardCode: String): List<Page> {
         return try {
             println("DEBUG: FirebaseRepository.getPagesByBoardCode - Starting query for boardCode: $boardCode")
             
+            // Get current user ID
+            val currentUser = auth.currentUser
+            if (currentUser == null) {
+                println("DEBUG: FirebaseRepository.getPagesByBoardCode - No authenticated user")
+                return emptyList()
+            }
+            
+            val userId = currentUser.uid
+            println("DEBUG: FirebaseRepository.getPagesByBoardCode - User ID: $userId")
+            
             // Check cache first
-            val cachedPages = cacheManager?.getCachedPagesList("board_code_$boardCode")
+            val cacheKey = "board_code_${boardCode}_user_${userId}"
+            val cachedPages = cacheManager?.getCachedPagesList(cacheKey)
             if (cachedPages != null) {
                 println("DEBUG: Returning cached pages for board code: ${cachedPages.size}")
                 return cachedPages
@@ -623,6 +778,7 @@ class FirebaseRepository(private val context: Context? = null) {
             
             val querySnapshot = firestore.collection("pages")
                 .whereEqualTo("code", boardCode)
+                .whereEqualTo("userId", userId)
                 .get()
                 .await()
             
@@ -631,7 +787,7 @@ class FirebaseRepository(private val context: Context? = null) {
             val pages = querySnapshot.documents.mapNotNull { doc ->
                 try {
                     val page = doc.toObject(Page::class.java)
-                    println("DEBUG: FirebaseRepository.getPagesByBoardCode - Document ${doc.id}: $page")
+                    println("DEBUG: FirebaseRepository.getPagesByBoardCode - Document ${doc.id}: code=${page?.code}, userId=${page?.userId}, title=${page?.title}")
                     page
                 } catch (e: Exception) {
                     println("DEBUG: FirebaseRepository.getPagesByBoardCode - Error converting document ${doc.id}: ${e.message}")
@@ -644,7 +800,7 @@ class FirebaseRepository(private val context: Context? = null) {
             val sortedPages = pages.sortedByDescending { it.createdAt }
             println("DEBUG: FirebaseRepository.getPagesByBoardCode - Sorted ${sortedPages.size} pages")
             // Cache the pages list
-            cacheManager?.cachePagesList("board_code_$boardCode", sortedPages)
+            cacheManager?.cachePagesList(cacheKey, sortedPages)
             sortedPages
         } catch (e: Exception) {
             println("DEBUG: FirebaseRepository.getPagesByBoardCode - Error: ${e.message}")
@@ -738,9 +894,20 @@ class FirebaseRepository(private val context: Context? = null) {
     
     suspend fun getAllPages(): List<Page> {
         return try {
-            println("DEBUG: FirebaseRepository.getAllPages - Getting all pages")
+            println("DEBUG: FirebaseRepository.getAllPages - Getting all pages for current user")
+            
+            // Get current user ID
+            val currentUser = auth.currentUser
+            if (currentUser == null) {
+                println("DEBUG: FirebaseRepository.getAllPages - No authenticated user")
+                return emptyList()
+            }
+            
+            val userId = currentUser.uid
+            println("DEBUG: FirebaseRepository.getAllPages - User ID: $userId")
             
             // Check cache first
+            val cacheKey = "all_pages_user_${userId}"
             val cachedPages = cacheManager?.getCachedAllPages()
             if (cachedPages != null) {
                 println("DEBUG: Returning cached all pages: ${cachedPages.size}")
@@ -748,6 +915,7 @@ class FirebaseRepository(private val context: Context? = null) {
             }
             
             val querySnapshot = firestore.collection("pages")
+                .whereEqualTo("userId", userId)
                 .get()
                 .await()
             
@@ -756,7 +924,7 @@ class FirebaseRepository(private val context: Context? = null) {
             val pages = querySnapshot.documents.mapNotNull { doc ->
                 try {
                     val page = doc.toObject(Page::class.java)
-                    println("DEBUG: FirebaseRepository.getAllPages - Document ${doc.id}: code=${page?.code}, title=${page?.title}")
+                    println("DEBUG: FirebaseRepository.getAllPages - Document ${doc.id}: code=${page?.code}, userId=${page?.userId}, title=${page?.title}")
                     page
                 } catch (e: Exception) {
                     println("DEBUG: FirebaseRepository.getAllPages - Error converting document ${doc.id}: ${e.message}")
@@ -775,25 +943,65 @@ class FirebaseRepository(private val context: Context? = null) {
     }
     
     // Subscription operations
-    suspend fun updateNoticeBoardSubscription(boardId: String, subscriptionType: String, subscriptionExpiry: Long): Result<Boolean> {
+    suspend fun updateNoticeBoardSubscription(
+        boardId: String, 
+        subscriptionExpiry: Long, 
+        currentPlanId: String = "",
+        subscriptionPeriod: String = "",
+        planName: String = ""
+    ): Result<Boolean> {
         return try {
             println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Updating subscription for board: $boardId")
+            println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Period: $subscriptionPeriod, expiry: $subscriptionExpiry, planId: $currentPlanId, planName: $planName")
+            
+            // Check if board exists first
+            val boardDoc = firestore.collection("noticeBoards")
+                .document(boardId)
+                .get()
+                .await()
+            
+            if (!boardDoc.exists()) {
+                println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Board $boardId does not exist")
+                return Result.failure(Exception("Board not found"))
+            }
+            
+            println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Board exists, updating subscription")
+            val updateData = mutableMapOf<String, Any>(
+                "subscriptionExpiry" to subscriptionExpiry,
+                "updatedAt" to System.currentTimeMillis()
+            )
+            
+            if (currentPlanId.isNotEmpty()) {
+                updateData["currentPlanId"] = currentPlanId
+            }
+            
+            if (subscriptionPeriod.isNotEmpty()) {
+                updateData["subscriptionPeriod"] = subscriptionPeriod
+            }
+            
+            if (planName.isNotEmpty()) {
+                updateData["planName"] = planName
+            }
+            
             firestore.collection("noticeBoards")
                 .document(boardId)
-                .update(
-                    mapOf(
-                        "subscriptionType" to subscriptionType,
-                        "subscriptionExpiry" to subscriptionExpiry,
-                        "updatedAt" to System.currentTimeMillis()
-                    )
-                )
+                .update(updateData)
                 .await()
             println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Subscription updated successfully")
             // Invalidate board cache since subscription was updated
             cacheManager?.invalidateNoticeBoard(boardId)
+            // Also invalidate by code if we have the board data
+            val updatedBoardDoc = firestore.collection("noticeBoards").document(boardId).get().await()
+            if (updatedBoardDoc.exists()) {
+                val board = updatedBoardDoc.toObject(NoticeBoard::class.java)
+                board?.let {
+                    cacheManager?.invalidateNoticeBoard("code_${it.organizationCode}")
+                }
+            }
             Result.success(true)
         } catch (e: Exception) {
             println("DEBUG: FirebaseRepository.updateNoticeBoardSubscription - Error: ${e.message}")
+            e.printStackTrace()
             Result.failure(e)
         }
     }
@@ -980,6 +1188,36 @@ class FirebaseRepository(private val context: Context? = null) {
             filteredBoards
         } catch (e: Exception) {
             println("DEBUG: FirebaseRepository.searchNoticeBoards - Error: ${e.message}")
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+    
+    suspend fun getAllPlans(): List<Plan> {
+        return try {
+            android.util.Log.d("sidxp", "getAllPlans - Getting all plans")
+            
+            val querySnapshot = firestore.collection("plans")
+                .get()
+                .await()
+            
+            android.util.Log.d("sidxp", "getAllPlans - Query returned ${querySnapshot.size()} documents")
+            
+            val plans = querySnapshot.documents.mapNotNull { doc ->
+                try {
+                    val plan = doc.toObject(Plan::class.java)
+                    android.util.Log.d("sidxp", "getAllPlans - Document ${doc.id}: planName='${plan?.planName}', pages=${plan?.pages}")
+                    plan
+                } catch (e: Exception) {
+                    android.util.Log.e("sidxp", "getAllPlans - Error converting document ${doc.id}: ${e.message}")
+                    null
+                }
+            }
+            
+            android.util.Log.d("sidxp", "getAllPlans - Successfully converted ${plans.size} plans")
+            plans
+        } catch (e: Exception) {
+            android.util.Log.e("sidxp", "getAllPlans - Error: ${e.message}")
             e.printStackTrace()
             emptyList()
         }
