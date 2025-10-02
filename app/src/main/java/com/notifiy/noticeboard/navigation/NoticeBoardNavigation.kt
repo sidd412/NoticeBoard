@@ -98,5 +98,9 @@ fun NoticeBoardNavigation(navController: NavHostController, themeViewModel: Them
         composable(Screen.Search.route) {
             SearchScreen(navController = navController)
         }
+        
+        composable(Screen.Orders.route) {
+            OrdersScreen(navController = navController)
+        }
     }
 }

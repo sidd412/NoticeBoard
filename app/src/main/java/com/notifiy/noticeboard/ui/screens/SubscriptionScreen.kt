@@ -44,6 +44,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -52,26 +54,36 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import android.app.Activity
+import androidx.compose.ui.platform.LocalContext
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Plan
 import com.notifiy.noticeboard.ui.viewmodel.SubscriptionViewModel
-import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SubscriptionScreen(
-    navController: NavController,
-    subscriptionViewModel: SubscriptionViewModel = cachedViewModel(SubscriptionViewModel::class.java)
+    navController: NavController
 ) {
+    val context = LocalContext.current
+    val subscriptionViewModel = remember {
+        SubscriptionViewModel(context)
+    }
+    
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var isMonthly by remember { mutableStateOf(true) }
+    val coroutineScope = rememberCoroutineScope()
 
     val boardState by subscriptionViewModel.boardState.collectAsState()
 
     // Load user details and plans
     LaunchedEffect(Unit) {
-        subscriptionViewModel.loadUserDetails()
+        try {
+            subscriptionViewModel.loadUserDetails()
+        } catch (e: Exception) {
+            android.util.Log.e("SubscriptionScreen", "Error calling loadUserDetails: ${e.message}")
+        }
     }
 
     Box(
@@ -109,33 +121,6 @@ fun SubscriptionScreen(
 
                     IconButton(
                         onClick = {}) {}
-                }
-            }
-            // User info
-            item {
-                boardState.data?.let { user ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(.3f)
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-                        ) {
-                            Text(
-                                text = "User Subscription",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Manage your subscription plan",
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
-                        }
-                    }
                 }
             }
 
@@ -206,14 +191,14 @@ fun SubscriptionScreen(
                     when {
                         plan.planName.lowercase() == "free" -> 0.0
                         isMonthly -> {
-                            // Extract numeric value from amount string for monthly
-                            val amountStr = plan.amount.replace(Regex("[^0-9.]"), "")
+                            // Extract numeric value from amount list for monthly
+                            val amountStr = plan.amount.getOrElse(0) { "" }.replace(Regex("[^0-9.]"), "")
                             amountStr.toDoubleOrNull() ?: Double.MAX_VALUE
                         }
 
                         else -> {
-                            // Extract numeric value from annualPrice string for annual
-                            val amountStr = plan.annualPrice.replace(Regex("[^0-9.]"), "")
+                            // Extract numeric value from amount list for annual
+                            val amountStr = plan.amount.getOrElse(1) { "" }.replace(Regex("[^0-9.]"), "")
                             amountStr.toDoubleOrNull() ?: Double.MAX_VALUE
                         }
                     }
@@ -247,14 +232,27 @@ fun SubscriptionScreen(
                  Button(
                      onClick = {
                          isLoading = true
-                         subscriptionViewModel.subscribeToPlan(plan, isMonthly) { success ->
-                             isLoading = false
-                             if (success) {
-                                 navController.popBackStack()
-                             } else {
-                                 errorMessage = "Failed to subscribe. Please try again."
-                             }
-                         }
+                        subscriptionViewModel.subscribeToPlan(
+                            context as Activity, 
+                            plan, 
+                            isMonthly,
+                            onResult = { success: Boolean ->
+                                isLoading = false
+                                if (success) {
+                                    // For free plans, navigate immediately since no Google Play interaction
+                                    if (plan.planName.lowercase() == "free") {
+                                        navController.popBackStack()
+                                    }
+                                    // For paid plans, stay on screen and wait for purchase completion callback
+                                } else {
+                                    errorMessage = subscriptionViewModel.getErrorMessage() ?: "Failed to subscribe. Please try again."
+                                }
+                            },
+                            onPurchaseSuccess = {
+                                // This gets called when Google Play purchase completes successfully
+                                navController.popBackStack()
+                            }
+                        )
                      },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -390,7 +388,11 @@ fun PlanCard(
 
                 // Price
                 Text(
-                    text = if (isMonthly) plan.amount else plan.annualPrice,
+                    text = when {
+                        plan.planName.lowercase() == "free" -> "Free"
+                        isMonthly -> plan.amount.getOrElse(0) { "N/A" }
+                        else -> plan.amount.getOrElse(1) { plan.amount.getOrElse(0) { "N/A" } }
+                    },
                     fontSize = 10.sp,
                     color = if (isSelected) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)

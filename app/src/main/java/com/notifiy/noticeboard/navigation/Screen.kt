@@ -30,6 +30,7 @@ sealed class Screen(val route: String) {
     object PrivacySettings : Screen("privacy_settings")
     object HelpSupport : Screen("help_support")
     object Search : Screen("search")
+    object Orders : Screen("orders")
 }
 
 sealed class BottomNavScreen(val route: String, val title: String, val icon: String) {

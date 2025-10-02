@@ -6,9 +6,9 @@ data class Plan(
     @DocumentId
     val id: String = "",
     val planName: String = "",
-    val amount: String = "",
-    val annualPrice: String = "",
-    val planId: List<String> = emptyList(), // [monthlyPlanId, annualPlanId]
+    val planId: String = "", // Product ID for Google Play Console (e.g., "notexp_plus")
+    val amount: List<String> = emptyList(), // ["INR 149/month", "INR 1490/year"]
+    val basePlanId: List<String> = emptyList(), // ["notexp-plus-monthly", "notexp-plus-yearly"]
     val pages: Int = 0,
     val boards: Int = 0, // Number of boards user can create
     val images: Int = 0,
