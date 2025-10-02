@@ -83,7 +83,7 @@ class AuthViewModel(private val context: Context) : ViewModel() {
         }
     }
     
-    fun signUpWithEmail(email: String, password: String, name: String) {
+    fun signUpWithEmail(email: String, password: String, name: String, mobileNumber: String = "") {
         _authState.value = _authState.value.copy(isLoading = true)
         viewModelScope.launch {
             try {
@@ -95,7 +95,7 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                         id = firebaseUser.uid,
                         name = name,
                         email = email,
-                        phoneNumber = "",
+                        phoneNumber = mobileNumber,
                         profileImageUrl = "",
                         subscribedBoards = emptyList(),
                         subscribedCodes = emptyList(),

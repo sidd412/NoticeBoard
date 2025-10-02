@@ -38,9 +38,29 @@ object ValidationUtils {
     }
     
     /**
+     * Validates if the mobile number is exactly 10 digits
+     */
+    fun isValidMobileNumber(mobileNumber: String): Boolean {
+        return mobileNumber.matches(Regex("^\\d{10}$"))
+    }
+    
+    /**
      * Validates all signup fields
      */
-    fun validateSignupFields(name: String, email: String, password: String): ValidationResult {
+    fun validateSignupFields(name: String, email: String, password: String, mobileNumber: String): ValidationResult {
+        return when {
+            !isValidName(name) -> ValidationResult(false, "Please enter your name")
+            !isValidMobileNumber(mobileNumber) -> ValidationResult(false, "Please enter a valid 10-digit mobile number")
+            !isValidEmail(email) -> ValidationResult(false, "Please enter a valid Gmail address")
+            !isValidPassword(password) -> ValidationResult(false, "Password must be at least 6 characters long")
+            else -> ValidationResult(true, "")
+        }
+    }
+    
+    /**
+     * Validates all signup fields without mobile number (for backward compatibility)
+     */
+    fun validateSignupFieldsLegacy(name: String, email: String, password: String): ValidationResult {
         return when {
             !isValidName(name) -> ValidationResult(false, "Please enter your name")
             !isValidEmail(email) -> ValidationResult(false, "Please enter a valid Gmail address")

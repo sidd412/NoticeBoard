@@ -218,8 +218,14 @@ fun EditNoticeBoardScreen(
                         item {
                             OutlinedTextField(
                                 value = organizationWhatsapp,
-                                onValueChange = { organizationWhatsapp = it },
-                                label = { Text("WhatsApp Number") },
+                                onValueChange = { 
+                                    // Limit to exactly 10 digits and only allow numbers
+                                    val filtered = it.filter { char -> char.isDigit() }
+                                    if (filtered.length <= 10) {
+                                        organizationWhatsapp = filtered
+                                    }
+                                },
+                                label = { Text("WhatsApp Number (10 digits)") },
                                 placeholder = { Text("1234567890") },
                                 modifier = Modifier.fillMaxWidth(),
                                 singleLine = true,
