@@ -118,6 +118,9 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.billing.ktx)
+    
+    // Location services
+    implementation(libs.play.services.location)
 
     // Testing
     testImplementation(libs.junit)

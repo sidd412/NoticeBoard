@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Whatsapp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,12 +30,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import android.Manifest
+import android.content.pm.PackageManager
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.navigation.Screen
+import com.notifiy.noticeboard.utils.hasLocationPermission
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.YourBoardsViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
+import com.notifiy.noticeboard.ui.components.LocationTextField
 import com.notifiy.noticeboard.utils.ShowErrorSnackbar
 import com.notifiy.noticeboard.utils.ValidationUtils
 import com.notifiy.noticeboard.utils.getErrorMessage
@@ -62,6 +69,18 @@ fun CreateBoardScreen(
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
     val context = LocalContext.current
+    
+    // Location permission launcher
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.all { it.value }
+        if (allGranted) {
+            Toast.makeText(context, "Location permission granted! Please click the location icon again.", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Location permission denied. Please enter location manually.", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     val yourBoardsViewModel: YourBoardsViewModel = cachedViewModel(YourBoardsViewModel::class.java)
     val errorMessage by yourBoardsViewModel.errorMessage.collectAsState()
@@ -209,17 +228,19 @@ fun CreateBoardScreen(
             }
 
             item {
-                OutlinedTextField(
+                LocationTextField(
                     value = organizationLocation,
                     onValueChange = { organizationLocation = it },
-                    label = { Text("Organization Location") },
-                    placeholder = { Text("Enter city, state") },
-                    leadingIcon = {
-                        Icon(Icons.Default.LocationOn, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                    label = "Organization Location",
+                    placeholder = "Enter city, state",
+                    onLocationRequested = {
+                        permissionLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            )
+                        )
+                    }
                 )
             }
 

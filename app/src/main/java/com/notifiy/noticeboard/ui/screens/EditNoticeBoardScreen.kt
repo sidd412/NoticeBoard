@@ -28,6 +28,7 @@ import com.notifiy.noticeboard.data.model.BoardDeletionRequest
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.repository.FirebaseRepository
 import com.notifiy.noticeboard.navigation.Screen
+import com.notifiy.noticeboard.ui.components.LocationTextField
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.BoardDetailsViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
@@ -204,17 +205,11 @@ fun EditNoticeBoardScreen(
 
                         // Organization Location
                         item {
-                            OutlinedTextField(
+                            LocationTextField(
                                 value = organizationLocation,
                                 onValueChange = { organizationLocation = it },
-                                label = { Text("Organization Location *") },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true,
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Default.LocationOn, contentDescription = "Location"
-                                    )
-                                },
+                                label = "Organization Location *",
+                                placeholder = "Enter city, state",
                                 isError = organizationLocation.isEmpty()
                             )
                         }

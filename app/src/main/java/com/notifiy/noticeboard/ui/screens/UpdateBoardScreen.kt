@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.navigation.Screen
+import com.notifiy.noticeboard.ui.components.LocationTextField
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.utils.ValidationUtils
@@ -176,17 +177,11 @@ fun UpdateBoardScreen(
                 }
                 
                 item {
-                    OutlinedTextField(
+                    LocationTextField(
                         value = organizationLocation,
                         onValueChange = { organizationLocation = it },
-                        label = { Text("Organization Location") },
-                        placeholder = { Text("Enter city, state") },
-                        leadingIcon = {
-                            Icon(Icons.Default.LocationOn, contentDescription = null)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                        label = "Organization Location",
+                        placeholder = "Enter city, state"
                     )
                 }
                 
