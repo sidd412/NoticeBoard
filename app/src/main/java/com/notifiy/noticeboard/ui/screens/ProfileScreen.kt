@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.SettingsBrightness
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -42,8 +43,12 @@ fun isSubscriptionActive(subscriptionExpiry: Long): Boolean {
     return System.currentTimeMillis() < subscriptionExpiry
 }
 
-fun getPlanValidityText(subscriptionExpiry: Long, subscriptionPeriod: String = ""): String {
-    if (subscriptionExpiry <= 0) return "Unlimited"
+fun getPlanValidityText(subscriptionExpiry: Long, subscriptionPeriod: String = "", planName: String = ""): String {
+    // Handle unlimited/no-expiry for paid plans (expiry = 0 means unlimited)
+    if (subscriptionExpiry <= 0 && planName.lowercase() != "free") {
+        return "No Expiry"
+    }
+    
     val currentTime = System.currentTimeMillis()
     val timeDiff = subscriptionExpiry - currentTime
     if (timeDiff <= 0) return "Expired"
@@ -53,7 +58,17 @@ fun getPlanValidityText(subscriptionExpiry: Long, subscriptionPeriod: String = "
     val remainingDays = days % 30
 
     return when {
-        subscriptionPeriod.lowercase() == "annual" -> "12 Month" // Cap annual at 12 months
+        planName.lowercase() == "free" -> {
+            // For free plan, show specific format
+            when {
+                months > 0 && remainingDays > 0 -> "Expires in $months Month $remainingDays Days"
+                months > 0 -> "Expires in $months Month"
+                days > 0 -> "Expires in $days Days"
+                else -> "Expired"
+            }
+        }
+        subscriptionPeriod.lowercase() == "annual" -> "Expires in $days days"
+        subscriptionPeriod.lowercase() == "monthly" -> "Expires in $days days"
         months > 0 && remainingDays > 0 -> "$months Month $remainingDays Days"
         months > 0 -> "$months Month"
         days > 0 -> "$days Days"
@@ -210,7 +225,7 @@ fun ProfileScreen(
                                 
                                 Text(
                                     text = if (currentUser?.planName?.isNotEmpty() == true) {
-                                        getPlanValidityText(currentUser.subscriptionExpiry, currentUser.subscriptionPeriod)
+                                        getPlanValidityText(currentUser.subscriptionExpiry, currentUser.subscriptionPeriod, currentUser.planName)
                                     } else {
                                         "Not Subscribed"
                                     },
@@ -294,6 +309,33 @@ fun ProfileScreen(
 
                         // Theme Mode Dropdown
                         ThemeModeDropdown(themeViewModel = themeViewModel)
+
+                        Divider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        )
+
+                        // Your Orders
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable { navController.navigate(Screen.Orders.route) },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Receipt,
+                                contentDescription = "Orders",
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = "Your Orders",
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
 
                         Divider(
                             modifier = Modifier.padding(vertical = 8.dp),

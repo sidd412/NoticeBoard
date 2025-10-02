@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.notifiy.noticeboard.ui.screens.*
 import com.notifiy.noticeboard.ui.viewmodel.ThemeViewModel
+import java.net.URLDecoder
 
 @Composable
 fun NoticeBoardNavigation(navController: NavHostController, themeViewModel: ThemeViewModel, onBottomNavBarVisibilityChanged: (Boolean) -> Unit = {}, onHomeTabChanged: (Boolean) -> Unit = {}) {
@@ -79,6 +80,26 @@ fun NoticeBoardNavigation(navController: NavHostController, themeViewModel: Them
             )
         }
         
+        composable(
+            route = Screen.Success.route + "?planName={planName}&subscriptionPeriod={subscriptionPeriod}&expiryDate={expiryDate}&purchaseTime={purchaseTime}&orderId={orderId}",
+            arguments = listOf()
+        ) { backStackEntry ->
+            SuccessScreen(
+                navController = navController,
+                planName = backStackEntry.arguments?.getString("planName") ?: "",
+                subscriptionPeriod = backStackEntry.arguments?.getString("subscriptionPeriod") ?: "",
+                expiryDate = backStackEntry.arguments?.getString("expiryDate")?.toLongOrNull() ?: 0L,
+                purchaseTime = backStackEntry.arguments?.getString("purchaseTime")?.toLongOrNull() ?: 0L,
+                orderId = backStackEntry.arguments?.getString("orderId") ?: ""
+            )
+        }
+        
+        composable(Screen.Orders.route) {
+            OrdersScreen(
+                navController = navController
+            )
+        }
+        
         composable(Screen.About.route) {
             AboutScreen(navController = navController)
         }
@@ -97,6 +118,19 @@ fun NoticeBoardNavigation(navController: NavHostController, themeViewModel: Them
         
         composable(Screen.Search.route) {
             SearchScreen(navController = navController)
+        }
+        
+        composable(Screen.Orders.route) {
+            OrdersScreen(navController = navController)
+        }
+
+        composable(Screen.PurchaseDetail.route) { backStackEntry ->
+            val purchaseId = backStackEntry.arguments?.getString("purchaseId") ?: ""
+            
+            PurchaseDetailScreenWrapper(
+                navController = navController,
+                purchaseId = purchaseId
+            )
         }
     }
 }

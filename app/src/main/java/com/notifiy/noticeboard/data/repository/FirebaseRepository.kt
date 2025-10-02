@@ -13,6 +13,9 @@ import com.notifiy.noticeboard.data.model.Plan
 import com.notifiy.noticeboard.data.model.UpdateConfig
 import com.notifiy.noticeboard.data.model.User
 import com.notifiy.noticeboard.data.model.UserNotification
+import com.notifiy.noticeboard.data.model.Purchase
+import com.notifiy.noticeboard.data.model.SubscriptionStatus
+import com.notifiy.noticeboard.data.model.PlanFeatures
 import com.notifiy.noticeboard.services.LocalNotificationService
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.TimeoutCancellationException
@@ -1070,7 +1073,7 @@ class FirebaseRepository(private val context: Context? = null) {
             
             val userPlan = plans.find { plan ->
                 val nameMatch = plan.planName.equals(user.planName, ignoreCase = true)
-                val idMatch = plan.planId.contains(user.currentPlanId) || plan.id == user.currentPlanId
+                val idMatch = plan.planId == user.currentPlanId || plan.id == user.currentPlanId
                 android.util.Log.d("board limit", "FirebaseRepository.checkBoardLimit - Checking plan ${plan.planName}: nameMatch=$nameMatch, idMatch=$idMatch")
                 nameMatch || idMatch
             }
@@ -1646,6 +1649,309 @@ class FirebaseRepository(private val context: Context? = null) {
         } catch (e: Exception) {
             // Handle any other exceptions (network, parsing, etc.)
             null
+        }
+    }
+    
+    // Purchase operations
+    suspend fun createPurchase(purchase: Purchase): Result<Purchase> {
+        return try {
+            firestore.collection("purchases")
+                .add(purchase)
+                .await()
+            Result.success(purchase)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    
+    suspend fun getPurchasesByUserIdAndOrgCode(userId: String, orgCode: String): List<Purchase> {
+        return try {
+            val querySnapshot = firestore.collection("purchases")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("orgCode", orgCode)
+                .orderBy("purchaseTime", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            querySnapshot.documents.mapNotNull { document ->
+                document.toObject(Purchase::class.java)
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+    
+    suspend fun getPurchaseByOrderId(orderId: String): Purchase? {
+        return try {
+            val querySnapshot = firestore.collection("purchases")
+                .whereEqualTo("orderId", orderId)
+                .limit(1)
+                .get()
+                .await()
+            
+            if (!querySnapshot.isEmpty) {
+                val document = querySnapshot.documents.first()
+                document.toObject(Purchase::class.java)?.copy(id = document.id)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun getPurchaseById(purchaseId: String): Purchase? {
+        return try {
+            val document = firestore.collection("purchases")
+                .document(purchaseId)
+                .get()
+                .await()
+            
+            if (document.exists()) {
+                document.toObject(Purchase::class.java)?.copy(id = document.id)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error getting purchase by ID: ${e.message}")
+            null
+        }
+    }
+    
+    suspend fun updatePurchase(purchase: Purchase): Result<Purchase> {
+        return try {
+            val updatedPurchase = purchase.copy(updatedAt = System.currentTimeMillis())
+            firestore.collection("purchases")
+                .document(purchase.id)
+                .set(updatedPurchase)
+                .await()
+            Result.success(updatedPurchase)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun getActiveSubscription(userId: String): Purchase? {
+        return try {
+            val currentTime = System.currentTimeMillis()
+            val querySnapshot = firestore.collection("purchases")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("purchaseState", "purchased")
+                .whereGreaterThan("expiryTime", currentTime)
+                .orderBy("expiryTime", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .await()
+            
+            if (!querySnapshot.isEmpty) {
+                querySnapshot.documents.first().toObject(Purchase::class.java)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun getPlanById(planId: String): Plan? {
+        return try {
+            val result = firestore.collection("plans")
+                .whereEqualTo("planId", planId)
+                .limit(1)
+                .get()
+                .await()
+            
+            if (!result.isEmpty) {
+                result.documents.first().toObject(Plan::class.java)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error getting plan by ID: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun checkSubscriptionStatus(userId: String): SubscriptionStatus {
+        return try {
+            val user = getCurrentUser()
+            if (user == null) {
+                return SubscriptionStatus.NOT_SUBSCRIBED
+            }
+
+            val currentTime = System.currentTimeMillis()
+            
+            // Check if subscription has expired
+            if (user.subscriptionExpiry <= currentTime) {
+                return SubscriptionStatus.EXPIRED
+            }
+
+            // Check if user has a valid subscription
+            if (user.currentPlanId.isNotEmpty() && user.subscriptionExpiry > currentTime) {
+                return SubscriptionStatus.ACTIVE
+            }
+
+            SubscriptionStatus.NOT_SUBSCRIBED
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error checking subscription status: ${e.message}")
+            SubscriptionStatus.NOT_SUBSCRIBED
+        }
+    }
+
+    suspend fun getPlanFeatures(userId: String): PlanFeatures? {
+        return try {
+            val user = getCurrentUser()
+            if (user == null) return null
+
+            val plan = getPlanById(user.currentPlanId)
+            if (plan == null) {
+                // Return default free plan features
+                return PlanFeatures(
+                    maxBoards = 1,
+                    maxPages = 5,
+                    boardCreation = false,
+                    boardMonetization = false,
+                    realTimeNotification = false,
+                    queryByUser = false,
+                    queryForAnalyticsReport = false,
+                    aiNoteFeature = false
+                )
+            }
+
+            PlanFeatures(
+                maxBoards = plan.boards,
+                maxPages = plan.pages,
+                boardCreation = plan.boardCreation,
+                boardMonetization = plan.boardMonetization,
+                realTimeNotification = plan.realTimeNotifictaion,
+                queryByUser = plan.queryByUser,
+                queryForAnalyticsReport = plan.queryForAnalyticsReport,
+                aiNoteFeature = plan.aiNoteFeature
+            )
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error getting plan features: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun updatePurchaseRecord(purchase: Purchase): Result<Boolean> {
+        return try {
+            val updatedPurchase = purchase.copy(updatedAt = System.currentTimeMillis())
+            firestore.collection("purchases")
+                .document(purchase.id)
+                .set(updatedPurchase)
+                .await()
+            Result.success(true)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error updating purchase record: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getPurchasesByUserId(userId: String): List<Purchase> {
+        return try {
+            android.util.Log.d("orderHistory", "🏗️ FirebaseRepository.getPurchasesByUserId called with userId: '$userId'")
+            android.util.Log.d("orderHistory", "🏗️ Starting Firebase query...")
+            
+            // Build the query - simplified to avoid index requirement
+            val query = firestore.collection("purchases")
+                .whereEqualTo("userId", userId)
+            
+            android.util.Log.d("orderHistory", "🏗️ Firebase query built - executing...")
+            
+            val result = query.get().await()
+
+            android.util.Log.d("orderHistory", "📊 Firebase query completed!")
+            android.util.Log.d("orderHistory", "📊 Query result size: ${result.size()} documents")
+            android.util.Log.d("orderHistory", "📊 Query was successful: ${!result.isEmpty}")
+            
+            if (result.isEmpty) {
+                android.util.Log.w("orderHistory", "⚠️ Firebase query returned no documents")
+                android.util.Log.w("orderHistory", "⚠️ This means either:")
+                android.util.Log.w("orderHistory", "   - No purchase records exist with userId '$userId'")
+                android.util.Log.w("orderHistory", "   - Firebase security rules are blocking the query")
+                android.util.Log.w("orderHistory", "   - Collection 'purchases' doesn't exist")
+                android.util.Log.w("orderHistory", "   - All documents have different userId values")
+            } else {
+                android.util.Log.d("orderHistory", "✅ Firebase returned ${result.size()} documents")
+                result.documents.forEachIndexed { index, doc ->
+                    android.util.Log.d("orderHistory", "📄 Document ${index + 1}: ID='${doc.id}'")
+                    android.util.Log.d("orderHistory", "📄 Document ${index + 1}: Data=${doc.data}")
+                }
+            }
+
+            val purchases = result.documents.mapNotNull { document ->
+                try {
+                    android.util.Log.d("orderHistory", "🔄 Converting document ${document.id} to Purchase object...")
+                    
+                    val purchase = document.toObject(Purchase::class.java)?.copy(id = document.id)
+                    
+                    if (purchase != null) {
+                        android.util.Log.d("orderHistory", "✅ Successfully converted document ${document.id}")
+                        android.util.Log.d("orderHistory", "✅ Purchase details: OrderID=${purchase.orderId}, PlanName=${purchase.planName}, UserID=${purchase.userId}")
+                    } else {
+                        android.util.Log.w("orderHistory", "❌ Document ${document.id} converted to null Purchase object")
+                        android.util.Log.w("orderHistory", "❌ Document data: ${document.data}")
+                    }
+                    
+                    purchase
+                } catch (e: Exception) {
+                    android.util.Log.e("orderHistory", "❌ Error converting purchase document ${document.id}: ${e.message}")
+                    android.util.Log.e("orderHistory", "❌ Exception type: ${e.javaClass.simpleName}")
+                    android.util.Log.e("orderHistory", "❌ Document data: ${document.data}")
+                    e.printStackTrace()
+                    null
+                }
+            }
+            
+            android.util.Log.d("orderHistory", "✅ Conversion complete!")
+            android.util.Log.d("orderHistory", "✅ Successfully converted ${purchases.size} purchases for userId: $userId")
+            
+            purchases.forEachIndexed { index, purchase ->
+                android.util.Log.d("orderHistory", "🔍 Final Purchase ${index + 1}:")
+                android.util.Log.d("orderHistory", "   - ID: ${purchase.id}")
+                android.util.Log.d("orderHistory", "   - OrderID: ${purchase.orderId}")
+                android.util.Log.d("orderHistory", "   - PlanName: ${purchase.planName}")
+                android.util.Log.d("orderHistory", "   - PlanID: ${purchase.planId}")
+                android.util.Log.d("orderHistory", "   - UserID: ${purchase.userId}")
+                android.util.Log.d("orderHistory", "   - PurchaseState: ${purchase.purchaseState}")
+            }
+            
+            // Sort purchases by purchaseTime descending (most recent first)
+            val sortedPurchases = purchases.sortedByDescending { it.purchaseTime }
+            android.util.Log.d("orderHistory", "🔄 Sorted ${sortedPurchases.size} purchases by purchaseTime DESC")
+            
+            sortedPurchases
+        } catch (e: Exception) {
+            android.util.Log.e("orderHistory", "❌ CRITICAL ERROR in getPurchasesByUserId!")
+            android.util.Log.e("orderHistory", "❌ Exception: ${e.message}")
+            android.util.Log.e("orderHistory", "❌ Exception type: ${e.javaClass.simpleName}")
+            android.util.Log.e("orderHistory", "❌ Stack trace:")
+            e.printStackTrace()
+            android.util.Log.e("orderHistory", "❌ Returning empty list due to error")
+            emptyList()
+        }
+    }
+
+    suspend fun checkPlanUpgradeRequired(currentPlan: String, requestedFeature: String): Boolean {
+        return try {
+            // This can be enhanced to check specific feature requirements
+            val plans = getAllPlans()
+            val currentPlanDetails = plans.find { it.planId == currentPlan } ?: return false
+            
+            return when (requestedFeature) {
+                "boardCreation" -> !currentPlanDetails.boardCreation
+                "boardMonetization" -> !currentPlanDetails.boardMonetization
+                "realTimeNotification" -> !currentPlanDetails.realTimeNotifictaion
+                "queryByUser" -> !currentPlanDetails.queryByUser
+                "queryForAnalyticsReport" -> !currentPlanDetails.queryForAnalyticsReport
+                "aiNoteFeature" -> !currentPlanDetails.aiNoteFeature
+                else -> false
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error checking plan upgrade: ${e.message}")
+            false
         }
     }
 }

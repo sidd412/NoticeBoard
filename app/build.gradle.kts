@@ -13,7 +13,7 @@ android {
         applicationId = "com.notifiy.noticeboard"
         minSdk = 24
         targetSdk = 36
-        versionCode = 4
+        versionCode = 7
         versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -46,7 +46,7 @@ android {
             resValue("string", "app_name", "NoteXP")
         }
         debug {
-            applicationIdSuffix = ".debug"
+//            applicationIdSuffix = ".debug"
             isDebuggable = true
             // Add debug-specific app name
             manifestPlaceholders["appName"] = "NoteXP Debug"
@@ -117,7 +117,8 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
-    
+    implementation(libs.billing.ktx)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -131,5 +132,9 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     
     // WebView for privacy policy
-    implementation("androidx.webkit:webkit:1.8.0")
+    implementation(libs.androidx.webkit)
+    
+    // Google Play Billing
+    implementation(libs.billing)
+    implementation(libs.billing.ktx.v610)
 }
