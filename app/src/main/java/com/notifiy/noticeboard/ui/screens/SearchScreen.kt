@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,12 +41,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import com.notifiy.noticeboard.utils.LocationManager
+import com.notifiy.noticeboard.utils.hasLocationPermission
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -53,7 +65,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.TextButton
-import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -80,6 +91,47 @@ fun SearchScreen(
     val context = LocalContext.current
     
     var searchQuery by remember { mutableStateOf("") }
+    var isLoadingLocation by remember { mutableStateOf(false) }
+    
+    // Location permission launcher
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.all { it.value }
+        // Only show toast for permission denial, success will trigger location fetch
+        if (!allGranted) {
+            Toast.makeText(context, "Location permission denied. You can still search manually.", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    val locationManager = remember { LocationManager(context) }
+    
+    // Handle location fetching when permission is granted
+    LaunchedEffect(isLoadingLocation) {
+        if (isLoadingLocation && context.hasLocationPermission()) {
+            android.util.Log.d("SearchScreen", "Starting location-based search")
+            try {
+                val locationData = locationManager.getCurrentLocation()
+                android.util.Log.d("SearchScreen", "Location data: $locationData")
+                locationData?.let { data ->
+                    // Extract city name from the full address for more precise search
+                    val cityName = data.city
+                    android.util.Log.d("SearchScreen", "Searching for city: $cityName")
+                    searchQuery = cityName
+                    searchViewModel.searchNoticeBoards(cityName)
+                    // Search results will show automatically, no need for toast here
+                } ?: run {
+                    android.util.Log.d("SearchScreen", "No location data returned")
+                    Toast.makeText(context, "Could not detect location. Please search manually.", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("SearchScreen", "Error getting location", e)
+                Toast.makeText(context, "Error getting location: ${e.message}", Toast.LENGTH_SHORT).show()
+            } finally {
+                isLoadingLocation = false
+            }
+        }
+    }
     
     Scaffold(
         topBar = {
@@ -104,7 +156,7 @@ fun SearchScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            // Search Bar
+            // Search Bar with Location Button
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { 
@@ -115,9 +167,38 @@ fun SearchScreen(
                 leadingIcon = {
                     Icon(Icons.Default.Search, contentDescription = "Search")
                 },
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            android.util.Log.d("SearchScreen", "Location button clicked in search")
+                            
+                            if (context.hasLocationPermission()) {
+                                android.util.Log.d("SearchScreen", "Permission granted, getting location for search")
+                                isLoadingLocation = true
+                            } else {
+                                android.util.Log.d("SearchScreen", "Location permission needed for search")
+                                // Request permission using the launcher
+                                permissionLauncher.launch(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                    )
+                                )
+                            }
+                        },
+                        enabled = !isLoadingLocation
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MyLocation,
+                            contentDescription = "Search by Current Location",
+                            modifier = Modifier.padding(end = 4.dp)
+                        )
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                maxLines = 1
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -165,7 +246,7 @@ fun SearchScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Enter city name, organization code, or organization name to find notice boards",
+                            text = "Enter city name, organization code, or organization name to find notice boards\nOr click the location icon to search boards near you",
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             textAlign = TextAlign.Center
