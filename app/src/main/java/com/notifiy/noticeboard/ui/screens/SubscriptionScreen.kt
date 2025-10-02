@@ -58,6 +58,7 @@ import android.app.Activity
 import androidx.compose.ui.platform.LocalContext
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Plan
+import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.SubscriptionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,6 +84,23 @@ fun SubscriptionScreen(
             subscriptionViewModel.loadUserDetails()
         } catch (e: Exception) {
             android.util.Log.e("SubscriptionScreen", "Error calling loadUserDetails: ${e.message}")
+        }
+    }
+
+    // Listen for successful purchases to navigate to success screen
+    LaunchedEffect(subscriptionViewModel.lastSuccessfulPurchase.collectAsState().value) {
+        val successfulPurchase = subscriptionViewModel.lastSuccessfulPurchase.value
+        if (successfulPurchase != null) {
+            // Navigate to success screen with purchase details
+            navController.navigate(
+                Screen.Success.createRoute(
+                    planName = successfulPurchase.planName,
+                    subscriptionPeriod = successfulPurchase.subscriptionPeriod,
+                    expiryDate = successfulPurchase.expiryTime,
+                    purchaseTime = successfulPurchase.purchaseTime,
+                    orderId = successfulPurchase.orderId
+                )
+            )
         }
     }
 
@@ -250,7 +268,7 @@ fun SubscriptionScreen(
                             },
                             onPurchaseSuccess = {
                                 // This gets called when Google Play purchase completes successfully
-                                navController.popBackStack()
+                                // Success screen navigation is handled by the Navigation composable listening to purchase changes
                             }
                         )
                      },

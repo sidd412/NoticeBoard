@@ -31,6 +31,8 @@ class SubscriptionViewModel(
     
     private var purchaseSuccessCallback: (() -> Unit)? = null
     private val recentSubscriptionPeriod = mutableMapOf<String, String>() // productId -> subscriptionPeriod
+    private val _lastSuccessfulPurchase = MutableStateFlow<PurchaseModel?>(null)
+    val lastSuccessfulPurchase: StateFlow<PurchaseModel?> = _lastSuccessfulPurchase.asStateFlow()
     
     private val iapManager = IAPManager(context)
     
@@ -499,7 +501,10 @@ class SubscriptionViewModel(
                         android.util.Log.d("googleIAP", "SubscriptionViewModel - User subscription updated from purchase")
                         loadUserDetails() // Reload user details
                         
-                        // Call success callback for navigation
+                        // Store successful purchase for navigation to success screen
+                        _lastSuccessfulPurchase.value = purchase
+                        
+                        // Call success callback for navigation to success screen
                         purchaseSuccessCallback?.invoke()
                         purchaseSuccessCallback = null
                     },

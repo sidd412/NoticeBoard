@@ -25,12 +25,24 @@ sealed class Screen(val route: String) {
         fun createRoute(boardId: String) = "edit_notice_board/$boardId"
     }
     object Subscription : Screen("subscription")
+    object Success : Screen("success") {
+        fun createRoute(
+            planName: String,
+            subscriptionPeriod: String,
+            expiryDate: Long,
+            purchaseTime: Long,
+            orderId: String
+        ) = "success?planName=$planName&subscriptionPeriod=$subscriptionPeriod&expiryDate=$expiryDate&purchaseTime=$purchaseTime&orderId=$orderId"
+    }
     object About : Screen("about")
     object PrivacyPolicy : Screen("privacy_policy")
     object PrivacySettings : Screen("privacy_settings")
     object HelpSupport : Screen("help_support")
     object Search : Screen("search")
     object Orders : Screen("orders")
+    object PurchaseDetail : Screen("purchase_detail/{purchaseId}") {
+        fun createRoute(purchaseId: String) = "purchase_detail/$purchaseId"
+    }
 }
 
 sealed class BottomNavScreen(val route: String, val title: String, val icon: String) {

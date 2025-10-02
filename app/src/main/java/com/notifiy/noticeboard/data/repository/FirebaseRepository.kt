@@ -1664,21 +1664,6 @@ class FirebaseRepository(private val context: Context? = null) {
         }
     }
     
-    suspend fun getPurchasesByUserId(userId: String): List<Purchase> {
-        return try {
-            val querySnapshot = firestore.collection("purchases")
-                .whereEqualTo("userId", userId)
-                .orderBy("purchaseTime", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                .get()
-                .await()
-            
-            querySnapshot.documents.mapNotNull { document ->
-                document.toObject(Purchase::class.java)
-            }
-        } catch (e: Exception) {
-            emptyList()
-        }
-    }
     
     suspend fun getPurchasesByUserIdAndOrgCode(userId: String, orgCode: String): List<Purchase> {
         return try {
@@ -1706,11 +1691,30 @@ class FirebaseRepository(private val context: Context? = null) {
                 .await()
             
             if (!querySnapshot.isEmpty) {
-                querySnapshot.documents.first().toObject(Purchase::class.java)
+                val document = querySnapshot.documents.first()
+                document.toObject(Purchase::class.java)?.copy(id = document.id)
             } else {
                 null
             }
         } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun getPurchaseById(purchaseId: String): Purchase? {
+        return try {
+            val document = firestore.collection("purchases")
+                .document(purchaseId)
+                .get()
+                .await()
+            
+            if (document.exists()) {
+                document.toObject(Purchase::class.java)?.copy(id = document.id)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error getting purchase by ID: ${e.message}")
             null
         }
     }
@@ -1842,6 +1846,91 @@ class FirebaseRepository(private val context: Context? = null) {
         } catch (e: Exception) {
             android.util.Log.e("FirebaseRepository", "Error updating purchase record: ${e.message}")
             Result.failure(e)
+        }
+    }
+
+    suspend fun getPurchasesByUserId(userId: String): List<Purchase> {
+        return try {
+            android.util.Log.d("orderHistory", "🏗️ FirebaseRepository.getPurchasesByUserId called with userId: '$userId'")
+            android.util.Log.d("orderHistory", "🏗️ Starting Firebase query...")
+            
+            // Build the query - simplified to avoid index requirement
+            val query = firestore.collection("purchases")
+                .whereEqualTo("userId", userId)
+            
+            android.util.Log.d("orderHistory", "🏗️ Firebase query built - executing...")
+            
+            val result = query.get().await()
+
+            android.util.Log.d("orderHistory", "📊 Firebase query completed!")
+            android.util.Log.d("orderHistory", "📊 Query result size: ${result.size()} documents")
+            android.util.Log.d("orderHistory", "📊 Query was successful: ${!result.isEmpty}")
+            
+            if (result.isEmpty) {
+                android.util.Log.w("orderHistory", "⚠️ Firebase query returned no documents")
+                android.util.Log.w("orderHistory", "⚠️ This means either:")
+                android.util.Log.w("orderHistory", "   - No purchase records exist with userId '$userId'")
+                android.util.Log.w("orderHistory", "   - Firebase security rules are blocking the query")
+                android.util.Log.w("orderHistory", "   - Collection 'purchases' doesn't exist")
+                android.util.Log.w("orderHistory", "   - All documents have different userId values")
+            } else {
+                android.util.Log.d("orderHistory", "✅ Firebase returned ${result.size()} documents")
+                result.documents.forEachIndexed { index, doc ->
+                    android.util.Log.d("orderHistory", "📄 Document ${index + 1}: ID='${doc.id}'")
+                    android.util.Log.d("orderHistory", "📄 Document ${index + 1}: Data=${doc.data}")
+                }
+            }
+
+            val purchases = result.documents.mapNotNull { document ->
+                try {
+                    android.util.Log.d("orderHistory", "🔄 Converting document ${document.id} to Purchase object...")
+                    
+                    val purchase = document.toObject(Purchase::class.java)?.copy(id = document.id)
+                    
+                    if (purchase != null) {
+                        android.util.Log.d("orderHistory", "✅ Successfully converted document ${document.id}")
+                        android.util.Log.d("orderHistory", "✅ Purchase details: OrderID=${purchase.orderId}, PlanName=${purchase.planName}, UserID=${purchase.userId}")
+                    } else {
+                        android.util.Log.w("orderHistory", "❌ Document ${document.id} converted to null Purchase object")
+                        android.util.Log.w("orderHistory", "❌ Document data: ${document.data}")
+                    }
+                    
+                    purchase
+                } catch (e: Exception) {
+                    android.util.Log.e("orderHistory", "❌ Error converting purchase document ${document.id}: ${e.message}")
+                    android.util.Log.e("orderHistory", "❌ Exception type: ${e.javaClass.simpleName}")
+                    android.util.Log.e("orderHistory", "❌ Document data: ${document.data}")
+                    e.printStackTrace()
+                    null
+                }
+            }
+            
+            android.util.Log.d("orderHistory", "✅ Conversion complete!")
+            android.util.Log.d("orderHistory", "✅ Successfully converted ${purchases.size} purchases for userId: $userId")
+            
+            purchases.forEachIndexed { index, purchase ->
+                android.util.Log.d("orderHistory", "🔍 Final Purchase ${index + 1}:")
+                android.util.Log.d("orderHistory", "   - ID: ${purchase.id}")
+                android.util.Log.d("orderHistory", "   - OrderID: ${purchase.orderId}")
+                android.util.Log.d("orderHistory", "   - PlanName: ${purchase.planName}")
+                android.util.Log.d("orderHistory", "   - PlanID: ${purchase.planId}")
+                android.util.Log.d("orderHistory", "   - UserID: ${purchase.userId}")
+                android.util.Log.d("orderHistory", "   - PurchaseState: ${purchase.purchaseState}")
+            }
+            
+            // Sort purchases by purchaseTime descending (most recent first)
+            val sortedPurchases = purchases.sortedByDescending { it.purchaseTime }
+            android.util.Log.d("orderHistory", "🔄 Sorted ${sortedPurchases.size} purchases by purchaseTime DESC")
+            
+            sortedPurchases
+        } catch (e: Exception) {
+            android.util.Log.e("orderHistory", "❌ CRITICAL ERROR in getPurchasesByUserId!")
+            android.util.Log.e("orderHistory", "❌ Exception: ${e.message}")
+            android.util.Log.e("orderHistory", "❌ Exception type: ${e.javaClass.simpleName}")
+            android.util.Log.e("orderHistory", "❌ Stack trace:")
+            e.printStackTrace()
+            android.util.Log.e("orderHistory", "❌ Returning empty list due to error")
+            emptyList()
         }
     }
 
