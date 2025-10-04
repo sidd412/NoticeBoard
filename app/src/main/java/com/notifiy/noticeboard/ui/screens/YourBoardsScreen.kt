@@ -944,7 +944,7 @@ fun YourBoardCard(
             Box(
                 modifier = Modifier
                     .padding(top = 16.dp, end = 16.dp)
-                    .size(90.dp)
+                    .size(90.dp).border(1.dp,Color.White.copy(.7f))
                     .align(Alignment.TopEnd), contentAlignment = Alignment.Center
             ) {
                 val qrBitmap = remember(board.id) {
@@ -957,7 +957,7 @@ fun YourBoardCard(
                         contentDescription = "QR Code for ${board.organizationName}",
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(2.dp)
+//                            .padding(2.dp)
                             .clip(RoundedCornerShape(2.dp)) // Small padding to prevent touching borders
                     )
                 } else {
