@@ -92,6 +92,7 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.ui.Alignment
 
@@ -500,7 +501,7 @@ fun YourBoardsScreen(
         // Main content
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 90.dp),
+            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 30.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Back button and header
@@ -510,26 +511,26 @@ fun YourBoardsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = {
-                            println("DEBUG: YourBoardsScreen - Back icon clicked")
-                            // Navigate to Home tab instead of popBackStack
-                            navController.navigate(BottomNavScreen.Home.route)
-                        }) {
-                        Icon(
-                            Icons.Default.ArrowBack, contentDescription = "Back"
-                        )
-                    }
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.clickable(onClick = {
+                            navController.navigate(
+                                BottomNavScreen.Home.route
+                            )
+                        })
+                    )
                     Text(
                         text = "Your Notice Boards",
-                        fontSize = 20.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
 
-                    // Refresh button
-                    IconButton(
-                        onClick = {
+                    Icon(
+                        Icons.Default.Refresh,
+                        contentDescription = "Refresh",
+                        modifier = Modifier.clickable(onClick = {
                             println("DEBUG: YourBoardsScreen - Refresh button clicked")
                             currentUser?.let { user ->
                                 println("DEBUG: YourBoardsScreen - Refreshing boards for user: ${user.id}")
@@ -537,11 +538,8 @@ fun YourBoardsScreen(
                             } ?: run {
                                 println("DEBUG: YourBoardsScreen - No current user for refresh")
                             }
-                        }) {
-                        Icon(
-                            Icons.Default.Refresh, contentDescription = "Refresh"
-                        )
-                    }
+                        })
+                    )
                 }
             }
 
@@ -573,12 +571,61 @@ fun YourBoardsScreen(
 
             // My Existing Boards Section
             item {
-                Text(
-                    text = "My Running Boards",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 5.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "My Running Boards",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Row(
+                        modifier = Modifier.clickable(onClick = {
+                            currentUser?.let { user ->
+                                android.util.Log.d(
+                                    "board limit",
+                                    "YourBoardsScreen - Create board button clicked for user: ${user.name}"
+                                )
+                                yourBoardsViewModel.checkBoardLimit(user.id) { canCreate, boardLimit ->
+                                    android.util.Log.d(
+                                        "board limit",
+                                        "YourBoardsScreen - Board limit check result: canCreate=$canCreate, limit=$boardLimit"
+                                    )
+                                    if (canCreate) {
+                                        android.util.Log.d(
+                                            "board limit",
+                                            "YourBoardsScreen - Can create board, navigating to create screen"
+                                        )
+                                        mainNavController.navigate(Screen.CreateBoard.route)
+                                    } else {
+                                        android.util.Log.d(
+                                            "board limit",
+                                            "YourBoardsScreen - Cannot create board, showing limit dialog"
+                                        )
+                                        currentBoardLimit = boardLimit
+                                        showBoardLimitDialog = true
+                                    }
+                                }
+                            }
+                        }), verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Search Notice Boards",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = "Add",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             }
 
             // Boards List
@@ -669,53 +716,53 @@ fun YourBoardsScreen(
         }
 
         // Fixed Create New Board Button
-        Button(
-            onClick = {
-                currentUser?.let { user ->
-                    android.util.Log.d(
-                        "board limit",
-                        "YourBoardsScreen - Create board button clicked for user: ${user.name}"
-                    )
-                    yourBoardsViewModel.checkBoardLimit(user.id) { canCreate, boardLimit ->
-                        android.util.Log.d(
-                            "board limit",
-                            "YourBoardsScreen - Board limit check result: canCreate=$canCreate, limit=$boardLimit"
-                        )
-                        if (canCreate) {
-                            android.util.Log.d(
-                                "board limit",
-                                "YourBoardsScreen - Can create board, navigating to create screen"
-                            )
-                            mainNavController.navigate(Screen.CreateBoard.route)
-                        } else {
-                            android.util.Log.d(
-                                "board limit",
-                                "YourBoardsScreen - Cannot create board, showing limit dialog"
-                            )
-                            currentBoardLimit = boardLimit
-                            showBoardLimitDialog = true
-                        }
-                    }
-                }
-            },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Icon(
-                Icons.Default.Add,
-                contentDescription = "Create New Board",
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Create New Board", fontSize = 16.sp, fontWeight = FontWeight.Medium
-            )
-        }
+//        Button(
+//            onClick = {
+//                currentUser?.let { user ->
+//                    android.util.Log.d(
+//                        "board limit",
+//                        "YourBoardsScreen - Create board button clicked for user: ${user.name}"
+//                    )
+//                    yourBoardsViewModel.checkBoardLimit(user.id) { canCreate, boardLimit ->
+//                        android.util.Log.d(
+//                            "board limit",
+//                            "YourBoardsScreen - Board limit check result: canCreate=$canCreate, limit=$boardLimit"
+//                        )
+//                        if (canCreate) {
+//                            android.util.Log.d(
+//                                "board limit",
+//                                "YourBoardsScreen - Can create board, navigating to create screen"
+//                            )
+//                            mainNavController.navigate(Screen.CreateBoard.route)
+//                        } else {
+//                            android.util.Log.d(
+//                                "board limit",
+//                                "YourBoardsScreen - Cannot create board, showing limit dialog"
+//                            )
+//                            currentBoardLimit = boardLimit
+//                            showBoardLimitDialog = true
+//                        }
+//                    }
+//                }
+//            },
+//            modifier = Modifier
+//                .align(Alignment.BottomCenter)
+//                .fillMaxWidth()
+//                .padding(16.dp),
+//            colors = ButtonDefaults.buttonColors(
+//                containerColor = MaterialTheme.colorScheme.primary
+//            )
+//        ) {
+//            Icon(
+//                Icons.Default.Add,
+//                contentDescription = "Create New Board",
+//                modifier = Modifier.size(20.dp)
+//            )
+//            Spacer(modifier = Modifier.width(8.dp))
+//            Text(
+//                text = "Create New Board", fontSize = 16.sp, fontWeight = FontWeight.Medium
+//            )
+//        }
 
         // Snackbar Host
         SnackbarHost(
@@ -927,8 +974,7 @@ fun YourBoardCard(
                                 }
                             }
 
-                        }
-                        else{
+                        } else {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = "|",
@@ -991,8 +1037,10 @@ fun YourBoardCard(
             Box(
                 modifier = Modifier
                     .padding(top = 16.dp, end = 16.dp)
-                    .size(90.dp).border(1.dp,Color.White.copy(.7f))
-                    .align(Alignment.TopEnd), contentAlignment = Alignment.Center
+                    .size(90.dp)
+                    .border(1.dp, Color.White.copy(.7f))
+                    .align(Alignment.TopEnd),
+                contentAlignment = Alignment.Center
             ) {
                 val qrBitmap = remember(board.id) {
                     QRCodeUtils.generateQRCodeBitmap(board, 90)

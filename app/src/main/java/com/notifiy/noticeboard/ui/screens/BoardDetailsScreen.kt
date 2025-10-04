@@ -4,20 +4,46 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.QuestionMark
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.QuestionMark
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,19 +54,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.notifiy.noticeboard.data.model.Page
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.components.BoardQueryBottomSheet
-import com.notifiy.noticeboard.ui.components.SubscriptionRequiredDialog
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.BoardDetailsViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
 import com.notifiy.noticeboard.utils.ShowErrorSnackbar
 import com.notifiy.noticeboard.utils.getErrorMessage
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,7 +94,7 @@ fun BoardDetailsScreen(
     val pagesState by boardDetailsViewModel.pagesState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
-    
+
     // Board Query Bottom Sheet state
     var showBoardQueryBottomSheet by remember { mutableStateOf(false) }
 
@@ -81,7 +106,7 @@ fun BoardDetailsScreen(
         val currentTime = System.currentTimeMillis()
         return user.currentPlanId.isNotEmpty() && user.subscriptionExpiry > currentTime
     }
-    
+
     // Check if user has any plan (including free plan)
     fun hasPlan(): Boolean {
         val user = currentUser
@@ -89,12 +114,12 @@ fun BoardDetailsScreen(
             println("DEBUG: BoardDetailsScreen.hasPlan - User is null")
             return false
         }
-        
+
         println("DEBUG: BoardDetailsScreen.hasPlan - User data:")
         println("  - currentPlanId: '${user.currentPlanId}' (empty: ${user.currentPlanId.isEmpty()})")
         println("  - planName: '${user.planName}' (empty: ${user.planName.isEmpty()})")
         println("  - subscriptionExpiry: ${user.subscriptionExpiry}")
-        
+
         // User has a plan if currentPlanId is not empty or planName is not empty
         val hasPlan = user.currentPlanId.isNotEmpty() || user.planName.isNotEmpty()
         println("DEBUG: BoardDetailsScreen.hasPlan - Result: $hasPlan")
@@ -115,7 +140,7 @@ fun BoardDetailsScreen(
         println("DEBUG: BoardDetailsScreen.onCreateNewPageClick - Starting")
         val hasPlanResult = hasPlan()
         println("DEBUG: BoardDetailsScreen.onCreateNewPageClick - hasPlan(): $hasPlanResult")
-        
+
         if (!hasPlanResult) {
             // No plan at all - navigate to subscription screen
             println("DEBUG: BoardDetailsScreen.onCreateNewPageClick - No plan, navigating to subscription")
@@ -150,22 +175,23 @@ fun BoardDetailsScreen(
         // Main content
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 60.dp),
+            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 30.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Back button and header
             item {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = { navController.popBackStack() }) {
-                        Icon(
-                            Icons.Default.ArrowBack, contentDescription = "Back"
-                        )
-                    }
+//                    IconButton(
+//                        onClick = { navController.popBackStack() }) {
+                    Icon(
+                        Icons.Default.ArrowBack, contentDescription = "Back",
+                        modifier = Modifier.clickable(onClick = { navController.popBackStack() })
+                    )
+//                    }
                     Text(
                         text = "Board Details",
                         fontSize = 22.sp,
@@ -174,15 +200,17 @@ fun BoardDetailsScreen(
                     )
 
                     // Edit button
-                    IconButton(
-                        onClick = { 
+//                    IconButton(
+//                        onClick = {
+//                            navController.navigate(Screen.EditNoticeBoard.createRoute(boardId))
+//                        }) {
+                    Icon(
+                        Icons.Default.Edit, contentDescription = "Edit Board",
+                        modifier = Modifier.clickable(onClick = {
                             navController.navigate(Screen.EditNoticeBoard.createRoute(boardId))
-                        }
-                    ) {
-                        Icon(
-                            Icons.Default.Edit, contentDescription = "Edit Board"
-                        )
-                    }
+                        })
+                    )
+//                    }
                 }
             }
 
@@ -195,8 +223,7 @@ fun BoardDetailsScreen(
                         )
                     ) {
                         Column(
-                            modifier = Modifier
-                                .padding(7.dp,0.dp,7.dp,7.dp)
+                            modifier = Modifier.padding(7.dp, 0.dp, 7.dp, 7.dp)
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -209,7 +236,7 @@ fun BoardDetailsScreen(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
-                                
+
                                 // Help icon for board queries
                                 Box(
                                     modifier = Modifier
@@ -228,15 +255,6 @@ fun BoardDetailsScreen(
                                         modifier = Modifier.size(15.dp)
                                     )
                                 }
-//                                IconButton(
-//                                    onClick = { showBoardQueryBottomSheet = true }
-//                                ) {
-//                                    Icon(
-//                                        Icons.Default.QuestionMark,
-//                                        contentDescription = "Ask Board Query",
-//                                        tint = MaterialTheme.colorScheme.primary
-//                                    )
-//                                }
                             }
                             Spacer(modifier = Modifier.height(12.dp))
 
@@ -263,13 +281,38 @@ fun BoardDetailsScreen(
 
             // Pages section
             item {
-                Text(
-                    text = "Pages On this Board",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 7.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Pages On this Board",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(horizontal = 7.dp)
+                    )
+                    Row(
+                        modifier = Modifier.clickable(onClick = { onCreateNewPageClick() }),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Search Notice Boards",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = "Add",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                }
+
             }
 
             // Loading state
@@ -322,34 +365,32 @@ fun BoardDetailsScreen(
                 items(pagesState.data ?: emptyList()) { page ->
                     println("DEBUG: BoardDetailsScreen - Rendering page: ${page.title}")
                     PageCard(
-                        page = page, 
-                        onClick = { onPageCardClick(page.id) }
-                    )
+                        page = page, onClick = { onPageCardClick(page.id) })
                 }
             }
         }
 
         // Fixed Create New Page Button
-        Button(
-            onClick = { onCreateNewPageClick() },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Icon(
-                Icons.Default.Add,
-                contentDescription = "Create New Page",
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Create New Page", fontSize = 16.sp, fontWeight = FontWeight.Medium
-            )
-        }
+//        Button(
+//            onClick = { onCreateNewPageClick() },
+//            modifier = Modifier
+//                .align(Alignment.BottomCenter)
+//                .fillMaxWidth()
+//                .padding(horizontal = 16.dp),
+//            colors = ButtonDefaults.buttonColors(
+//                containerColor = MaterialTheme.colorScheme.primary
+//            )
+//        ) {
+//            Icon(
+//                Icons.Default.Add,
+//                contentDescription = "Create New Page",
+//                modifier = Modifier.size(20.dp)
+//            )
+//            Spacer(modifier = Modifier.width(8.dp))
+//            Text(
+//                text = "Create New Page", fontSize = 16.sp, fontWeight = FontWeight.Medium
+//            )
+//        }
 
         // Snackbar Host
         SnackbarHost(
@@ -373,8 +414,7 @@ fun BoardDetailsScreen(
                         "Board query submitted successfully!",
                         android.widget.Toast.LENGTH_SHORT
                     ).show()
-                }
-            )
+                })
         }
     }
 }
@@ -407,8 +447,7 @@ fun BoardInfoRow(
 
 @Composable
 fun PageCard(
-    page: Page, 
-    onClick: () -> Unit
+    page: Page, onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier

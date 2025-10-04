@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -26,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.Alignment
 import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.NoticePriority
@@ -72,7 +73,10 @@ fun BoardEditorScreen(
                 // Extract board code from route
                 val codeStr = id.substringAfter("new_")
                 boardCode = codeStr
-                android.util.Log.d("sidxp", "BoardEditorScreen - Extracted boardCode from route: '$boardCode' (length: ${boardCode.length})")
+                android.util.Log.d(
+                    "sidxp",
+                    "BoardEditorScreen - Extracted boardCode from route: '$boardCode' (length: ${boardCode.length})"
+                )
                 boardEditorViewModel.loadPage("new")
             } else {
                 boardEditorViewModel.loadPage(id)
@@ -87,7 +91,9 @@ fun BoardEditorScreen(
                 // Extract board code from route
                 val codeStr = id.substringAfter("new_")
                 boardCode = codeStr
-                android.util.Log.d("sidxp", "BoardEditorScreen - Refreshing board data for code: '$boardCode'")
+                android.util.Log.d(
+                    "sidxp", "BoardEditorScreen - Refreshing board data for code: '$boardCode'"
+                )
             }
         }
     }
@@ -124,194 +130,199 @@ fun BoardEditorScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 35.dp, bottom = 50.dp)
+            .padding(top = 20.dp, bottom = 50.dp)
             .background(MaterialTheme.colorScheme.background)
     ) {
 //        Column(
 //            modifier = Modifier.fillMaxSize()
 //        ) {
-            // Content
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 60.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(
-                                Icons.Default.ArrowBack, contentDescription = "Back"
-                            )
-                        }
-                        Text(
-                            text = if (boardId?.startsWith("new_") == true) "Create New Page" else "Edit this Page",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp
+        // Content
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 60.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.clickable(onClick = { navController.popBackStack() })
+                    )
+                    Text(
+                        text = if (boardId?.startsWith("new_") == true) "Create New Page" else "Edit this Page",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp
+                    )
+                    // Show delete button only when editing existing page
+                    if (boardId != null && !boardId.startsWith("new_")) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Delete Page",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.clickable(onClick = {
+                                showDeleteDialog = true
+                            })
                         )
-                        // Show delete button only when editing existing page
-                        if (boardId != null && !boardId.startsWith("new_")) {
-                            IconButton(
-                                onClick = { 
-                                    showDeleteDialog = true
-                                }
-                            ) {
-                                Icon(
-                                    Icons.Default.Delete, 
-                                    contentDescription = "Delete Page",
-                                    tint = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        } else {
-                            IconButton(onClick = {}) {}
-                        }
+                    } else {
+                        IconButton(onClick = {}) {}
                     }
                 }
+            }
 
-                // Priority
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
+            // Priority
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        contentPadding = PaddingValues(horizontal = 15.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
-                        ) {
+                        item {
                             Text(
                                 text = "Priority", fontSize = 16.sp, fontWeight = FontWeight.Medium
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            LazyRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                listOf("LOW", "NORMAL", "HIGH", "URGENT").forEach { prio ->
-                                    item {
-                                        FilterChip(
-                                            onClick = { priority = prio },
-                                            label = { Text(prio) },
-                                            selected = priority == prio
-                                        )
-                                    }
-                                }
-                            }
                         }
-                    }
-                }
-
-                // Title
-                item {
-                    OutlinedTextField(
-                        value = title,
-                        onValueChange = { 
-                            if (it.length <= 30) {
-                                title = it
-                            }
-                        },
-                        label = { Text("Page Title * (max 30 characters)") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        supportingText = {
-                            Text(
-                                text = "${title.length}/30",
-                                color = if (title.length > 30) MaterialTheme.colorScheme.error 
-                                       else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
-                    )
-                }
-
-                // Subtitle
-                item {
-                    OutlinedTextField(
-                        value = subtitle,
-                        onValueChange = { subtitle = it },
-                        label = { Text("Subtitle") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                }
-
-                // Info Points
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Info Points",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium
+                        listOf("LOW", "NORMAL", "HIGH", "URGENT").forEach { prio ->
+                            item {
+                                FilterChip(
+                                    onClick = { priority = prio },
+                                    label = { Text(prio) },
+                                    selected = priority == prio
                                 )
-                                IconButton(
-                                    onClick = {
-                                        infoPoints = infoPoints + ""
-                                    }) {
-                                    Icon(
-                                        Icons.Default.Add, contentDescription = "Add Info Point"
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            infoPoints.forEachIndexed { index, point ->
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    OutlinedTextField(
-                                        value = point,
-                                        onValueChange = { newValue ->
-                                            val newPoints = infoPoints.toMutableList()
-                                            newPoints[index] = newValue
-                                            infoPoints = newPoints
-                                        },
-                                        label = { Text("Info Point ${index + 1}") },
-                                        modifier = Modifier.weight(1f),
-                                        singleLine = true
-                                    )
-                                    if (infoPoints.size > 1) {
-                                        IconButton(
-                                            onClick = {
-                                                val newPoints = infoPoints.toMutableList()
-                                                newPoints.removeAt(index)
-                                                infoPoints = newPoints
-                                            }) {
-                                            Icon(
-                                                Icons.Default.Delete, contentDescription = "Delete"
-                                            )
-                                        }
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
                     }
-                }
-
-                // Additional Info
-                item {
-                    OutlinedTextField(
-                        value = additionalInfo,
-                        onValueChange = { additionalInfo = it },
-                        label = { Text("Additional Information") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp),
-                        maxLines = 5
-                    )
                 }
             }
+
+            // Title
+            item {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = {
+                        if (it.length <= 30) {
+                            title = it
+                        }
+                    },
+                    label = { Text("Page Title * (max 30 characters)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+//                        supportingText = {
+//                            Text(
+//                                text = "${title.length}/30",
+//                                color = if (title.length > 30) MaterialTheme.colorScheme.error
+//                                       else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+//                            )
+//                        }
+                )
+            }
+
+            // Subtitle
+            item {
+                OutlinedTextField(
+                    value = subtitle,
+                    onValueChange = { subtitle = it },
+                    label = { Text("Subtitle (Optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+
+            // Info Points
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Notice Points",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            IconButton(
+                                onClick = {
+                                    infoPoints = infoPoints + ""
+                                }) {
+                                Icon(
+                                    Icons.Default.Add, contentDescription = "Add Info Point"
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        infoPoints.forEachIndexed { index, point ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                OutlinedTextField(
+                                    value = point,
+                                    onValueChange = { newValue ->
+                                        val newPoints = infoPoints.toMutableList()
+                                        newPoints[index] = newValue
+                                        infoPoints = newPoints
+                                    },
+                                    label = { Text("Notice Point ${index + 1} (Optional)") },
+                                    modifier = Modifier.weight(1f),
+                                    singleLine = true
+                                )
+                                if (infoPoints.size > 1) {
+//                                        IconButton(
+//                                            onClick = {
+//                                                val newPoints = infoPoints.toMutableList()
+//                                                newPoints.removeAt(index)
+//                                                infoPoints = newPoints
+//                                            }) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = "Delete",
+                                        modifier = Modifier.clickable(onClick = {
+                                            val newPoints = infoPoints.toMutableList()
+                                            newPoints.removeAt(index)
+                                            infoPoints = newPoints
+                                        })
+                                    )
+//                                        }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                }
+            }
+
+            // Additional Info
+            item {
+                OutlinedTextField(
+                    value = additionalInfo,
+                    onValueChange = { additionalInfo = it },
+                    label = { Text("Additional Information (Optional)") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
+                    maxLines = 5
+                )
+            }
+        }
 //        }
 
         Button(
@@ -333,9 +344,14 @@ fun BoardEditorScreen(
 
                 // Check page limit for new pages only
                 if (boardId?.startsWith("new_") == true) {
-                    android.util.Log.d("sidxp", "BoardEditorScreen - Using boardCode as String: '$boardCode'")
+                    android.util.Log.d(
+                        "sidxp", "BoardEditorScreen - Using boardCode as String: '$boardCode'"
+                    )
                     android.util.Log.d("sidxp", "BoardEditorScreen - boardId: '$boardId'")
-                    android.util.Log.d("sidxp", "BoardEditorScreen - Calling checkPageLimit with boardCode: '$boardCode'")
+                    android.util.Log.d(
+                        "sidxp",
+                        "BoardEditorScreen - Calling checkPageLimit with boardCode: '$boardCode'"
+                    )
                     boardEditorViewModel.checkPageLimit(boardCode) { canCreate, planPages ->
                         if (canCreate) {
                             isPublishing = true
@@ -396,7 +412,8 @@ fun BoardEditorScreen(
             enabled = !isPublishing && currentUser != null,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .fillMaxWidth().padding(horizontal = 16.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         ) {
             if (isPublishing) {
                 CircularProgressIndicator(
@@ -427,31 +444,32 @@ fun BoardEditorScreen(
             },
             boardName = "Notice Board"
         )
-        
+
         // Delete Page Confirmation Dialog
         if (showDeleteDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },
                 title = { Text("Delete Page") },
-                text = { 
+                text = {
                     Text("Are you sure you want to delete this page? This action cannot be undone.")
                 },
                 confirmButton = {
                     Button(
-                        onClick = { 
+                        onClick = {
                             showDeleteDialog = false
                             boardId?.let { id ->
                                 boardEditorViewModel.deletePage(id) { success ->
                                     if (success) {
-                                        Toast.makeText(context, "Page deleted successfully!", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(
+                                            context, "Page deleted successfully!", Toast.LENGTH_LONG
+                                        ).show()
                                         navController.popBackStack()
                                     } else {
                                         validationError = "Failed to delete page. Please try again."
                                     }
                                 }
                             }
-                        },
-                        colors = ButtonDefaults.buttonColors(
+                        }, colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error
                         )
                     ) {
@@ -462,10 +480,9 @@ fun BoardEditorScreen(
                     TextButton(onClick = { showDeleteDialog = false }) {
                         Text("Cancel")
                     }
-                }
-            )
+                })
         }
-        
+
         // Page Limit Dialog
         PageLimitDialog(
             isVisible = showPageLimitDialog,
@@ -479,17 +496,26 @@ fun BoardEditorScreen(
                     // Get the actual board ID from the board code
                     coroutineScope.launch {
                         try {
-                            val board = boardEditorViewModel.repository.getNoticeBoardByCode(boardCode)
+                            val board =
+                                boardEditorViewModel.repository.getNoticeBoardByCode(boardCode)
                             if (board != null) {
-                                android.util.Log.d("sidxp", "BoardEditorScreen - Found board for upgrade: ${board.id}")
+                                android.util.Log.d(
+                                    "sidxp",
+                                    "BoardEditorScreen - Found board for upgrade: ${board.id}"
+                                )
                                 navController.navigate(Screen.Subscription.route)
                             } else {
-                                android.util.Log.d("sidxp", "BoardEditorScreen - Board not found for code: $boardCode")
+                                android.util.Log.d(
+                                    "sidxp",
+                                    "BoardEditorScreen - Board not found for code: $boardCode"
+                                )
                                 // Fallback to subscription screen
                                 navController.navigate(Screen.Subscription.route)
                             }
                         } catch (e: Exception) {
-                            android.util.Log.e("sidxp", "BoardEditorScreen - Error finding board: ${e.message}")
+                            android.util.Log.e(
+                                "sidxp", "BoardEditorScreen - Error finding board: ${e.message}"
+                            )
                             // Fallback to subscription screen
                             navController.navigate(Screen.Subscription.route)
                         }
@@ -500,8 +526,7 @@ fun BoardEditorScreen(
             },
             onBack = {
                 showPageLimitDialog = false
-            }
-        )
+            })
     }
 }
 
