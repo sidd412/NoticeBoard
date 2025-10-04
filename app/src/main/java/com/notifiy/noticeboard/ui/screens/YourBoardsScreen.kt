@@ -490,7 +490,8 @@ fun YourBoardsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
-                ) {
+                )
+                {
                     IconButton(
                         onClick = {
                             println("DEBUG: YourBoardsScreen - Back icon clicked")

@@ -39,7 +39,7 @@ class AuthViewModel(private val context: Context) : ViewModel() {
     // Google Sign-In client
     val googleSignInClient: GoogleSignInClient by lazy {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestIdToken("1020177538461-1j75djeebl4gmm7g0ok1pit25eutm25l.apps.googleusercontent.com")
             .requestEmail()
             .build()
         GoogleSignIn.getClient(context, gso)
@@ -83,7 +83,7 @@ class AuthViewModel(private val context: Context) : ViewModel() {
         }
     }
     
-    fun signUpWithEmail(email: String, password: String, name: String, mobileNumber: String = "") {
+    fun signUpWithEmail(email: String, password: String, name: String) {
         _authState.value = _authState.value.copy(isLoading = true)
         viewModelScope.launch {
             try {
@@ -95,7 +95,7 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                         id = firebaseUser.uid,
                         name = name,
                         email = email,
-                        phoneNumber = mobileNumber,
+                        phoneNumber = "",
                         profileImageUrl = "",
                         subscribedBoards = emptyList(),
                         subscribedCodes = emptyList(),

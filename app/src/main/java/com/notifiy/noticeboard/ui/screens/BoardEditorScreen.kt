@@ -205,10 +205,21 @@ fun BoardEditorScreen(
                 item {
                     OutlinedTextField(
                         value = title,
-                        onValueChange = { title = it },
-                        label = { Text("Page Title *") },
+                        onValueChange = { 
+                            if (it.length <= 30) {
+                                title = it
+                            }
+                        },
+                        label = { Text("Page Title * (max 30 characters)") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        supportingText = {
+                            Text(
+                                text = "${title.length}/30",
+                                color = if (title.length > 30) MaterialTheme.colorScheme.error 
+                                       else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
                     )
                 }
 
@@ -307,6 +318,11 @@ fun BoardEditorScreen(
             onClick = {
                 if (title.isBlank()) {
                     validationError = "Please enter a title"
+                    return@Button
+                }
+
+                if (title.length > 30) {
+                    validationError = "Title cannot be more than 30 characters"
                     return@Button
                 }
 

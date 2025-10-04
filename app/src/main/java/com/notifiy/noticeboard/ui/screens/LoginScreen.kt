@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -46,7 +45,6 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
-    var mobileNumber by remember { mutableStateOf("") }
     var isSignUp by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
     var validationError by remember { mutableStateOf("") }
@@ -179,28 +177,6 @@ fun LoginScreen(
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
-                
-                // Mobile Number field (only for sign up)
-                OutlinedTextField(
-                    value = mobileNumber,
-                    onValueChange = { 
-                        // Limit to exactly 10 digits and only allow numbers
-                        val filtered = it.filter { char -> char.isDigit() }
-                        if (filtered.length <= 10) {
-                            mobileNumber = filtered
-                        }
-                    },
-                    label = { Text("Mobile Number (10 digits)") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Phone, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    placeholder = { Text("9876543210") }
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
             }
             
             // Email field
@@ -246,7 +222,7 @@ fun LoginScreen(
             Button(
                 onClick = {
                     val validation = if (isSignUp) {
-                        ValidationUtils.validateSignupFields(name, email, password, mobileNumber)
+                        ValidationUtils.validateSignupFields(name, email, password)
                     } else {
                         ValidationUtils.validateLoginFields(email, password)
                     }
@@ -257,7 +233,7 @@ fun LoginScreen(
                     }
                     
                     if (isSignUp) {
-                        authViewModel.signUpWithEmail(email, password, name, mobileNumber)
+                        authViewModel.signUpWithEmail(email, password, name)
                     } else {
                         authViewModel.signInWithEmail(email, password)
                     }
@@ -286,14 +262,6 @@ fun LoginScreen(
                 onClick = { 
                     isSignUp = !isSignUp
                     authViewModel.clearError()
-                    // Clear form fields when switching
-                    if (isSignUp) {
-                        name = ""
-                        mobileNumber = ""
-                    }
-                    email = ""
-                    password = ""
-                    validationError = ""
                 }
             ) {
                 Text(
