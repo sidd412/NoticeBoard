@@ -92,6 +92,7 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.ui.Alignment
 
 
@@ -889,7 +890,7 @@ fun YourBoardCard(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "unresolved",
+                                    text = "unresolved queries",
                                     fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                 )
@@ -926,6 +927,52 @@ fun YourBoardCard(
                                 }
                             }
 
+                        }
+                        else{
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "|",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "No unresolved query",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
+                                Box {
+                                    IconButton(
+                                        onClick = { onQueriesClick(board) },
+                                        modifier = Modifier
+                                            .size(27.dp)
+                                            .align(Alignment.BottomCenter)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.CheckCircle,
+                                            contentDescription = "View Queries",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(22.dp)
+                                        )
+                                    }
+//                                    // Notification Badge
+//                                    Box(
+//                                        modifier = Modifier
+//                                            .size(16.dp)
+//                                            .clip(RoundedCornerShape(8.dp))
+//                                            .background(Color.Red)
+//                                            .align(Alignment.TopEnd),
+//                                        contentAlignment = Alignment.TopCenter
+//                                    ) {
+//                                        Text(
+//                                            text = if (unresolvedQueriesCount > 9) "9+" else unresolvedQueriesCount.toString(),
+//                                            fontSize = 9.sp,
+//                                            fontWeight = FontWeight.Bold,
+//                                            color = Color.White,
+//                                        )
+//                                    }
+                                }
+                            }
                         }
                     }
 
