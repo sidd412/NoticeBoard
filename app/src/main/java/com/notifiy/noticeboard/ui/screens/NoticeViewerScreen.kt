@@ -50,6 +50,7 @@ import androidx.navigation.NavController
 import com.notifiy.noticeboard.data.model.NoticeBoard
 import com.notifiy.noticeboard.data.model.Page
 import com.notifiy.noticeboard.ui.components.HorizontalPagesCarousel
+import com.notifiy.noticeboard.ui.components.QueryBottomSheet
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.HomeViewModel
 import com.notifiy.noticeboard.ui.viewmodel.cachedViewModel
@@ -66,6 +67,7 @@ fun NoticeViewerScreen(
     var noticeBoard by remember { mutableStateOf<NoticeBoard?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var showUnsubscribeDialog by remember { mutableStateOf(false) }
+    var showQueryBottomSheet by remember { mutableStateOf(false) }
 
     val authState by authViewModel.authState.collectAsState()
     val currentUser = authState.data
@@ -145,7 +147,7 @@ fun NoticeViewerScreen(
                                 MaterialTheme.colorScheme.onBackground,
                                 shape = RoundedCornerShape(25.dp)
                             )
-                            .clickable(onClick = {})
+                            .clickable(onClick = { showQueryBottomSheet = true })
                             .padding(5.dp)
 
                     ) {
@@ -341,4 +343,15 @@ fun NoticeViewerScreen(
                 }
             })
     }
+    
+    // Query Bottom Sheet
+    QueryBottomSheet(
+        isVisible = showQueryBottomSheet,
+        onDismiss = { showQueryBottomSheet = false },
+        currentUser = currentUser,
+        organisationCode = noticeBoard?.organizationCode ?: "",
+        onQuerySubmitted = {
+            // Query submitted successfully
+        }
+    )
 }

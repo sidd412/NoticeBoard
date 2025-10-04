@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.SettingsBrightness
+import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -369,7 +370,32 @@ fun ProfileScreen(
                             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                         )
 
-                        // About Notice Board Button
+                        // My Queries
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable { navController.navigate(Screen.MyQueries.route) },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.QuestionAnswer,
+                                contentDescription = "My Queries",
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = "My Queries",
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        Divider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        )
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()

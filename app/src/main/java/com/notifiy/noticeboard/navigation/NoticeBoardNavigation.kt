@@ -132,5 +132,17 @@ fun NoticeBoardNavigation(navController: NavHostController, themeViewModel: Them
                 purchaseId = purchaseId
             )
         }
+        
+        composable(Screen.MyQueries.route) {
+            MyQueriesScreen(navController = navController)
+        }
+        
+        composable(Screen.QueriesToMe.route) { backStackEntry ->
+            val orgCode = backStackEntry.arguments?.getString("orgCode") ?: ""
+            QueriesToMeScreen(
+                navController = navController,
+                orgCode = orgCode
+            )
+        }
     }
 }
