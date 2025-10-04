@@ -91,9 +91,36 @@ fun HomeScreen(
         // Main content
         LazyColumn(
             modifier = Modifier.fillMaxSize(), // Add padding for fixed button
-            contentPadding = PaddingValues(16.dp, 20.dp, 16.dp, 80.dp),
+            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 80.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Subscribed Boards Section
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth() ,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "NoteXP",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+
+                    Box(modifier = Modifier.clickable(onClick = {
+                        navController.navigate(Screen.Search.route)
+                    })) {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = "Search Notice Boards",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
             // Welcome message card
             item {
                 Card(
@@ -106,7 +133,7 @@ fun HomeScreen(
                     ) {
                         Text(
                             text = "Welcome to NoteXP!",
-                            fontSize = 22.sp,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -123,7 +150,7 @@ fun HomeScreen(
             // Subscribed Boards Section
             item {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 5.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -134,16 +161,21 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.onBackground
                     )
 
-                    IconButton(
-                        onClick = {
-                            navController.navigate(Screen.Search.route)
-                        }
+                    Row(
+                        modifier = Modifier.clickable(onClick = { navController.navigate(Screen.SubscribePopup.route) }),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            Icons.Default.Search,
+                            Icons.Default.Add,
                             contentDescription = "Search Notice Boards",
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = "Add",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -196,11 +228,9 @@ fun HomeScreen(
                 // Subscribed Boards List (no header needed, just show boards)
                 items(visibleBoards) { board ->
                     NoticeBoardCard(
-                        board = board,
-                        onClick = {
+                        board = board, onClick = {
                             navController.navigate(Screen.NoticeViewer.createRoute(board.id))
-                        },
-                        notificationCount = boardNotifications[board.id] ?: 0
+                        }, notificationCount = boardNotifications[board.id] ?: 0
                     )
                 }
             }
@@ -228,34 +258,32 @@ fun HomeScreen(
         }
 
         // Fixed Subscribe More Button
-        Button(
-            onClick = { navController.navigate(Screen.SubscribePopup.route) },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Icon(
-                Icons.Default.Add,
-                contentDescription = "Subscribe More",
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Subscribe More", fontSize = 16.sp, fontWeight = FontWeight.Medium
-            )
-        }
+//        Button(
+//            onClick = { navController.navigate(Screen.SubscribePopup.route) },
+//            modifier = Modifier
+//                .align(Alignment.BottomCenter)
+//                .fillMaxWidth()
+//                .padding(16.dp),
+//            colors = ButtonDefaults.buttonColors(
+//                containerColor = MaterialTheme.colorScheme.primary
+//            )
+//        ) {
+//            Icon(
+//                Icons.Default.Add,
+//                contentDescription = "Subscribe More",
+//                modifier = Modifier.size(20.dp)
+//            )
+//            Spacer(modifier = Modifier.width(8.dp))
+//            Text(
+//                text = "Subscribe More", fontSize = 16.sp, fontWeight = FontWeight.Medium
+//            )
+//        }
     }
 }
 
 @Composable
 fun NoticeBoardCard(
-    board: NoticeBoard,
-    onClick: () -> Unit,
-    notificationCount: Int = 0
+    board: NoticeBoard, onClick: () -> Unit, notificationCount: Int = 0
 ) {
     Card(
         modifier = Modifier
@@ -264,8 +292,7 @@ fun NoticeBoardCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
         ) {
             // Board Icon
             Box(
@@ -318,11 +345,9 @@ fun NoticeBoardCard(
                         modifier = Modifier
                             .size(16.dp)
                             .background(
-                                MaterialTheme.colorScheme.error,
-                                RoundedCornerShape(8.dp)
+                                MaterialTheme.colorScheme.error, RoundedCornerShape(8.dp)
                             )
-                            .align(Alignment.TopEnd),
-                        contentAlignment = Alignment.Center
+                            .align(Alignment.TopEnd), contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = if (notificationCount > 99) "99+" else notificationCount.toString(),

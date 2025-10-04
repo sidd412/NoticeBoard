@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.notifiy.noticeboard.data.model.BoardQuery
 import com.notifiy.noticeboard.data.model.UserQuery
 import com.notifiy.noticeboard.data.repository.FirebaseRepository
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
@@ -40,10 +41,13 @@ fun MyQueriesScreen(
     val repository = remember { FirebaseRepository(context) }
     val scope = rememberCoroutineScope()
     
-    var createdQueries by remember { mutableStateOf<List<UserQuery>>(emptyList()) }
-    var resolvedQueries by remember { mutableStateOf<List<UserQuery>>(emptyList()) }
+    var createdUserQueries by remember { mutableStateOf<List<UserQuery>>(emptyList()) }
+    var resolvedUserQueries by remember { mutableStateOf<List<UserQuery>>(emptyList()) }
+    var createdBoardQueries by remember { mutableStateOf<List<BoardQuery>>(emptyList()) }
+    var resolvedBoardQueries by remember { mutableStateOf<List<BoardQuery>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var selectedTabIndex by remember { mutableStateOf(0) }
+    var isUserQueriesSelected by remember { mutableStateOf(true) } // true for User Queries, false for Board Queries
     
     // Function to load queries
     fun loadQueries() {
@@ -52,13 +56,23 @@ fun MyQueriesScreen(
             scope.launch {
                 try {
                     android.util.Log.d("MyQueriesScreen", "Loading queries for user: ${currentUser.id}")
-                    val allQueries = repository.getUserQueriesByUserId(currentUser.id)
-                    android.util.Log.d("MyQueriesScreen", "Retrieved ${allQueries.size} total queries")
                     
-                    createdQueries = allQueries.filter { it.status == "created" }
-                    resolvedQueries = allQueries.filter { it.status == "resolved" }
+                    // Load User Queries
+                    val allUserQueries = repository.getUserQueriesByUserId(currentUser.id)
+                    android.util.Log.d("MyQueriesScreen", "Retrieved ${allUserQueries.size} total user queries")
                     
-                    android.util.Log.d("MyQueriesScreen", "Created queries: ${createdQueries.size}, Resolved queries: ${resolvedQueries.size}")
+                    createdUserQueries = allUserQueries.filter { it.status == "created" }
+                    resolvedUserQueries = allUserQueries.filter { it.status == "resolved" }
+                    
+                    // Load Board Queries
+                    val allBoardQueries = repository.getBoardQueriesByUserId(currentUser.id)
+                    android.util.Log.d("MyQueriesScreen", "Retrieved ${allBoardQueries.size} total board queries")
+                    
+                    createdBoardQueries = allBoardQueries.filter { it.status == "created" }
+                    resolvedBoardQueries = allBoardQueries.filter { it.status == "resolved" }
+
+                    android.util.Log.d("MyQueriesScreen", "User Queries - Created: ${createdUserQueries.size}, Resolved: ${resolvedUserQueries.size}")
+                    android.util.Log.d("MyQueriesScreen", "Board Queries - Created: ${createdBoardQueries.size}, Resolved: ${resolvedBoardQueries.size}")
                 } catch (e: Exception) {
                     android.util.Log.e("MyQueriesScreen", "Error loading queries: ${e.message}")
                 } finally {
@@ -113,6 +127,64 @@ fun MyQueriesScreen(
             }
         }
         
+        // Toggle Slider for User Queries vs Board Queries
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(4.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    // User Queries Button
+                    Button(
+                        onClick = { isUserQueriesSelected = true },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isUserQueriesSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            contentColor = if (isUserQueriesSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = if (isUserQueriesSelected) 4.dp else 0.dp
+                        )
+                    ) {
+                        Text(
+                            text = "User Queries",
+                            fontSize = 14.sp,
+                            fontWeight = if (isUserQueriesSelected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
+                    
+                    // Board Queries Button
+                    Button(
+                        onClick = { isUserQueriesSelected = false },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (!isUserQueriesSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            contentColor = if (!isUserQueriesSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = if (!isUserQueriesSelected) 4.dp else 0.dp
+                        )
+                    ) {
+                        Text(
+                            text = "Board Queries",
+                            fontSize = 14.sp,
+                            fontWeight = if (!isUserQueriesSelected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
+                }
+            }
+        }
+        
         // Debug info (remove in production)
         if (currentUser != null) {
             Text(
@@ -141,7 +213,7 @@ fun MyQueriesScreen(
                             contentDescription = null,
                             modifier = Modifier.size(16.dp)
                         )
-                        Text("Created (${createdQueries.size})")
+                        Text("Created (${if (isUserQueriesSelected) createdUserQueries.size else createdBoardQueries.size})")
                     }
                 }
             )
@@ -158,7 +230,7 @@ fun MyQueriesScreen(
                             contentDescription = null,
                             modifier = Modifier.size(16.dp)
                         )
-                        Text("Resolved (${resolvedQueries.size})")
+                        Text("Resolved (${if (isUserQueriesSelected) resolvedUserQueries.size else resolvedBoardQueries.size})")
                     }
                 }
             )
@@ -173,7 +245,12 @@ fun MyQueriesScreen(
                 CircularProgressIndicator()
             }
         } else {
-            val queriesToShow = if (selectedTabIndex == 0) createdQueries else resolvedQueries
+            // Show appropriate queries based on toggle selection
+            val queriesToShow = if (isUserQueriesSelected) {
+                if (selectedTabIndex == 0) createdUserQueries else resolvedUserQueries
+            } else {
+                if (selectedTabIndex == 0) createdBoardQueries else resolvedBoardQueries
+            }
             
             if (queriesToShow.isEmpty()) {
                 Box(
@@ -208,8 +285,14 @@ fun MyQueriesScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(queriesToShow) { query ->
-                        QueryCard(query = query)
+                    if (isUserQueriesSelected) {
+                        items(queriesToShow as List<UserQuery>) { query ->
+                            UserQueryCard(query = query)
+                        }
+                    } else {
+                        items(queriesToShow as List<BoardQuery>) { query ->
+                            BoardQueryCard(query = query)
+                        }
                     }
                 }
             }
@@ -218,7 +301,7 @@ fun MyQueriesScreen(
 }
 
 @Composable
-private fun QueryCard(query: UserQuery) {
+private fun UserQueryCard(query: UserQuery) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -272,6 +355,107 @@ private fun QueryCard(query: UserQuery) {
             // Organization Code
             Text(
                 text = "Organization: ${query.organisationCode}",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+            
+            // Answer (if resolved)
+            if (query.status == "resolved" && query.answer.isNotBlank()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "Answer:",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = query.answer,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BoardQueryCard(query: BoardQuery) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Header with status
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Board Query",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                
+                // Status indicator
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(
+                                if (query.status == "resolved") Color(0xFF4CAF50) else Color(0xFFFF9800),
+                                shape = androidx.compose.foundation.shape.CircleShape
+                            )
+                    )
+                    Text(
+                        text = query.status.replaceFirstChar { it.uppercase() },
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = if (query.status == "resolved") Color(0xFF4CAF50) else Color(0xFFFF9800)
+                    )
+                }
+            }
+            
+            // Type
+            Text(
+                text = "Type: ${query.type.replaceFirstChar { it.uppercase() }}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            
+            // Question
+            Text(
+                text = query.question,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+            
+            // Organization details
+            Text(
+                text = "Organization: ${query.orgName} (${query.orgCode})",
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )

@@ -2,6 +2,7 @@ package com.notifiy.noticeboard.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,13 +13,16 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -28,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.notifiy.noticeboard.data.model.Page
 import com.notifiy.noticeboard.navigation.Screen
+import com.notifiy.noticeboard.ui.components.BoardQueryBottomSheet
 import com.notifiy.noticeboard.ui.components.SubscriptionRequiredDialog
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
 import com.notifiy.noticeboard.ui.viewmodel.BoardDetailsViewModel
@@ -63,6 +68,10 @@ fun BoardDetailsScreen(
     val boardState by boardDetailsViewModel.boardState.collectAsState()
     val pagesState by boardDetailsViewModel.pagesState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    
+    // Board Query Bottom Sheet state
+    var showBoardQueryBottomSheet by remember { mutableStateOf(false) }
 
     // Check if subscription is active (now based on user's subscription)
     fun isSubscriptionActive(): Boolean {
@@ -189,12 +198,46 @@ fun BoardDetailsScreen(
                             modifier = Modifier
                                 .padding(7.dp,0.dp,7.dp,7.dp)
                         ) {
-                            Text(
-                                text = "Your Board Information",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Your Board Information",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                
+                                // Help icon for board queries
+                                Box(
+                                    modifier = Modifier
+                                        .border(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.onBackground,
+                                            shape = RoundedCornerShape(25.dp)
+                                        )
+                                        .clickable(onClick = { showBoardQueryBottomSheet = true })
+                                        .padding(5.dp)
+
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.QuestionMark,
+                                        contentDescription = "Back",
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                }
+//                                IconButton(
+//                                    onClick = { showBoardQueryBottomSheet = true }
+//                                ) {
+//                                    Icon(
+//                                        Icons.Default.QuestionMark,
+//                                        contentDescription = "Ask Board Query",
+//                                        tint = MaterialTheme.colorScheme.primary
+//                                    )
+//                                }
+                            }
                             Spacer(modifier = Modifier.height(12.dp))
 
                             BoardInfoRow(
@@ -313,6 +356,26 @@ fun BoardDetailsScreen(
             hostState = snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter)
         )
 
+        // Board Query Bottom Sheet
+        boardState.data?.let { board ->
+            BoardQueryBottomSheet(
+                isVisible = showBoardQueryBottomSheet,
+                onDismiss = { showBoardQueryBottomSheet = false },
+                currentUser = currentUser,
+                boardOrgCode = board.organizationCode,
+                boardOrgName = board.organizationName,
+                boardOrgEmail = board.organizationEmail,
+                boardOrgMobile = board.organizationWhatsapp,
+                onQuerySubmitted = {
+                    // Optionally refresh data or show success message
+                    android.widget.Toast.makeText(
+                        context,
+                        "Board query submitted successfully!",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            )
+        }
     }
 }
 

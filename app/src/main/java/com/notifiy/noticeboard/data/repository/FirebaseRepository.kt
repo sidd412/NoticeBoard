@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.notifiy.noticeboard.data.cache.CacheManager
 import com.notifiy.noticeboard.data.model.BoardDeletionRequest
+import com.notifiy.noticeboard.data.model.BoardQuery
 import com.notifiy.noticeboard.data.model.DataExportRequest
 import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
@@ -2261,6 +2262,95 @@ class FirebaseRepository(private val context: Context? = null) {
             
             Result.success(true)
         } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    // BoardQuery operations
+    suspend fun createBoardQuery(boardQuery: BoardQuery): Result<BoardQuery> {
+        return try {
+            val currentUser = auth.currentUser
+            if (currentUser == null) {
+                android.util.Log.e("FirebaseRepository", "createBoardQuery - User not authenticated")
+                return Result.failure(Exception("User not authenticated"))
+            }
+
+            android.util.Log.d("FirebaseRepository", "createBoardQuery - Creating board query for user: ${currentUser.uid}")
+
+            val queryWithId = boardQuery.copy(
+                id = firestore.collection("boardQueries").document().id,
+                userId = currentUser.uid,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
+            )
+
+            android.util.Log.d("FirebaseRepository", "createBoardQuery - Board query data: ${queryWithId}")
+
+            firestore.collection("boardQueries")
+                .document(queryWithId.id)
+                .set(queryWithId)
+                .await()
+
+            android.util.Log.d("FirebaseRepository", "createBoardQuery - Board query created successfully with ID: ${queryWithId.id}")
+
+            Result.success(queryWithId)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "createBoardQuery - Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun getBoardQueriesByUserId(userId: String): List<BoardQuery> {
+        return try {
+            android.util.Log.d("FirebaseRepository", "getBoardQueriesByUserId - Fetching board queries for userId: $userId")
+
+            val querySnapshot = firestore.collection("boardQueries")
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+
+            android.util.Log.d("FirebaseRepository", "getBoardQueriesByUserId - Found ${querySnapshot.size()} documents")
+
+            val queries = querySnapshot.documents.mapNotNull { doc ->
+                try {
+                    val query = doc.toObject(BoardQuery::class.java)
+                    android.util.Log.d("FirebaseRepository", "getBoardQueriesByUserId - Document ${doc.id}: status=${query?.status}, question=${query?.question}")
+                    query
+                } catch (e: Exception) {
+                    android.util.Log.e("FirebaseRepository", "getBoardQueriesByUserId - Error converting document ${doc.id}: ${e.message}")
+                    null
+                }
+            }
+
+            android.util.Log.d("FirebaseRepository", "getBoardQueriesByUserId - Successfully converted ${queries.size} board queries")
+
+            // Sort by createdAt descending locally
+            queries.sortedByDescending { it.createdAt }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "getBoardQueriesByUserId - Error: ${e.message}")
+            emptyList()
+        }
+    }
+    
+    suspend fun updateBoardQueryAnswer(queryId: String, answer: String): Result<Boolean> {
+        return try {
+            android.util.Log.d("FirebaseRepository", "updateBoardQueryAnswer - Updating board query $queryId with answer")
+            
+            firestore.collection("boardQueries")
+                .document(queryId)
+                .update(
+                    mapOf(
+                        "answer" to answer,
+                        "status" to "resolved",
+                        "updatedAt" to System.currentTimeMillis()
+                    )
+                )
+                .await()
+            
+            android.util.Log.d("FirebaseRepository", "updateBoardQueryAnswer - Board query updated successfully")
+            Result.success(true)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "updateBoardQueryAnswer - Error: ${e.message}")
             Result.failure(e)
         }
     }
