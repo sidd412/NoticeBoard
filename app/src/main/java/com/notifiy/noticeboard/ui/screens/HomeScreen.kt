@@ -20,17 +20,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,9 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -71,11 +63,9 @@ fun HomeScreen(
     val notificationCount by homeViewModel.notificationCount.collectAsState()
     val boardNotifications by homeViewModel.boardNotifications.collectAsState()
 
-    // State for showing all subscribed boards
-    var showAllSubscribedBoards by remember { mutableStateOf(false) }
+    // State for showing all subscribed boards - REMOVED (now navigates to new screen)
     val maxVisibleBoards = 3
-    val visibleBoards =
-        if (showAllSubscribedBoards) subscribedBoards else subscribedBoards.take(maxVisibleBoards)
+    val visibleBoards = subscribedBoards.take(maxVisibleBoards)
 
     LaunchedEffect(currentUser?.id) {
         currentUser?.id?.let { userId ->
@@ -189,7 +179,8 @@ fun HomeScreen(
                         CircularProgressIndicator()
                     }
                 }
-            } else if (subscribedBoards.isEmpty()) {
+            }
+            else if (subscribedBoards.isEmpty()) {
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
@@ -224,7 +215,8 @@ fun HomeScreen(
                         }
                     }
                 }
-            } else {
+            }
+            else {
                 // Subscribed Boards List (no header needed, just show boards)
                 items(visibleBoards) { board ->
                     NoticeBoardCard(
@@ -238,16 +230,15 @@ fun HomeScreen(
             // View More button (only if more than 3 active subscribed boards)
             if (subscribedBoards.size > maxVisibleBoards) {
                 item {
-                    Spacer(modifier = Modifier.height(16.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TextButton(
-                            onClick = { showAllSubscribedBoards = !showAllSubscribedBoards }) {
+                            onClick = { navController.navigate(Screen.AllSubscribedBoards.route) }) {
                             Text(
-                                text = if (showAllSubscribedBoards) "Show Less" else "View More",
+                                text = "View More",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -256,28 +247,6 @@ fun HomeScreen(
                 }
             }
         }
-
-        // Fixed Subscribe More Button
-//        Button(
-//            onClick = { navController.navigate(Screen.SubscribePopup.route) },
-//            modifier = Modifier
-//                .align(Alignment.BottomCenter)
-//                .fillMaxWidth()
-//                .padding(16.dp),
-//            colors = ButtonDefaults.buttonColors(
-//                containerColor = MaterialTheme.colorScheme.primary
-//            )
-//        ) {
-//            Icon(
-//                Icons.Default.Add,
-//                contentDescription = "Subscribe More",
-//                modifier = Modifier.size(20.dp)
-//            )
-//            Spacer(modifier = Modifier.width(8.dp))
-//            Text(
-//                text = "Subscribe More", fontSize = 16.sp, fontWeight = FontWeight.Medium
-//            )
-//        }
     }
 }
 

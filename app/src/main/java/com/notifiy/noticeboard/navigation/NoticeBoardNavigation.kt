@@ -144,5 +144,9 @@ fun NoticeBoardNavigation(navController: NavHostController, themeViewModel: Them
                 orgCode = orgCode
             )
         }
+        
+        composable(Screen.AllSubscribedBoards.route) {
+            AllSubscribedBoardsScreen(navController = navController)
+        }
     }
 }
