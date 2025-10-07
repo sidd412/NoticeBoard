@@ -43,6 +43,11 @@ sealed class Screen(val route: String) {
     object PurchaseDetail : Screen("purchase_detail/{purchaseId}") {
         fun createRoute(purchaseId: String) = "purchase_detail/$purchaseId"
     }
+    object MyQueries : Screen("my_queries")
+    object QueriesToMe : Screen("queries_to_me/{orgCode}") {
+        fun createRoute(orgCode: String) = "queries_to_me/$orgCode"
+    }
+    object AllSubscribedBoards : Screen("all_subscribed_boards")
 }
 
 sealed class BottomNavScreen(val route: String, val title: String, val icon: String) {

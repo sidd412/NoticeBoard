@@ -39,7 +39,7 @@ class AuthViewModel(private val context: Context) : ViewModel() {
     // Google Sign-In client
     val googleSignInClient: GoogleSignInClient by lazy {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestIdToken("1020177538461-1j75djeebl4gmm7g0ok1pit25eutm25l.apps.googleusercontent.com")
             .requestEmail()
             .build()
         GoogleSignIn.getClient(context, gso)

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -51,7 +52,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -75,6 +75,7 @@ import android.content.Context
 import java.io.File
 import java.util.concurrent.TimeUnit
 import com.notifiy.noticeboard.data.model.NoticeBoard
+import com.notifiy.noticeboard.data.repository.FirebaseRepository
 import com.notifiy.noticeboard.navigation.BottomNavScreen
 import com.notifiy.noticeboard.navigation.Screen
 import com.notifiy.noticeboard.ui.viewmodel.AuthViewModel
@@ -91,44 +92,51 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.ui.Alignment
 
 
 // Top-level function for showing download notification
-private fun showDownloadNotification(context: android.content.Context, boardName: String, filePath: String) {
+private fun showDownloadNotification(
+    context: android.content.Context, boardName: String, filePath: String
+) {
     try {
         // Check if we have permission to post notifications (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 println("DEBUG: POST_NOTIFICATIONS permission not granted, skipping notification")
                 return
             }
         }
-        
+
         // Create notification channel for Android 8.0+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "pdf_downloads",
-                "PDF Downloads",
-                NotificationManager.IMPORTANCE_DEFAULT
+                "pdf_downloads", "PDF Downloads", NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = "Notifications for PDF downloads"
             }
-            
+
             val notificationManager = context.getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
-        
+
         // Create intents for both actions
         val file = File(filePath)
-        val pdfUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-        
+        val pdfUri =
+            FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+
         // Intent to open PDF
         val openPdfIntent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(pdfUri, "application/pdf")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        
+
         // Intent to share PDF
         val sharePdfIntent = Intent(Intent.ACTION_SEND).apply {
             type = "application/pdf"
@@ -136,7 +144,7 @@ private fun showDownloadNotification(context: android.content.Context, boardName
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        
+
         // Create pending intents for both actions
         val openPdfPendingIntent = PendingIntent.getActivity(
             context,
@@ -144,34 +152,25 @@ private fun showDownloadNotification(context: android.content.Context, boardName
             openPdfIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        
+
         val sharePdfPendingIntent = PendingIntent.getActivity(
             context,
             (System.currentTimeMillis() + 1).toInt(),
             Intent.createChooser(sharePdfIntent, "Share PDF"),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        
+
         // Create notification with both action buttons
         val notification = NotificationCompat.Builder(context, "pdf_downloads")
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("PDF Downloaded")
+            .setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle("PDF Downloaded")
             .setContentText("Notice board PDF for $boardName is ready")
-            .setContentIntent(openPdfPendingIntent)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setAutoCancel(true)
-            .addAction(
-                android.R.drawable.ic_menu_view,
-                "Open PDF",
-                openPdfPendingIntent
-            )
-            .addAction(
-                android.R.drawable.ic_menu_share,
-                "Share PDF",
-                sharePdfPendingIntent
-            )
-            .build()
-        
+            .setContentIntent(openPdfPendingIntent).setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true).addAction(
+                android.R.drawable.ic_menu_view, "Open PDF", openPdfPendingIntent
+            ).addAction(
+                android.R.drawable.ic_menu_share, "Share PDF", sharePdfPendingIntent
+            ).build()
+
         // Show notification with permission check
         val notificationManager = NotificationManagerCompat.from(context)
         if (notificationManager.areNotificationsEnabled()) {
@@ -180,7 +179,7 @@ private fun showDownloadNotification(context: android.content.Context, boardName
         } else {
             println("DEBUG: Notifications are disabled by user")
         }
-        
+
     } catch (e: SecurityException) {
         println("DEBUG: SecurityException when showing notification: ${e.message}")
     } catch (e: Exception) {
@@ -206,16 +205,16 @@ fun YourBoardsScreen(
     var showBoardLimitDialog by remember { mutableStateOf(false) }
     var currentBoardLimit by remember { mutableStateOf(1) }
     val coroutineScope = rememberCoroutineScope()
-    
+
     // Function to show dialog suggesting PDF viewer installation
     fun showPDFViewerInstallDialog() {
         // Show a toast with installation instructions
         Toast.makeText(
-            context, 
-            "No PDF viewer found! Please install Adobe Reader, Google PDF Viewer, or WPS Office from Play Store.", 
+            context,
+            "No PDF viewer found! Please install Adobe Reader, Google PDF Viewer, or WPS Office from Play Store.",
             Toast.LENGTH_LONG
         ).show()
-        
+
         // Also try to open Play Store
         try {
             val intent = Intent(Intent.ACTION_VIEW).apply {
@@ -227,7 +226,8 @@ fun YourBoardsScreen(
             // Fallback to web browser
             try {
                 val webIntent = Intent(Intent.ACTION_VIEW).apply {
-                    data = android.net.Uri.parse("https://play.google.com/store/search?q=pdf+reader")
+                    data =
+                        android.net.Uri.parse("https://play.google.com/store/search?q=pdf+reader")
                 }
                 context.startActivity(webIntent)
             } catch (webException: Exception) {
@@ -235,66 +235,75 @@ fun YourBoardsScreen(
             }
         }
     }
-    
+
     // Function to open PDF file using share intent (most reliable approach)
     fun openPDFFile(filePath: String) {
         try {
             println("DEBUG: openPDFFile called with path: $filePath")
-            
+
             val file = File(filePath)
             println("DEBUG: File path: ${file.absolutePath}")
             println("DEBUG: File exists: ${file.exists()}")
             println("DEBUG: File size: ${file.length()}")
             println("DEBUG: File readable: ${file.canRead()}")
-            
+
             if (!file.exists()) {
-                Toast.makeText(context, "PDF file not found at: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context, "PDF file not found at: ${file.absolutePath}", Toast.LENGTH_LONG
+                ).show()
                 return
             }
-            
+
             if (!file.canRead()) {
-                Toast.makeText(context, "Cannot read PDF file. Check permissions.", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context, "Cannot read PDF file. Check permissions.", Toast.LENGTH_LONG
+                ).show()
                 return
             }
-            
+
             // Use share intent - this is the most reliable way to open files
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "application/pdf"
-                putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file))
+                putExtra(
+                    Intent.EXTRA_STREAM,
+                    FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+                )
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            
+
             // Check if any apps can handle this
             val packageManager = context.packageManager
             val resolveInfo = packageManager.queryIntentActivities(shareIntent, 0)
             println("DEBUG: Share intent - Apps found: ${resolveInfo.size}")
-            
+
             if (resolveInfo.isNotEmpty()) {
                 // Filter for PDF viewers and document apps
                 val pdfApps = resolveInfo.filter { resolveInfo ->
                     val packageName = resolveInfo.activityInfo.packageName.lowercase()
-                    packageName.contains("pdf") || 
-                    packageName.contains("adobe") || 
-                    packageName.contains("foxit") ||
-                    packageName.contains("wps") ||
-                    packageName.contains("office") ||
-                    packageName.contains("drive") ||
-                    packageName.contains("docs") ||
-                    packageName.contains("viewer") ||
-                    packageName.contains("reader")
+                    packageName.contains("pdf") || packageName.contains("adobe") || packageName.contains(
+                        "foxit"
+                    ) || packageName.contains("wps") || packageName.contains("office") || packageName.contains(
+                        "drive"
+                    ) || packageName.contains("docs") || packageName.contains("viewer") || packageName.contains(
+                        "reader"
+                    )
                 }
-                
+
                 if (pdfApps.isNotEmpty()) {
                     // Try to open with a specific PDF app
                     val specificIntent = Intent(Intent.ACTION_SEND).apply {
                         type = "application/pdf"
-                        putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file))
+                        putExtra(
+                            Intent.EXTRA_STREAM, FileProvider.getUriForFile(
+                                context, "${context.packageName}.fileprovider", file
+                            )
+                        )
                         setPackage(pdfApps.first().activityInfo.packageName)
                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
-                    
+
                     try {
                         context.startActivity(specificIntent)
                         println("DEBUG: Successfully opened with PDF app: ${pdfApps.first().activityInfo.packageName}")
@@ -303,7 +312,7 @@ fun YourBoardsScreen(
                         println("DEBUG: Failed to open with specific app: ${e.message}")
                     }
                 }
-                
+
                 // Fallback: Show share dialog
                 val chooserIntent = Intent.createChooser(shareIntent, "Open PDF with")
                 chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -311,16 +320,18 @@ fun YourBoardsScreen(
                 println("DEBUG: Showing share dialog")
                 return
             }
-            
-            Toast.makeText(context, "No app found to open PDF. Please install a PDF viewer.", Toast.LENGTH_LONG).show()
-            
+
+            Toast.makeText(
+                context, "No app found to open PDF. Please install a PDF viewer.", Toast.LENGTH_LONG
+            ).show()
+
         } catch (e: Exception) {
             println("DEBUG: Error opening PDF: ${e.message}")
             e.printStackTrace()
             Toast.makeText(context, "Error opening PDF: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
-    
+
     // Handle snackbar action result
     LaunchedEffect(showSnackbar) {
         if (showSnackbar) {
@@ -343,18 +354,21 @@ fun YourBoardsScreen(
             showSnackbar = false
         }
     }
-    
+
     // Permission launcher for storage access
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            Toast.makeText(context, "Permission granted! You can now download PDFs.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context, "Permission granted! You can now download PDFs.", Toast.LENGTH_SHORT
+            ).show()
         } else {
-            Toast.makeText(context, "Permission denied. Cannot download PDFs.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Permission denied. Cannot download PDFs.", Toast.LENGTH_SHORT)
+                .show()
         }
     }
-    
+
     // Permission launcher for notifications (Android 13+)
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -362,69 +376,76 @@ fun YourBoardsScreen(
         if (isGranted) {
             Toast.makeText(context, "Notification permission granted!", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(context, "Notification permission denied. You won't see download notifications.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                "Notification permission denied. You won't see download notifications.",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
-    
+
     // Function to check and request permissions
     fun checkStoragePermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             // For Android 13+, we don't need WRITE_EXTERNAL_STORAGE permission
             true
         } else {
-            ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(
+                context, Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
         }
     }
-    
+
     // Function to check notification permission
     fun checkNotificationPermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(
+                context, Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
         } else {
             true // Notifications are allowed by default on older Android versions
         }
     }
-    
+
     // Function to download PDF
     fun downloadBoardPDF(board: NoticeBoard) {
         if (!checkStoragePermission()) {
             permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             return
         }
-        
+
         // Request notification permission if needed (Android 13+)
         if (!checkNotificationPermission()) {
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             // Continue with download even if notification permission is denied
         }
-        
+
         Toast.makeText(context, "Downloading...", Toast.LENGTH_SHORT).show()
-        
+
         // Generate QR code bitmap
         val qrBitmap = QRCodeUtils.generateQRCodeBitmap(board, 300) // Larger size for PDF
-        
+
         PDFGenerator.generateBoardInfoPDF(
             context = context,
             board = board,
             qrBitmap = qrBitmap,
             onSuccess = { filePath ->
                 downloadedFilePath = filePath
-                
+
                 // Show toast notification
                 Toast.makeText(context, "Successfully downloaded!", Toast.LENGTH_SHORT).show()
-                
+
                 // Show top notification (will check permission internally)
                 showDownloadNotification(context, board.organizationName, filePath)
-                
+
                 // Show snackbar
                 showSnackbar = true
             },
             onError = { error ->
                 Toast.makeText(context, "Failed to generate PDF: $error", Toast.LENGTH_LONG).show()
-            }
-        )
+            })
     }
-    
+
 
     // Handle mobile back button
     BackHandler {
@@ -480,10 +501,9 @@ fun YourBoardsScreen(
         // Main content
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 90.dp),
+            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 30.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
-        )
-        {
+        ) {
             // Back button and header
             item {
                 Row(
@@ -491,26 +511,26 @@ fun YourBoardsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = {
-                            println("DEBUG: YourBoardsScreen - Back icon clicked")
-                            // Navigate to Home tab instead of popBackStack
-                            navController.navigate(BottomNavScreen.Home.route)
-                        }) {
-                        Icon(
-                            Icons.Default.ArrowBack, contentDescription = "Back"
-                        )
-                    }
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.clickable(onClick = {
+                            navController.navigate(
+                                BottomNavScreen.Home.route
+                            )
+                        })
+                    )
                     Text(
                         text = "Your Notice Boards",
-                        fontSize = 20.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
 
-                    // Refresh button
-                    IconButton(
-                        onClick = {
+                    Icon(
+                        Icons.Default.Refresh,
+                        contentDescription = "Refresh",
+                        modifier = Modifier.clickable(onClick = {
                             println("DEBUG: YourBoardsScreen - Refresh button clicked")
                             currentUser?.let { user ->
                                 println("DEBUG: YourBoardsScreen - Refreshing boards for user: ${user.id}")
@@ -518,11 +538,8 @@ fun YourBoardsScreen(
                             } ?: run {
                                 println("DEBUG: YourBoardsScreen - No current user for refresh")
                             }
-                        }) {
-                        Icon(
-                            Icons.Default.Refresh, contentDescription = "Refresh"
-                        )
-                    }
+                        })
+                    )
                 }
             }
 
@@ -554,12 +571,61 @@ fun YourBoardsScreen(
 
             // My Existing Boards Section
             item {
-                Text(
-                    text = "My Running Boards",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 5.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "My Running Boards",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Row(
+                        modifier = Modifier.clickable(onClick = {
+                            currentUser?.let { user ->
+                                android.util.Log.d(
+                                    "board limit",
+                                    "YourBoardsScreen - Create board button clicked for user: ${user.name}"
+                                )
+                                yourBoardsViewModel.checkBoardLimit(user.id) { canCreate, boardLimit ->
+                                    android.util.Log.d(
+                                        "board limit",
+                                        "YourBoardsScreen - Board limit check result: canCreate=$canCreate, limit=$boardLimit"
+                                    )
+                                    if (canCreate) {
+                                        android.util.Log.d(
+                                            "board limit",
+                                            "YourBoardsScreen - Can create board, navigating to create screen"
+                                        )
+                                        mainNavController.navigate(Screen.CreateBoard.route)
+                                    } else {
+                                        android.util.Log.d(
+                                            "board limit",
+                                            "YourBoardsScreen - Cannot create board, showing limit dialog"
+                                        )
+                                        currentBoardLimit = boardLimit
+                                        showBoardLimitDialog = true
+                                    }
+                                }
+                            }
+                        }), verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Search Notice Boards",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = "Add",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             }
 
             // Boards List
@@ -612,78 +678,97 @@ fun YourBoardsScreen(
                 println("DEBUG: YourBoardsScreen - Showing ${userBoardsState.data?.size ?: 0} boards")
                 items(userBoardsState.data ?: emptyList()) { board ->
                     println("DEBUG: YourBoardsScreen - Rendering board: ${board.organizationName}")
-                    YourBoardCard(
-                        board = board, 
-                        onUpdateClick = {
-                            println("DEBUG: YourBoardsScreen - Update clicked for board: ${board.id}")
-                            mainNavController.navigate(Screen.BoardDetails.createRoute(board.id))
-                        },
-                        onDeleteClick = { boardToDelete ->
-                            println("DEBUG: YourBoardsScreen - Delete clicked for board: ${boardToDelete.id}")
-                            currentUser?.let { user ->
-                                yourBoardsViewModel.deleteNoticeBoard(boardToDelete.id, user.id) { success ->
-                                    if (success) {
-                                        println("DEBUG: YourBoardsScreen - Board deleted successfully")
-                                        Toast.makeText(context, "Notice board \"${boardToDelete.organizationName}\" deleted successfully!", Toast.LENGTH_LONG).show()
-                                    } else {
-                                        println("DEBUG: YourBoardsScreen - Failed to delete board")
-                                        Toast.makeText(context, "Failed to delete notice board. Please try again.", Toast.LENGTH_SHORT).show()
-                                    }
+                    YourBoardCard(board = board, onUpdateClick = {
+                        println("DEBUG: YourBoardsScreen - Update clicked for board: ${board.id}")
+                        mainNavController.navigate(Screen.BoardDetails.createRoute(board.id))
+                    }, onDeleteClick = { boardToDelete ->
+                        println("DEBUG: YourBoardsScreen - Delete clicked for board: ${boardToDelete.id}")
+                        currentUser?.let { user ->
+                            yourBoardsViewModel.deleteNoticeBoard(
+                                boardToDelete.id, user.id
+                            ) { success ->
+                                if (success) {
+                                    println("DEBUG: YourBoardsScreen - Board deleted successfully")
+                                    Toast.makeText(
+                                        context,
+                                        "Notice board \"${boardToDelete.organizationName}\" deleted successfully!",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                } else {
+                                    println("DEBUG: YourBoardsScreen - Failed to delete board")
+                                    Toast.makeText(
+                                        context,
+                                        "Failed to delete notice board. Please try again.",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
-                        },
-                        onDownloadClick = { boardToDownload ->
-                            println("DEBUG: YourBoardsScreen - Download clicked for board: ${boardToDownload.id}")
-                            downloadBoardPDF(boardToDownload)
                         }
-                    )
+                    }, onDownloadClick = { boardToDownload ->
+                        println("DEBUG: YourBoardsScreen - Download clicked for board: ${boardToDownload.id}")
+                        downloadBoardPDF(boardToDownload)
+                    }, onQueriesClick = { boardToQuery ->
+                        println("DEBUG: YourBoardsScreen - Queries clicked for board: ${boardToQuery.id}")
+                        mainNavController.navigate(Screen.QueriesToMe.createRoute(boardToQuery.organizationCode))
+                    })
                 }
             }
         }
 
         // Fixed Create New Board Button
-        Button(
-            onClick = { 
-                currentUser?.let { user ->
-                    android.util.Log.d("board limit", "YourBoardsScreen - Create board button clicked for user: ${user.name}")
-                    yourBoardsViewModel.checkBoardLimit(user.id) { canCreate, boardLimit ->
-                        android.util.Log.d("board limit", "YourBoardsScreen - Board limit check result: canCreate=$canCreate, limit=$boardLimit")
-                        if (canCreate) {
-                            android.util.Log.d("board limit", "YourBoardsScreen - Can create board, navigating to create screen")
-                            mainNavController.navigate(Screen.CreateBoard.route)
-                        } else {
-                            android.util.Log.d("board limit", "YourBoardsScreen - Cannot create board, showing limit dialog")
-                            currentBoardLimit = boardLimit
-                            showBoardLimitDialog = true
-                        }
-                    }
-                }
-            },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Icon(
-                Icons.Default.Add,
-                contentDescription = "Create New Board",
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Create New Board", fontSize = 16.sp, fontWeight = FontWeight.Medium
-            )
-        }
+//        Button(
+//            onClick = {
+//                currentUser?.let { user ->
+//                    android.util.Log.d(
+//                        "board limit",
+//                        "YourBoardsScreen - Create board button clicked for user: ${user.name}"
+//                    )
+//                    yourBoardsViewModel.checkBoardLimit(user.id) { canCreate, boardLimit ->
+//                        android.util.Log.d(
+//                            "board limit",
+//                            "YourBoardsScreen - Board limit check result: canCreate=$canCreate, limit=$boardLimit"
+//                        )
+//                        if (canCreate) {
+//                            android.util.Log.d(
+//                                "board limit",
+//                                "YourBoardsScreen - Can create board, navigating to create screen"
+//                            )
+//                            mainNavController.navigate(Screen.CreateBoard.route)
+//                        } else {
+//                            android.util.Log.d(
+//                                "board limit",
+//                                "YourBoardsScreen - Cannot create board, showing limit dialog"
+//                            )
+//                            currentBoardLimit = boardLimit
+//                            showBoardLimitDialog = true
+//                        }
+//                    }
+//                }
+//            },
+//            modifier = Modifier
+//                .align(Alignment.BottomCenter)
+//                .fillMaxWidth()
+//                .padding(16.dp),
+//            colors = ButtonDefaults.buttonColors(
+//                containerColor = MaterialTheme.colorScheme.primary
+//            )
+//        ) {
+//            Icon(
+//                Icons.Default.Add,
+//                contentDescription = "Create New Board",
+//                modifier = Modifier.size(20.dp)
+//            )
+//            Spacer(modifier = Modifier.width(8.dp))
+//            Text(
+//                text = "Create New Board", fontSize = 16.sp, fontWeight = FontWeight.Medium
+//            )
+//        }
 
         // Snackbar Host
         SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            hostState = snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter)
         )
-        
+
         // Board Limit Dialog
         BoardLimitDialog(
             isVisible = showBoardLimitDialog,
@@ -694,20 +779,36 @@ fun YourBoardsScreen(
             },
             onBack = {
                 showBoardLimitDialog = false
-            }
-        )
+            })
     }
 }
 
 @Composable
 fun YourBoardCard(
-    board: NoticeBoard, 
+    board: NoticeBoard,
     onUpdateClick: () -> Unit,
     onDeleteClick: (NoticeBoard) -> Unit,
-    onDownloadClick: (NoticeBoard) -> Unit
+    onDownloadClick: (NoticeBoard) -> Unit,
+    onQueriesClick: (NoticeBoard) -> Unit = {}
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
-    
+    var unresolvedQueriesCount by remember { mutableStateOf(0) }
+    val context = LocalContext.current
+    val repository = remember { FirebaseRepository(context) }
+    val scope = rememberCoroutineScope()
+
+    // Load unresolved queries count
+    LaunchedEffect(board.organizationCode) {
+        scope.launch {
+            try {
+                unresolvedQueriesCount =
+                    repository.getUnresolvedQueriesCount(board.organizationCode)
+            } catch (e: Exception) {
+                android.util.Log.e("YourBoardCard", "Error loading query count: ${e.message}")
+            }
+        }
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -722,7 +823,7 @@ fun YourBoardCard(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // Board Icon
+                    // Board Icon (without notification badge)
                     Box(
                         modifier = Modifier
                             .size(40.dp)
@@ -753,7 +854,7 @@ fun YourBoardCard(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
-                    
+
                     // Action buttons
                     Row {
                         IconButton(
@@ -766,8 +867,7 @@ fun YourBoardCard(
                             )
                         }
                         IconButton(
-                            onClick = { showDeleteDialog = true }
-                        ) {
+                            onClick = { showDeleteDialog = true }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "Delete Board",
@@ -802,34 +902,129 @@ fun YourBoardCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(
-                                if (board.isActive) Color(0xFF4CAF50)
-                                else Color(0xFFF44336)
-                            )
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = if (board.isActive) {
-                            "Active"
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(
+                                    if (board.isActive) Color(0xFF4CAF50)
+                                    else Color(0xFFF44336)
+                                )
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (board.isActive) {
+                                "Active"
+                            } else {
+                                "Inactive"
+                            },
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+
+
+                        // Notification Icon with Badge (only show if there are queries)
+                        if (unresolvedQueriesCount > 0) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "|",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "unresolved queries",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
+                                Box {
+                                    IconButton(
+                                        onClick = { onQueriesClick(board) },
+                                        modifier = Modifier
+                                            .size(27.dp)
+                                            .align(Alignment.BottomCenter)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Notifications,
+                                            contentDescription = "View Queries",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(22.dp)
+                                        )
+                                    }
+                                    // Notification Badge
+                                    Box(
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(Color.Red)
+                                            .align(Alignment.TopEnd),
+                                        contentAlignment = Alignment.TopCenter
+                                    ) {
+                                        Text(
+                                            text = if (unresolvedQueriesCount > 9) "9+" else unresolvedQueriesCount.toString(),
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White,
+                                        )
+                                    }
+                                }
+                            }
+
                         } else {
-                            "Inactive"
-                        },
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "|",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "No unresolved query",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
+                                Box {
+                                    IconButton(
+                                        onClick = { onQueriesClick(board) },
+                                        modifier = Modifier
+                                            .size(27.dp)
+                                            .align(Alignment.BottomCenter)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.CheckCircle,
+                                            contentDescription = "View Queries",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(22.dp)
+                                        )
+                                    }
+//                                    // Notification Badge
+//                                    Box(
+//                                        modifier = Modifier
+//                                            .size(16.dp)
+//                                            .clip(RoundedCornerShape(8.dp))
+//                                            .background(Color.Red)
+//                                            .align(Alignment.TopEnd),
+//                                        contentAlignment = Alignment.TopCenter
+//                                    ) {
+//                                        Text(
+//                                            text = if (unresolvedQueriesCount > 9) "9+" else unresolvedQueriesCount.toString(),
+//                                            fontSize = 9.sp,
+//                                            fontWeight = FontWeight.Bold,
+//                                            color = Color.White,
+//                                        )
+//                                    }
+                                }
+                            }
+                        }
                     }
-                    
+
                     // Download Button
                     IconButton(
-                        onClick = { onDownloadClick(board) }
-                    ) {
+                        onClick = { onDownloadClick(board) }) {
                         Icon(
                             imageVector = Icons.Default.Download,
                             contentDescription = "Download Board Info",
@@ -840,22 +1035,25 @@ fun YourBoardCard(
                 }
             }
             Box(
-                modifier = Modifier.padding(top = 16.dp, end = 16.dp)
+                modifier = Modifier
+                    .padding(top = 16.dp, end = 16.dp)
                     .size(90.dp)
+                    .border(1.dp, Color.White.copy(.7f))
                     .align(Alignment.TopEnd),
                 contentAlignment = Alignment.Center
-            ){
-                val qrBitmap = remember(board.id) { 
-                    QRCodeUtils.generateQRCodeBitmap(board, 90) 
+            ) {
+                val qrBitmap = remember(board.id) {
+                    QRCodeUtils.generateQRCodeBitmap(board, 90)
                 }
-                
+
                 if (qrBitmap != null) {
                     Image(
                         bitmap = qrBitmap.asImageBitmap(),
                         contentDescription = "QR Code for ${board.organizationName}",
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(2.dp).clip(RoundedCornerShape(2.dp)) // Small padding to prevent touching borders
+//                            .padding(2.dp)
+                            .clip(RoundedCornerShape(2.dp)) // Small padding to prevent touching borders
                     )
                 } else {
                     Text(
@@ -866,22 +1064,21 @@ fun YourBoardCard(
                 }
             }
         }
-        
+
         // Delete confirmation dialog
         if (showDeleteDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },
                 title = { Text("Delete Notice Board") },
-                text = { 
+                text = {
                     Text("Are you sure you want to delete \"${board.organizationName}\"? This action cannot be undone and will permanently remove the board and all its data. All subscribers will lose access to this board and its notices.")
                 },
                 confirmButton = {
                     Button(
-                        onClick = { 
+                        onClick = {
                             showDeleteDialog = false
                             onDeleteClick(board)
-                        },
-                        colors = ButtonDefaults.buttonColors(
+                        }, colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error
                         )
                     ) {
@@ -892,8 +1089,7 @@ fun YourBoardCard(
                     TextButton(onClick = { showDeleteDialog = false }) {
                         Text("Cancel")
                     }
-                }
-            )
+                })
         }
     }
 }

@@ -3,8 +3,10 @@ package com.notifiy.noticeboard.data.repository
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.notifiy.noticeboard.data.cache.CacheManager
 import com.notifiy.noticeboard.data.model.BoardDeletionRequest
+import com.notifiy.noticeboard.data.model.BoardQuery
 import com.notifiy.noticeboard.data.model.DataExportRequest
 import com.notifiy.noticeboard.data.model.Notice
 import com.notifiy.noticeboard.data.model.NoticeBoard
@@ -13,6 +15,7 @@ import com.notifiy.noticeboard.data.model.Plan
 import com.notifiy.noticeboard.data.model.UpdateConfig
 import com.notifiy.noticeboard.data.model.User
 import com.notifiy.noticeboard.data.model.UserNotification
+import com.notifiy.noticeboard.data.model.UserQuery
 import com.notifiy.noticeboard.data.model.Purchase
 import com.notifiy.noticeboard.data.model.SubscriptionStatus
 import com.notifiy.noticeboard.data.model.PlanFeatures
@@ -1952,6 +1955,403 @@ class FirebaseRepository(private val context: Context? = null) {
         } catch (e: Exception) {
             android.util.Log.e("FirebaseRepository", "Error checking plan upgrade: ${e.message}")
             false
+        }
+    }
+    
+    // User Query operations
+    suspend fun createUserQuery(userQuery: UserQuery): Result<UserQuery> {
+        return try {
+            val currentUser = auth.currentUser
+            if (currentUser == null) {
+                android.util.Log.e("FirebaseRepository", "createUserQuery - User not authenticated")
+                return Result.failure(Exception("User not authenticated"))
+            }
+            
+            android.util.Log.d("FirebaseRepository", "createUserQuery - Creating query for user: ${currentUser.uid}")
+            
+            val queryWithId = userQuery.copy(
+                id = firestore.collection("userQueries").document().id,
+                raiserId = currentUser.uid,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
+            )
+            
+            android.util.Log.d("FirebaseRepository", "createUserQuery - Query data: ${queryWithId}")
+            
+            firestore.collection("userQueries")
+                .document(queryWithId.id)
+                .set(queryWithId)
+                .await()
+            
+            android.util.Log.d("FirebaseRepository", "createUserQuery - Query created successfully with ID: ${queryWithId.id}")
+            
+            // Send notification to board owner
+            sendQueryNotificationToBoardOwner(queryWithId.organisationCode, queryWithId)
+            
+            Result.success(queryWithId)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "createUserQuery - Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun getUserQueriesByUserId(userId: String): List<UserQuery> {
+        return try {
+            android.util.Log.d("FirebaseRepository", "getUserQueriesByUserId - Fetching queries for userId: $userId")
+            
+            val querySnapshot = firestore.collection("userQueries")
+                .whereEqualTo("raiserId", userId)
+                .get()
+                .await()
+            
+            android.util.Log.d("FirebaseRepository", "getUserQueriesByUserId - Found ${querySnapshot.size()} documents")
+            
+            val queries = querySnapshot.documents.mapNotNull { doc ->
+                try {
+                    val query = doc.toObject(UserQuery::class.java)
+                    android.util.Log.d("FirebaseRepository", "getUserQueriesByUserId - Document ${doc.id}: status=${query?.status}, question=${query?.question}")
+                    query
+                } catch (e: Exception) {
+                    android.util.Log.e("FirebaseRepository", "getUserQueriesByUserId - Error converting document ${doc.id}: ${e.message}")
+                    null
+                }
+            }
+            
+            android.util.Log.d("FirebaseRepository", "getUserQueriesByUserId - Successfully converted ${queries.size} queries")
+            
+            // Sort by createdAt descending locally
+            queries.sortedByDescending { it.createdAt }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "getUserQueriesByUserId - Error: ${e.message}")
+            emptyList()
+        }
+    }
+    
+    suspend fun getUserQueriesByStatus(userId: String, status: String): List<UserQuery> {
+        return try {
+            val querySnapshot = firestore.collection("userQueries")
+                .whereEqualTo("raiserId", userId)
+                .whereEqualTo("status", status)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            querySnapshot.documents.mapNotNull { doc ->
+                try {
+                    doc.toObject(UserQuery::class.java)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+    
+    suspend fun getQueriesByOrganizationCode(orgCode: String): List<UserQuery> {
+        return try {
+            android.util.Log.d("FirebaseRepository", "getQueriesByOrganizationCode - Fetching queries for orgCode: $orgCode")
+            
+            val querySnapshot = firestore.collection("userQueries")
+                .whereEqualTo("organisationCode", orgCode)
+                .get()
+                .await()
+            
+            android.util.Log.d("FirebaseRepository", "getQueriesByOrganizationCode - Found ${querySnapshot.size()} documents")
+            
+            val queries = querySnapshot.documents.mapNotNull { doc ->
+                try {
+                    val query = doc.toObject(UserQuery::class.java)
+                    android.util.Log.d("FirebaseRepository", "getQueriesByOrganizationCode - Document ${doc.id}: status=${query?.status}, question=${query?.question}")
+                    query
+                } catch (e: Exception) {
+                    android.util.Log.e("FirebaseRepository", "getQueriesByOrganizationCode - Error converting document ${doc.id}: ${e.message}")
+                    null
+                }
+            }
+            
+            android.util.Log.d("FirebaseRepository", "getQueriesByOrganizationCode - Successfully converted ${queries.size} queries")
+            
+            // Sort by createdAt descending locally
+            queries.sortedByDescending { it.createdAt }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "getQueriesByOrganizationCode - Error: ${e.message}")
+            emptyList()
+        }
+    }
+    
+    suspend fun getUnresolvedQueriesCount(orgCode: String): Int {
+        return try {
+            val querySnapshot = firestore.collection("userQueries")
+                .whereEqualTo("organisationCode", orgCode)
+                .whereEqualTo("status", "created")
+                .get()
+                .await()
+            
+            querySnapshot.size()
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "getUnresolvedQueriesCount - Error: ${e.message}")
+            0
+        }
+    }
+    
+    suspend fun sendQueryNotificationToBoardOwner(orgCode: String, query: UserQuery): Result<Boolean> {
+        return try {
+            android.util.Log.d("FirebaseRepository", "sendQueryNotificationToBoardOwner - Sending notification for orgCode: $orgCode")
+            
+            // Get the board owner (user who created the board with this orgCode)
+            val boardQuery = firestore.collection("noticeBoards")
+                .whereEqualTo("organizationCode", orgCode)
+                .limit(1)
+                .get()
+                .await()
+            
+            if (boardQuery.isEmpty) {
+                android.util.Log.e("FirebaseRepository", "sendQueryNotificationToBoardOwner - No board found for orgCode: $orgCode")
+                return Result.failure(Exception("Board not found"))
+            }
+            
+            val board = boardQuery.documents.first().toObject(NoticeBoard::class.java)
+            if (board == null) {
+                android.util.Log.e("FirebaseRepository", "sendQueryNotificationToBoardOwner - Failed to parse board")
+                return Result.failure(Exception("Failed to parse board"))
+            }
+            
+            // Get board owner
+            val boardOwner = firestore.collection("users")
+                .document(board.createdBy)
+                .get()
+                .await()
+                .toObject(User::class.java)
+            
+            if (boardOwner == null) {
+                android.util.Log.e("FirebaseRepository", "sendQueryNotificationToBoardOwner - Board owner not found")
+                return Result.failure(Exception("Board owner not found"))
+            }
+            
+            // Create notification for board owner
+            val notificationId = "${boardOwner.id}_query_${query.id}"
+            val notificationRef = firestore.collection("userNotifications").document(notificationId)
+            
+            val notification = UserNotification(
+                id = notificationId,
+                userId = boardOwner.id,
+                boardId = board.id,
+                boardCode = orgCode,
+                unreadCount = 1,
+                title = "New Query Received",
+                body = "You have received a new query from ${query.raiserName}: ${query.question.take(50)}...",
+                type = "query",
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
+            )
+            
+            notificationRef.set(notification).await()
+            
+            // Send local notification if board owner is current user
+            val currentUser = getCurrentUser()
+            if (currentUser?.id == boardOwner.id && context != null) {
+                val notificationService = LocalNotificationService(context)
+                notificationService.showNotification(
+                    "New Query Received",
+                    "You have received a new query from ${query.raiserName}",
+                    board.id,
+                    board.organizationName
+                )
+            }
+            
+            android.util.Log.d("FirebaseRepository", "sendQueryNotificationToBoardOwner - Notification sent successfully")
+            Result.success(true)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "sendQueryNotificationToBoardOwner - Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun sendQueryResolutionNotificationToRaiser(query: UserQuery): Result<Boolean> {
+        return try {
+            android.util.Log.d("FirebaseRepository", "sendQueryResolutionNotificationToRaiser - Sending resolution notification for query: ${query.id}")
+            
+            // Get query raiser
+            val queryRaiser = firestore.collection("users")
+                .document(query.raiserId)
+                .get()
+                .await()
+                .toObject(User::class.java)
+            
+            if (queryRaiser == null) {
+                android.util.Log.e("FirebaseRepository", "sendQueryResolutionNotificationToRaiser - Query raiser not found")
+                return Result.failure(Exception("Query raiser not found"))
+            }
+            
+            // Get board info
+            val boardQuery = firestore.collection("noticeBoards")
+                .whereEqualTo("organizationCode", query.organisationCode)
+                .limit(1)
+                .get()
+                .await()
+            
+            val board = boardQuery.documents.firstOrNull()?.toObject(NoticeBoard::class.java)
+            
+            // Create notification for query raiser
+            val notificationId = "${queryRaiser.id}_query_resolved_${query.id}"
+            val notificationRef = firestore.collection("userNotifications").document(notificationId)
+            
+            val notification = UserNotification(
+                id = notificationId,
+                userId = queryRaiser.id,
+                boardId = board?.id ?: "",
+                boardCode = query.organisationCode,
+                unreadCount = 1,
+                title = "Query Resolved",
+                body = "Your query has been resolved by ${board?.organizationName ?: "the board owner"}",
+                type = "query_resolved",
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
+            )
+            
+            notificationRef.set(notification).await()
+            
+            // Send local notification if query raiser is current user
+            val currentUser = getCurrentUser()
+            if (currentUser?.id == queryRaiser.id && context != null) {
+                val notificationService = LocalNotificationService(context)
+                notificationService.showNotification(
+                    "Query Resolved",
+                    "Your query has been resolved by ${board?.organizationName ?: "the board owner"}",
+                    board?.id,
+                    board?.organizationName ?: "Notice Board"
+                )
+            }
+            
+            android.util.Log.d("FirebaseRepository", "sendQueryResolutionNotificationToRaiser - Resolution notification sent successfully")
+            Result.success(true)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "sendQueryResolutionNotificationToRaiser - Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun updateUserQueryAnswer(queryId: String, answer: String): Result<Boolean> {
+        return try {
+            // First get the query to send notification
+            val queryDoc = firestore.collection("userQueries")
+                .document(queryId)
+                .get()
+                .await()
+            
+            val query = queryDoc.toObject(UserQuery::class.java)
+            if (query == null) {
+                return Result.failure(Exception("Query not found"))
+            }
+            
+            // Update the query
+            firestore.collection("userQueries")
+                .document(queryId)
+                .update(
+                    mapOf(
+                        "answer" to answer,
+                        "status" to "resolved",
+                        "updatedAt" to System.currentTimeMillis()
+                    )
+                )
+                .await()
+            
+            // Send resolution notification to query raiser
+            sendQueryResolutionNotificationToRaiser(query.copy(answer = answer, status = "resolved"))
+            
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    // BoardQuery operations
+    suspend fun createBoardQuery(boardQuery: BoardQuery): Result<BoardQuery> {
+        return try {
+            val currentUser = auth.currentUser
+            if (currentUser == null) {
+                android.util.Log.e("FirebaseRepository", "createBoardQuery - User not authenticated")
+                return Result.failure(Exception("User not authenticated"))
+            }
+
+            android.util.Log.d("FirebaseRepository", "createBoardQuery - Creating board query for user: ${currentUser.uid}")
+
+            val queryWithId = boardQuery.copy(
+                id = firestore.collection("boardQueries").document().id,
+                userId = currentUser.uid,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
+            )
+
+            android.util.Log.d("FirebaseRepository", "createBoardQuery - Board query data: ${queryWithId}")
+
+            firestore.collection("boardQueries")
+                .document(queryWithId.id)
+                .set(queryWithId)
+                .await()
+
+            android.util.Log.d("FirebaseRepository", "createBoardQuery - Board query created successfully with ID: ${queryWithId.id}")
+
+            Result.success(queryWithId)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "createBoardQuery - Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun getBoardQueriesByUserId(userId: String): List<BoardQuery> {
+        return try {
+            android.util.Log.d("FirebaseRepository", "getBoardQueriesByUserId - Fetching board queries for userId: $userId")
+
+            val querySnapshot = firestore.collection("boardQueries")
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+
+            android.util.Log.d("FirebaseRepository", "getBoardQueriesByUserId - Found ${querySnapshot.size()} documents")
+
+            val queries = querySnapshot.documents.mapNotNull { doc ->
+                try {
+                    val query = doc.toObject(BoardQuery::class.java)
+                    android.util.Log.d("FirebaseRepository", "getBoardQueriesByUserId - Document ${doc.id}: status=${query?.status}, question=${query?.question}")
+                    query
+                } catch (e: Exception) {
+                    android.util.Log.e("FirebaseRepository", "getBoardQueriesByUserId - Error converting document ${doc.id}: ${e.message}")
+                    null
+                }
+            }
+
+            android.util.Log.d("FirebaseRepository", "getBoardQueriesByUserId - Successfully converted ${queries.size} board queries")
+
+            // Sort by createdAt descending locally
+            queries.sortedByDescending { it.createdAt }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "getBoardQueriesByUserId - Error: ${e.message}")
+            emptyList()
+        }
+    }
+    
+    suspend fun updateBoardQueryAnswer(queryId: String, answer: String): Result<Boolean> {
+        return try {
+            android.util.Log.d("FirebaseRepository", "updateBoardQueryAnswer - Updating board query $queryId with answer")
+            
+            firestore.collection("boardQueries")
+                .document(queryId)
+                .update(
+                    mapOf(
+                        "answer" to answer,
+                        "status" to "resolved",
+                        "updatedAt" to System.currentTimeMillis()
+                    )
+                )
+                .await()
+            
+            android.util.Log.d("FirebaseRepository", "updateBoardQueryAnswer - Board query updated successfully")
+            Result.success(true)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "updateBoardQueryAnswer - Error: ${e.message}")
+            Result.failure(e)
         }
     }
 }
