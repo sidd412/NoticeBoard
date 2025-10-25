@@ -20,6 +20,7 @@ import com.notifiy.noticeboard.data.model.Purchase
 import com.notifiy.noticeboard.data.model.SubscriptionStatus
 import com.notifiy.noticeboard.data.model.PlanFeatures
 import com.notifiy.noticeboard.services.LocalNotificationService
+import com.notifiy.noticeboard.services.FCMTokenManager
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
@@ -30,6 +31,7 @@ class FirebaseRepository(private val context: Context? = null) {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private val cacheManager: CacheManager? = context?.let { CacheManager(it) }
+    private val fcmTokenManager: FCMTokenManager? = context?.let { FCMTokenManager(it) }
     
     // User operations
     suspend fun getCurrentUser(): User? {
@@ -152,6 +154,58 @@ class FirebaseRepository(private val context: Context? = null) {
             println("accountdeletion: FirebaseRepository - Error clearing cache: ${e.message}")
             println("accountdeletion: FirebaseRepository - Exception type: ${e.javaClass.simpleName}")
             e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+    
+    // FCM Token Management
+    suspend fun initializeFCMToken(): Result<String?> {
+        return try {
+            val token = fcmTokenManager?.initializeToken()
+            token?.let { updateUserFCMToken(it) }
+            Result.success(token)
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository.initializeFCMToken - Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun updateUserFCMToken(token: String): Result<Boolean> {
+        return try {
+            val currentUser = auth.currentUser
+            if (currentUser == null) {
+                return Result.failure(Exception("User not authenticated"))
+            }
+            
+            val userRef = firestore.collection("users").document(currentUser.uid)
+            firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(userRef)
+                val user = snapshot.toObject(User::class.java)
+                
+                if (user != null) {
+                    val updatedUser = user.copy(
+                        fcmToken = token,
+                        updatedAt = System.currentTimeMillis()
+                    )
+                    transaction.set(userRef, updatedUser)
+                }
+            }.await()
+            
+            println("DEBUG: FirebaseRepository.updateUserFCMToken - FCM token updated successfully")
+            Result.success(true)
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository.updateUserFCMToken - Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun refreshFCMTokenIfNeeded(): Result<String?> {
+        return try {
+            val token = fcmTokenManager?.refreshTokenIfNeeded()
+            token?.let { updateUserFCMToken(it) }
+            Result.success(token)
+        } catch (e: Exception) {
+            println("DEBUG: FirebaseRepository.refreshFCMTokenIfNeeded - Error: ${e.message}")
             Result.failure(e)
         }
     }
@@ -1389,40 +1443,77 @@ class FirebaseRepository(private val context: Context? = null) {
         println("DEBUG: FirebaseRepository.clearSearchCache - Search cache cleared")
     }
 
-    // Local notification management
-    suspend fun sendLocalNotificationToSubscribers(boardId: String, boardCode: String, title: String, body: String): Result<Boolean> {
+    // Notification management - Trigger only (Cloud Functions handle everything)
+    suspend fun sendPushNotificationToSubscribers(boardId: String, boardCode: String, title: String, body: String): Result<Boolean> {
         return try {
-            println("DEBUG: FirebaseRepository.sendLocalNotificationToSubscribers - Sending local notification for boardId: $boardId")
+            // SIRF TRIGGER करते हैं - कोई subscriber data नहीं लेते
+            val triggerData = hashMapOf<String, Any>(
+                "boardId" to boardId,
+                "boardCode" to boardCode,
+                "title" to title,
+                "body" to body,
+                "type" to "board_update",
+                "triggeredBy" to (getCurrentUser()?.id ?: ""),
+                "triggeredAt" to System.currentTimeMillis(),
+                "status" to "pending"
+            )
             
-            // Get all users subscribed to this board
-            val subscribedUsersQuery = firestore.collection("users")
-                .whereArrayContains("subscribedCodes", boardCode)
-                .get()
-                .await()
+            // Firestore में trigger record बनाते हैं
+            val triggerId = "${boardId}_${System.currentTimeMillis()}"
+            firestore.collection("notificationTriggers").document(triggerId).set(triggerData).await()
             
-            val subscribedUsers = subscribedUsersQuery.documents.mapNotNull { doc ->
-                doc.toObject(User::class.java)
-            }
-            
-            println("DEBUG: FirebaseRepository.sendLocalNotificationToSubscribers - Found ${subscribedUsers.size} subscribed users")
-            
-            // Show local notification (only for current user if they're subscribed)
-            val currentUser = getCurrentUser()
-            val isCurrentUserSubscribed = currentUser?.let { user ->
-                subscribedUsers.any { it.id == user.id }
-            } ?: false
-            
-            if (isCurrentUserSubscribed && context != null) {
-                val notificationService = LocalNotificationService(context)
-                val boardName = getNoticeBoardById(boardId)?.organizationName ?: "Notice Board"
-                notificationService.showNotification(title, body, boardId, boardName)
-                println("DEBUG: FirebaseRepository.sendLocalNotificationToSubscribers - Local notification shown to current user")
-            }
-            
-            println("DEBUG: FirebaseRepository.sendLocalNotificationToSubscribers - Local notification process completed")
             Result.success(true)
         } catch (e: Exception) {
-            println("DEBUG: FirebaseRepository.sendLocalNotificationToSubscribers - Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+    
+    // Legacy method for backward compatibility - now uses push notifications
+    suspend fun sendLocalNotificationToSubscribers(boardId: String, boardCode: String, title: String, body: String): Result<Boolean> {
+        return sendPushNotificationToSubscribers(boardId, boardCode, title, body)
+    }
+    
+    // Query notification trigger (SECURE - no subscriber data exposure)
+    suspend fun sendQueryNotificationTrigger(orgCode: String, query: UserQuery): Result<Boolean> {
+        return try {
+            val triggerData = hashMapOf<String, Any>(
+                "orgCode" to orgCode,
+                "queryId" to query.id,
+                "raiserName" to query.raiserName,
+                "question" to query.question,
+                "type" to "query",
+                "triggeredBy" to (getCurrentUser()?.id ?: ""),
+                "triggeredAt" to System.currentTimeMillis(),
+                "status" to "pending"
+            )
+            
+            val triggerId = "query_${query.id}_${System.currentTimeMillis()}"
+            firestore.collection("notificationTriggers").document(triggerId).set(triggerData).await()
+            
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    // Query resolution notification trigger (SECURE - no subscriber data exposure)
+    suspend fun sendQueryResolutionNotificationTrigger(query: UserQuery): Result<Boolean> {
+        return try {
+            val triggerData = hashMapOf<String, Any>(
+                "orgCode" to query.organisationCode,
+                "queryId" to query.id,
+                "raiserId" to query.raiserId,
+                "type" to "query_resolved",
+                "triggeredBy" to (getCurrentUser()?.id ?: ""),
+                "triggeredAt" to System.currentTimeMillis(),
+                "status" to "pending"
+            )
+            
+            val triggerId = "query_resolved_${query.id}_${System.currentTimeMillis()}"
+            firestore.collection("notificationTriggers").document(triggerId).set(triggerData).await()
+            
+            Result.success(true)
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }
@@ -1985,8 +2076,8 @@ class FirebaseRepository(private val context: Context? = null) {
             
             android.util.Log.d("FirebaseRepository", "createUserQuery - Query created successfully with ID: ${queryWithId.id}")
             
-            // Send notification to board owner
-            sendQueryNotificationToBoardOwner(queryWithId.organisationCode, queryWithId)
+            // Send notification to board owner (trigger only)
+            sendQueryNotificationTrigger(queryWithId.organisationCode, queryWithId)
             
             Result.success(queryWithId)
         } catch (e: Exception) {
@@ -2095,142 +2186,7 @@ class FirebaseRepository(private val context: Context? = null) {
         }
     }
     
-    suspend fun sendQueryNotificationToBoardOwner(orgCode: String, query: UserQuery): Result<Boolean> {
-        return try {
-            android.util.Log.d("FirebaseRepository", "sendQueryNotificationToBoardOwner - Sending notification for orgCode: $orgCode")
-            
-            // Get the board owner (user who created the board with this orgCode)
-            val boardQuery = firestore.collection("noticeBoards")
-                .whereEqualTo("organizationCode", orgCode)
-                .limit(1)
-                .get()
-                .await()
-            
-            if (boardQuery.isEmpty) {
-                android.util.Log.e("FirebaseRepository", "sendQueryNotificationToBoardOwner - No board found for orgCode: $orgCode")
-                return Result.failure(Exception("Board not found"))
-            }
-            
-            val board = boardQuery.documents.first().toObject(NoticeBoard::class.java)
-            if (board == null) {
-                android.util.Log.e("FirebaseRepository", "sendQueryNotificationToBoardOwner - Failed to parse board")
-                return Result.failure(Exception("Failed to parse board"))
-            }
-            
-            // Get board owner
-            val boardOwner = firestore.collection("users")
-                .document(board.createdBy)
-                .get()
-                .await()
-                .toObject(User::class.java)
-            
-            if (boardOwner == null) {
-                android.util.Log.e("FirebaseRepository", "sendQueryNotificationToBoardOwner - Board owner not found")
-                return Result.failure(Exception("Board owner not found"))
-            }
-            
-            // Create notification for board owner
-            val notificationId = "${boardOwner.id}_query_${query.id}"
-            val notificationRef = firestore.collection("userNotifications").document(notificationId)
-            
-            val notification = UserNotification(
-                id = notificationId,
-                userId = boardOwner.id,
-                boardId = board.id,
-                boardCode = orgCode,
-                unreadCount = 1,
-                title = "New Query Received",
-                body = "You have received a new query from ${query.raiserName}: ${query.question.take(50)}...",
-                type = "query",
-                createdAt = System.currentTimeMillis(),
-                updatedAt = System.currentTimeMillis()
-            )
-            
-            notificationRef.set(notification).await()
-            
-            // Send local notification if board owner is current user
-            val currentUser = getCurrentUser()
-            if (currentUser?.id == boardOwner.id && context != null) {
-                val notificationService = LocalNotificationService(context)
-                notificationService.showNotification(
-                    "New Query Received",
-                    "You have received a new query from ${query.raiserName}",
-                    board.id,
-                    board.organizationName
-                )
-            }
-            
-            android.util.Log.d("FirebaseRepository", "sendQueryNotificationToBoardOwner - Notification sent successfully")
-            Result.success(true)
-        } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "sendQueryNotificationToBoardOwner - Error: ${e.message}")
-            Result.failure(e)
-        }
-    }
-    
-    suspend fun sendQueryResolutionNotificationToRaiser(query: UserQuery): Result<Boolean> {
-        return try {
-            android.util.Log.d("FirebaseRepository", "sendQueryResolutionNotificationToRaiser - Sending resolution notification for query: ${query.id}")
-            
-            // Get query raiser
-            val queryRaiser = firestore.collection("users")
-                .document(query.raiserId)
-                .get()
-                .await()
-                .toObject(User::class.java)
-            
-            if (queryRaiser == null) {
-                android.util.Log.e("FirebaseRepository", "sendQueryResolutionNotificationToRaiser - Query raiser not found")
-                return Result.failure(Exception("Query raiser not found"))
-            }
-            
-            // Get board info
-            val boardQuery = firestore.collection("noticeBoards")
-                .whereEqualTo("organizationCode", query.organisationCode)
-                .limit(1)
-                .get()
-                .await()
-            
-            val board = boardQuery.documents.firstOrNull()?.toObject(NoticeBoard::class.java)
-            
-            // Create notification for query raiser
-            val notificationId = "${queryRaiser.id}_query_resolved_${query.id}"
-            val notificationRef = firestore.collection("userNotifications").document(notificationId)
-            
-            val notification = UserNotification(
-                id = notificationId,
-                userId = queryRaiser.id,
-                boardId = board?.id ?: "",
-                boardCode = query.organisationCode,
-                unreadCount = 1,
-                title = "Query Resolved",
-                body = "Your query has been resolved by ${board?.organizationName ?: "the board owner"}",
-                type = "query_resolved",
-                createdAt = System.currentTimeMillis(),
-                updatedAt = System.currentTimeMillis()
-            )
-            
-            notificationRef.set(notification).await()
-            
-            // Send local notification if query raiser is current user
-            val currentUser = getCurrentUser()
-            if (currentUser?.id == queryRaiser.id && context != null) {
-                val notificationService = LocalNotificationService(context)
-                notificationService.showNotification(
-                    "Query Resolved",
-                    "Your query has been resolved by ${board?.organizationName ?: "the board owner"}",
-                    board?.id,
-                    board?.organizationName ?: "Notice Board"
-                )
-            }
-            
-            android.util.Log.d("FirebaseRepository", "sendQueryResolutionNotificationToRaiser - Resolution notification sent successfully")
-            Result.success(true)
-        } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "sendQueryResolutionNotificationToRaiser - Error: ${e.message}")
-            Result.failure(e)
-        }
-    }
+    // OLD METHODS REMOVED - Using secure trigger approach only
     
     suspend fun updateUserQueryAnswer(queryId: String, answer: String): Result<Boolean> {
         return try {
@@ -2257,8 +2213,8 @@ class FirebaseRepository(private val context: Context? = null) {
                 )
                 .await()
             
-            // Send resolution notification to query raiser
-            sendQueryResolutionNotificationToRaiser(query.copy(answer = answer, status = "resolved"))
+            // Send resolution notification to query raiser (trigger only)
+            sendQueryResolutionNotificationTrigger(query.copy(answer = answer, status = "resolved"))
             
             Result.success(true)
         } catch (e: Exception) {
