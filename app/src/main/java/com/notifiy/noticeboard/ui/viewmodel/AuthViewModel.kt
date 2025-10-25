@@ -60,8 +60,24 @@ class AuthViewModel(private val context: Context) : ViewModel() {
             try {
                 val user = repository.getCurrentUser()
                 _authState.value = UiState(data = user, isLoading = false)
+                
+                // Initialize FCM token if user is authenticated
+                if (user != null) {
+                    initializeFCMToken()
+                }
             } catch (e: Exception) {
                 _authState.value = UiState(isLoading = false, error = e.message)
+            }
+        }
+    }
+    
+    private fun initializeFCMToken() {
+        viewModelScope.launch {
+            try {
+                repository.initializeFCMToken()
+                println("DEBUG: AuthViewModel - FCM token initialized successfully")
+            } catch (e: Exception) {
+                println("DEBUG: AuthViewModel - Error initializing FCM token: ${e.message}")
             }
         }
     }
@@ -77,6 +93,11 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                 auth.signInWithEmailAndPassword(email, password).await()
                 val user = repository.getCurrentUser()
                 _authState.value = UiState(data = user, isLoading = false)
+                
+                // Initialize FCM token after successful sign-in
+                if (user != null) {
+                    initializeFCMToken()
+                }
             } catch (e: Exception) {
                 _authState.value = UiState(isLoading = false, error = e.message)
             }
@@ -106,6 +127,9 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                     
                     repository.createUser(user)
                     _authState.value = UiState(data = user, isLoading = false)
+                    
+                    // Initialize FCM token after successful sign-up
+                    initializeFCMToken()
                 } else {
                     _authState.value = UiState(isLoading = false, error = "Failed to create user")
                 }
@@ -263,8 +287,14 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                         )
                         repository.createUser(user)
                         _authState.value = UiState(data = user, isLoading = false)
+                        
+                        // Initialize FCM token after successful Google sign-up
+                        initializeFCMToken()
                     } else {
                         _authState.value = UiState(data = existingUser, isLoading = false)
+                        
+                        // Initialize FCM token after successful Google sign-in
+                        initializeFCMToken()
                     }
                 } else {
                     _authState.value = UiState(isLoading = false, error = "Failed to sign in with Google")

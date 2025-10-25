@@ -1,0 +1,3656 @@
+[
+  {
+    "textPayload": "Function execution started",
+    "insertId": "5uadszf1czewe",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:47.866276801Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "9kd7xb3nkhvy",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:47.872425779Z"
+  },
+  {
+    "textPayload": "Processing notification trigger: board_update",
+    "insertId": "68fcca77000e889ed1ca5616",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:47.952478Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7xb3nkhvy"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:48.205474517Z"
+  },
+  {
+    "textPayload": "Found 1 subscribed users for board ANSPAL4470",
+    "insertId": "68fcca7d000cbdce6719f336",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:53.835022Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7xb3nkhvy",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:53.866632628Z"
+  },
+  {
+    "textPayload": "Error processing board update notification: Error: Value for argument \"data\" is not a valid Firestore document. Cannot use \"undefined\" as a Firestore value (found in field \"userId\"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.",
+    "insertId": "68fcca7d000ccae7672f5755",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:53.838375Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7xb3nkhvy",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:53.866632628Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:383:19)",
+    "insertId": "68fcca7d000ccb0073d20b28",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:53.838400Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7xb3nkhvy"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:53.866632628Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:375:13)",
+    "insertId": "68fcca7d000ccb0654ae9267",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:53.838406Z",
+    "labels": {
+      "execution_id": "9kd7xb3nkhvy",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:53.866632628Z"
+  },
+  {
+    "textPayload": "    at validateDocumentData (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:609:40)",
+    "insertId": "68fcca7d000ccb0cf52e75fa",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:53.838412Z",
+    "labels": {
+      "execution_id": "9kd7xb3nkhvy",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:53.866632628Z"
+  },
+  {
+    "textPayload": "    at WriteBatch.set (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:263:9)",
+    "insertId": "68fcca7d000ccb12ae87958b",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:53.838418Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7xb3nkhvy",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:53.866632628Z"
+  },
+  {
+    "textPayload": "    at /workspace/lib/index.js:124:27",
+    "insertId": "68fcca7d000ccb177735a84d",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:53.838423Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7xb3nkhvy"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:53.866632628Z"
+  },
+  {
+    "textPayload": "    at Array.forEach (<anonymous>)",
+    "insertId": "68fcca7d000ccb1c10209f64",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:53.838428Z",
+    "labels": {
+      "execution_id": "9kd7xb3nkhvy",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:53.866632628Z"
+  },
+  {
+    "textPayload": "    at processBoardUpdateNotification (/workspace/lib/index.js:106:39)",
+    "insertId": "68fcca7d000ccb2207b5cada",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:53.838434Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7xb3nkhvy"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:53.866632628Z"
+  },
+  {
+    "textPayload": "    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)",
+    "insertId": "68fcca7d000ccb28b3f643d0",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:53.838440Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7xb3nkhvy"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:53.866632628Z"
+  },
+  {
+    "textPayload": "    at async /workspace/lib/index.js:72:13",
+    "insertId": "68fcca7d000ccb2db8fe30bf",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:53.838445Z",
+    "labels": {
+      "execution_id": "9kd7xb3nkhvy",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:53.866632628Z"
+  },
+  {
+    "textPayload": "Function execution took 7304 ms, finished with status: 'ok'",
+    "insertId": "1y8vovzf1eleep",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:02:55.171254404Z",
+    "severity": "DEBUG",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7xb3nkhvy"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/52f90363aae68e5608e9e2a0d2515c88",
+    "receiveTimestamp": "2025-10-25T13:02:55.198165219Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "uja77yf14xqz1",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processPushNotifications",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:04:30.397478178Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "extrryf7ggtj",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/bb63993d88b2141ad22d26d923e0a8aa",
+    "receiveTimestamp": "2025-10-25T13:04:30.403829244Z"
+  },
+  {
+    "textPayload": "Processing push notification: nWtGIktebSTAPta2q6r3KaxN3Ri2_board_update_a6511aa8-63c5-4a38-8ced-af87e6ecb30b_1761397469770",
+    "insertId": "68fccade0007e8c7b58ab18a",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processPushNotifications",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:04:30.518343Z",
+    "labels": {
+      "execution_id": "extrryf7ggtj",
+      "instance_id": "0069c7a9887f30e3495ec5b7cfe053f6e559bc939064c234249ac3e610916ec276f8f8b6353fc770cc11f62c010ed81447e7e3e6f33f2dd20ba7d72c255924fbd24843a74852f11fd4ffe7ab780bcb",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/bb63993d88b2141ad22d26d923e0a8aa",
+    "receiveTimestamp": "2025-10-25T13:04:30.738360699Z"
+  },
+  {
+    "textPayload": "Successfully sent FCM message: projects/noticeboard-4f708/messages/0:1761397470987838%1456929314569293",
+    "insertId": "68fccadf00001a1b41ac1240",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processPushNotifications",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:04:31.006683Z",
+    "labels": {
+      "execution_id": "extrryf7ggtj",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a9887f30e3495ec5b7cfe053f6e559bc939064c234249ac3e610916ec276f8f8b6353fc770cc11f62c010ed81447e7e3e6f33f2dd20ba7d72c255924fbd24843a74852f11fd4ffe7ab780bcb"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/bb63993d88b2141ad22d26d923e0a8aa",
+    "receiveTimestamp": "2025-10-25T13:04:31.069679488Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "14j4s0pf1o8qq1",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processPushNotifications",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:04:31.891203994Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "ddtcla99us79",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/30b6c663deba5384da06e573a3ff45f3",
+    "receiveTimestamp": "2025-10-25T13:04:32.067907828Z"
+  },
+  {
+    "textPayload": "Processing push notification: LCuPHawLH2R07rmQA8N0eDYXk8P2_board_update_a6511aa8-63c5-4a38-8ced-af87e6ecb30b_1761397469642",
+    "insertId": "68fccae000003c248cc214ee",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processPushNotifications"
+      }
+    },
+    "timestamp": "2025-10-25T13:04:32.015396Z",
+    "labels": {
+      "execution_id": "ddtcla99us79",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a9889f37eb8d4121cfb1be08fe6fa482157d61f0477d7dc7b8847d6bcb59422fc1e2dba441d329d9da8cef4f8cbcbee8f71b1f8ab5a97f56dcadf7c1cb21951b55909ab488896da8401016a0"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/30b6c663deba5384da06e573a3ff45f3",
+    "receiveTimestamp": "2025-10-25T13:04:32.067907828Z"
+  },
+  {
+    "textPayload": "Successfully sent FCM message: projects/noticeboard-4f708/messages/0:1761397472544475%1456929314569293",
+    "insertId": "68fccae00008ad2eb71e944a",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processPushNotifications"
+      }
+    },
+    "timestamp": "2025-10-25T13:04:32.568622Z",
+    "labels": {
+      "instance_id": "0069c7a9889f37eb8d4121cfb1be08fe6fa482157d61f0477d7dc7b8847d6bcb59422fc1e2dba441d329d9da8cef4f8cbcbee8f71b1f8ab5a97f56dcadf7c1cb21951b55909ab488896da8401016a0",
+      "execution_id": "ddtcla99us79",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/30b6c663deba5384da06e573a3ff45f3",
+    "receiveTimestamp": "2025-10-25T13:04:32.733459180Z"
+  },
+  {
+    "textPayload": "Function execution took 5838 ms, finished with status: 'ok'",
+    "insertId": "ndffzef1j09e5",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processPushNotifications",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:04:36.235518310Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "extrryf7ggtj",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/bb63993d88b2141ad22d26d923e0a8aa",
+    "receiveTimestamp": "2025-10-25T13:04:36.397404136Z"
+  },
+  {
+    "textPayload": "Function execution took 5546 ms, finished with status: 'ok'",
+    "insertId": "kl9z44f1a7d1l",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processPushNotifications",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:04:37.437763193Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "ddtcla99us79",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/30b6c663deba5384da06e573a3ff45f3",
+    "receiveTimestamp": "2025-10-25T13:04:37.730384741Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "1dyj1qwefunec",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:20.607169214Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "9kd7jyeejmla",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:20.612143345Z"
+  },
+  {
+    "textPayload": "Processing notification trigger: board_update",
+    "insertId": "68fccb1000095b092a7cd6ba",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:20.613129Z",
+    "labels": {
+      "execution_id": "9kd7jyeejmla",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:20.944995853Z"
+  },
+  {
+    "textPayload": "Found 2 subscribed users for board ANSPAL4470",
+    "insertId": "68fccb120003e9a6004913c7",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:22.256422Z",
+    "labels": {
+      "execution_id": "9kd7jyeejmla",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:22.279000473Z"
+  },
+  {
+    "textPayload": "Error processing board update notification: Error: Value for argument \"data\" is not a valid Firestore document. Cannot use \"undefined\" as a Firestore value (found in field \"userId\"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.",
+    "insertId": "68fccb120003eb423eed5103",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:22.256834Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7jyeejmla",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:22.279000473Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:383:19)",
+    "insertId": "68fccb120003eb4c99023d50",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:22.256844Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7jyeejmla",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:22.279000473Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:375:13)",
+    "insertId": "68fccb120003eb5181492006",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:22.256849Z",
+    "labels": {
+      "execution_id": "9kd7jyeejmla",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:22.279000473Z"
+  },
+  {
+    "textPayload": "    at validateDocumentData (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:609:40)",
+    "insertId": "68fccb120003eb56a1eae8a6",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:22.256854Z",
+    "labels": {
+      "execution_id": "9kd7jyeejmla",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:22.279000473Z"
+  },
+  {
+    "textPayload": "    at WriteBatch.set (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:263:9)",
+    "insertId": "68fccb120003eb5ab55a8096",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:22.256858Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7jyeejmla"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:22.279000473Z"
+  },
+  {
+    "textPayload": "    at /workspace/lib/index.js:124:27",
+    "insertId": "68fccb120003eb5f872e20d8",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:22.256863Z",
+    "labels": {
+      "execution_id": "9kd7jyeejmla",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:22.279000473Z"
+  },
+  {
+    "textPayload": "    at Array.forEach (<anonymous>)",
+    "insertId": "68fccb120003eb64a599f20b",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:22.256868Z",
+    "labels": {
+      "execution_id": "9kd7jyeejmla",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:22.279000473Z"
+  },
+  {
+    "textPayload": "    at processBoardUpdateNotification (/workspace/lib/index.js:106:39)",
+    "insertId": "68fccb120003eb6ab53b4a43",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:22.256874Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7jyeejmla",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:22.279000473Z"
+  },
+  {
+    "textPayload": "    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)",
+    "insertId": "68fccb120003eb6f760c956d",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:22.256879Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7jyeejmla",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:22.279000473Z"
+  },
+  {
+    "textPayload": "    at async /workspace/lib/index.js:72:13",
+    "insertId": "68fccb120003eb73eb3430d5",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:22.256883Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7jyeejmla",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:22.279000473Z"
+  },
+  {
+    "textPayload": "Function execution took 1957 ms, finished with status: 'ok'",
+    "insertId": "chj4bof18hxya",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:05:22.564626840Z",
+    "severity": "DEBUG",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7jyeejmla"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/981cf465f503a390a5bd2c2c8304cb08",
+    "receiveTimestamp": "2025-10-25T13:05:22.610998637Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "hie3ezf1bd06i",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:43.239873906Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "9kd7papiwui1",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:43.246944538Z"
+  },
+  {
+    "textPayload": "Processing notification trigger: board_update",
+    "insertId": "68fccb630003b9f0cd9d9630",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:43.244208Z",
+    "labels": {
+      "execution_id": "9kd7papiwui1",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:43.580349388Z"
+  },
+  {
+    "textPayload": "Found 2 subscribed users for board ANSPAL4470",
+    "insertId": "68fccb64000d31b892852dc9",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:44.864696Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7papiwui1",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:44.912580189Z"
+  },
+  {
+    "textPayload": "Error processing board update notification: Error: Value for argument \"data\" is not a valid Firestore document. Cannot use \"undefined\" as a Firestore value (found in field \"userId\"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.",
+    "insertId": "68fccb64000d3519b16c6c56",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:44.865561Z",
+    "labels": {
+      "execution_id": "9kd7papiwui1",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:44.912580189Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:383:19)",
+    "insertId": "68fccb64000d352878351949",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:44.865576Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7papiwui1"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:44.912580189Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:375:13)",
+    "insertId": "68fccb64000d352d1cccad7b",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:44.865581Z",
+    "labels": {
+      "execution_id": "9kd7papiwui1",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:44.912580189Z"
+  },
+  {
+    "textPayload": "    at validateDocumentData (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:609:40)",
+    "insertId": "68fccb64000d3532af32aec9",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:44.865586Z",
+    "labels": {
+      "execution_id": "9kd7papiwui1",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:44.912580189Z"
+  },
+  {
+    "textPayload": "    at WriteBatch.set (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:263:9)",
+    "insertId": "68fccb64000d35384c154f92",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:44.865592Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7papiwui1"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:44.912580189Z"
+  },
+  {
+    "textPayload": "    at /workspace/lib/index.js:124:27",
+    "insertId": "68fccb64000d353c604f49df",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:44.865596Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7papiwui1"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:44.912580189Z"
+  },
+  {
+    "textPayload": "    at Array.forEach (<anonymous>)",
+    "insertId": "68fccb64000d354854fdc661",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:44.865608Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7papiwui1"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:44.912580189Z"
+  },
+  {
+    "textPayload": "    at processBoardUpdateNotification (/workspace/lib/index.js:106:39)",
+    "insertId": "68fccb64000d354defa8fbf9",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:44.865613Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7papiwui1",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:44.912580189Z"
+  },
+  {
+    "textPayload": "    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)",
+    "insertId": "68fccb64000d3552c7c8cde2",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:44.865618Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7papiwui1",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:44.912580189Z"
+  },
+  {
+    "textPayload": "    at async /workspace/lib/index.js:72:13",
+    "insertId": "68fccb64000d35569769347c",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:44.865622Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7papiwui1"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:44.912580189Z"
+  },
+  {
+    "textPayload": "Function execution took 1943 ms, finished with status: 'ok'",
+    "insertId": "1etb5g5f1hj16v",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:06:45.183087008Z",
+    "severity": "DEBUG",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7papiwui1"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4787c5322c32bc8648aa14d907976d80",
+    "receiveTimestamp": "2025-10-25T13:06:45.243440604Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "1fnm94if1hw2z2",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:16.916067874Z",
+    "severity": "DEBUG",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd70cga9odc"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:16.920262708Z"
+  },
+  {
+    "textPayload": "Processing notification trigger: board_update",
+    "insertId": "68fccb84000e0e6249ed757e",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:16.921186Z",
+    "labels": {
+      "execution_id": "9kd70cga9odc",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:17.254991473Z"
+  },
+  {
+    "textPayload": "Found 2 subscribed users for board ANSPAL4470",
+    "insertId": "68fccb86000c8a384c5fb9db",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:18.821816Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd70cga9odc"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:18.920007870Z"
+  },
+  {
+    "textPayload": "Error processing board update notification: Error: Value for argument \"data\" is not a valid Firestore document. Cannot use \"undefined\" as a Firestore value (found in field \"userId\"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.",
+    "insertId": "68fccb86000c8c2ba4494ca1",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:18.822315Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd70cga9odc"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:18.920007870Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:383:19)",
+    "insertId": "68fccb86000c8c3bd5f1ab95",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:18.822331Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd70cga9odc"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:18.920007870Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:375:13)",
+    "insertId": "68fccb86000c8c40647f95a2",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:18.822336Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd70cga9odc"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:18.920007870Z"
+  },
+  {
+    "textPayload": "    at validateDocumentData (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:609:40)",
+    "insertId": "68fccb86000c8c4326bc695c",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:18.822339Z",
+    "labels": {
+      "execution_id": "9kd70cga9odc",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:18.920007870Z"
+  },
+  {
+    "textPayload": "    at WriteBatch.set (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:263:9)",
+    "insertId": "68fccb86000c8c48a0b0c993",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:18.822344Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd70cga9odc"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:18.920007870Z"
+  },
+  {
+    "textPayload": "    at /workspace/lib/index.js:124:27",
+    "insertId": "68fccb86000c8c4d2cba9152",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:18.822349Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd70cga9odc",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:18.920007870Z"
+  },
+  {
+    "textPayload": "    at Array.forEach (<anonymous>)",
+    "insertId": "68fccb86000c8c51a9c25354",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:18.822353Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd70cga9odc"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:18.920007870Z"
+  },
+  {
+    "textPayload": "    at processBoardUpdateNotification (/workspace/lib/index.js:106:39)",
+    "insertId": "68fccb86000c8c5545d7b43b",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:18.822357Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd70cga9odc"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:18.920007870Z"
+  },
+  {
+    "textPayload": "    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)",
+    "insertId": "68fccb86000c8c5a8788a49b",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:18.822362Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd70cga9odc"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:18.920007870Z"
+  },
+  {
+    "textPayload": "    at async /workspace/lib/index.js:72:13",
+    "insertId": "68fccb86000c8c5e6b769047",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:18.822366Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd70cga9odc",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:18.920007870Z"
+  },
+  {
+    "textPayload": "Function execution took 2207 ms, finished with status: 'ok'",
+    "insertId": "scg6b8f1l3rn5",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:19.123323270Z",
+    "severity": "DEBUG",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd70cga9odc"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a8cd5417004283a6a01393b75001fa47",
+    "receiveTimestamp": "2025-10-25T13:07:19.252890518Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "172j931f1e7jzb",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:27.371552956Z",
+    "severity": "DEBUG",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7ikh77crr"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:27.577274538Z"
+  },
+  {
+    "textPayload": "Processing notification trigger: board_update",
+    "insertId": "68fccb8f0005beb77f801d94",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:27.376503Z",
+    "labels": {
+      "execution_id": "9kd7ikh77crr",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:27.577274538Z"
+  },
+  {
+    "textPayload": "Found 2 subscribed users for board ANSPAL4470",
+    "insertId": "68fccb90000ecd3491f02a57",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:28.970036Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7ikh77crr",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:29.243612181Z"
+  },
+  {
+    "textPayload": "Error processing board update notification: Error: Value for argument \"data\" is not a valid Firestore document. Cannot use \"undefined\" as a Firestore value (found in field \"userId\"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.",
+    "insertId": "68fccb90000ecf09293ecdcd",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:28.970505Z",
+    "labels": {
+      "execution_id": "9kd7ikh77crr",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:29.243612181Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:383:19)",
+    "insertId": "68fccb90000ecf1a9519fb59",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:28.970522Z",
+    "labels": {
+      "execution_id": "9kd7ikh77crr",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:29.243612181Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:375:13)",
+    "insertId": "68fccb90000ecf1f3752c460",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:28.970527Z",
+    "labels": {
+      "execution_id": "9kd7ikh77crr",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:29.243612181Z"
+  },
+  {
+    "textPayload": "    at validateDocumentData (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:609:40)",
+    "insertId": "68fccb90000ecf23bcab7457",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:28.970531Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7ikh77crr"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:29.243612181Z"
+  },
+  {
+    "textPayload": "    at WriteBatch.set (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:263:9)",
+    "insertId": "68fccb90000ecf281ecdcb67",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:28.970536Z",
+    "labels": {
+      "execution_id": "9kd7ikh77crr",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:29.243612181Z"
+  },
+  {
+    "textPayload": "    at /workspace/lib/index.js:124:27",
+    "insertId": "68fccb90000ecf2ce5eca8a1",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:28.970540Z",
+    "labels": {
+      "execution_id": "9kd7ikh77crr",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:29.243612181Z"
+  },
+  {
+    "textPayload": "    at Array.forEach (<anonymous>)",
+    "insertId": "68fccb90000ecf315d0f6f13",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:28.970545Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7ikh77crr",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:29.243612181Z"
+  },
+  {
+    "textPayload": "    at processBoardUpdateNotification (/workspace/lib/index.js:106:39)",
+    "insertId": "68fccb90000ecf37c2939fc0",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:28.970551Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7ikh77crr"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:29.243612181Z"
+  },
+  {
+    "textPayload": "    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)",
+    "insertId": "68fccb90000ecf3b0773c2ce",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:28.970555Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7ikh77crr",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:29.243612181Z"
+  },
+  {
+    "textPayload": "    at async /workspace/lib/index.js:72:13",
+    "insertId": "68fccb90000ecf3f14d10687",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:28.970559Z",
+    "labels": {
+      "execution_id": "9kd7ikh77crr",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:29.243612181Z"
+  },
+  {
+    "textPayload": "Function execution took 2220 ms, finished with status: 'ok'",
+    "insertId": "xl3kpxf1dtoym",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:07:29.592533575Z",
+    "severity": "DEBUG",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7ikh77crr"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/ec4611b4a4dfde6ca01393b75001ff0f",
+    "receiveTimestamp": "2025-10-25T13:07:29.909829063Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "1ggjydzf15yjjp",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processPushNotifications"
+      }
+    },
+    "timestamp": "2025-10-25T13:08:19.330846711Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "ddtcyeawyjtd",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/c7e58a2c68d48f2163b6c6fd5b77db04",
+    "receiveTimestamp": "2025-10-25T13:08:19.336915221Z"
+  },
+  {
+    "textPayload": "Processing push notification: LCuPHawLH2R07rmQA8N0eDYXk8P2_board_update_a6511aa8-63c5-4a38-8ced-af87e6ecb30b_1761397698781",
+    "insertId": "68fccbc300061054ca82140a",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processPushNotifications",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:08:19.397396Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a9889f37eb8d4121cfb1be08fe6fa482157d61f0477d7dc7b8847d6bcb59422fc1e2dba441d329d9da8cef4f8cbcbee8f71b1f8ab5a97f56dcadf7c1cb21951b55909ab488896da8401016a0",
+      "execution_id": "ddtcyeawyjtd"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/c7e58a2c68d48f2163b6c6fd5b77db04",
+    "receiveTimestamp": "2025-10-25T13:08:19.670566844Z"
+  },
+  {
+    "textPayload": "Successfully sent FCM message: projects/noticeboard-4f708/messages/0:1761397699452297%1456929314569293",
+    "insertId": "68fccbc300078f6521c8058c",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processPushNotifications"
+      }
+    },
+    "timestamp": "2025-10-25T13:08:19.495461Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "ddtcyeawyjtd",
+      "instance_id": "0069c7a9889f37eb8d4121cfb1be08fe6fa482157d61f0477d7dc7b8847d6bcb59422fc1e2dba441d329d9da8cef4f8cbcbee8f71b1f8ab5a97f56dcadf7c1cb21951b55909ab488896da8401016a0"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/c7e58a2c68d48f2163b6c6fd5b77db04",
+    "receiveTimestamp": "2025-10-25T13:08:19.670566844Z"
+  },
+  {
+    "textPayload": "Function execution took 477 ms, finished with status: 'ok'",
+    "insertId": "17uk2p0f1gf3hs",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processPushNotifications",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:08:19.808753972Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "ddtcyeawyjtd",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/c7e58a2c68d48f2163b6c6fd5b77db04",
+    "receiveTimestamp": "2025-10-25T13:08:20.002028168Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "hrbbrcf1g5y3t",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processPushNotifications",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:08:20.139723552Z",
+    "severity": "DEBUG",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "ddtcbb1evkb6"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/9858f1ae64ae37de7c81be4359cf1821",
+    "receiveTimestamp": "2025-10-25T13:08:20.335805933Z"
+  },
+  {
+    "textPayload": "Processing push notification: nWtGIktebSTAPta2q6r3KaxN3Ri2_board_update_a6511aa8-63c5-4a38-8ced-af87e6ecb30b_1761397698924",
+    "insertId": "68fccbc400023394356ed715",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processPushNotifications",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:08:20.144276Z",
+    "labels": {
+      "execution_id": "ddtcbb1evkb6",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a9889f37eb8d4121cfb1be08fe6fa482157d61f0477d7dc7b8847d6bcb59422fc1e2dba441d329d9da8cef4f8cbcbee8f71b1f8ab5a97f56dcadf7c1cb21951b55909ab488896da8401016a0"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/9858f1ae64ae37de7c81be4359cf1821",
+    "receiveTimestamp": "2025-10-25T13:08:20.335805933Z"
+  },
+  {
+    "textPayload": "Successfully sent FCM message: projects/noticeboard-4f708/messages/0:1761397700196533%1456929314569293",
+    "insertId": "68fccbc400033f6920da9103",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processPushNotifications",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:08:20.212841Z",
+    "labels": {
+      "execution_id": "ddtcbb1evkb6",
+      "instance_id": "0069c7a9889f37eb8d4121cfb1be08fe6fa482157d61f0477d7dc7b8847d6bcb59422fc1e2dba441d329d9da8cef4f8cbcbee8f71b1f8ab5a97f56dcadf7c1cb21951b55909ab488896da8401016a0",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/9858f1ae64ae37de7c81be4359cf1821",
+    "receiveTimestamp": "2025-10-25T13:08:20.335805933Z"
+  },
+  {
+    "textPayload": "Function execution took 931 ms, finished with status: 'ok'",
+    "insertId": "ivmjz0f19erph",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processPushNotifications",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:08:21.070762280Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "ddtcbb1evkb6",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/9858f1ae64ae37de7c81be4359cf1821",
+    "receiveTimestamp": "2025-10-25T13:08:21.334863042Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "12blugof17dlpg",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:30.703171139Z",
+    "severity": "DEBUG",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7v1vf6owq"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:30.708128840Z"
+  },
+  {
+    "textPayload": "Processing notification trigger: board_update",
+    "insertId": "68fccc0a000ace196629bf73",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:30.708121Z",
+    "labels": {
+      "execution_id": "9kd7v1vf6owq",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:31.042937537Z"
+  },
+  {
+    "textPayload": "Found 2 subscribed users for board ANSPAL4470",
+    "insertId": "68fccc0c000549e7e34c880d",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:32.346599Z",
+    "labels": {
+      "execution_id": "9kd7v1vf6owq",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:32.372000861Z"
+  },
+  {
+    "textPayload": "Error processing board update notification: Error: Value for argument \"data\" is not a valid Firestore document. Cannot use \"undefined\" as a Firestore value (found in field \"userId\"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.",
+    "insertId": "68fccc0c00054b97f5833d48",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:32.347031Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7v1vf6owq"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:32.372000861Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:383:19)",
+    "insertId": "68fccc0c00054ba7dc29add9",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:32.347047Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7v1vf6owq"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:32.372000861Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:375:13)",
+    "insertId": "68fccc0c00054bad570fa222",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:32.347053Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7v1vf6owq",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:32.372000861Z"
+  },
+  {
+    "textPayload": "    at validateDocumentData (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:609:40)",
+    "insertId": "68fccc0c00054bb2f9c4e6e6",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:32.347058Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7v1vf6owq",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:32.372000861Z"
+  },
+  {
+    "textPayload": "    at WriteBatch.set (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:263:9)",
+    "insertId": "68fccc0c00054bb7ed947263",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:32.347063Z",
+    "labels": {
+      "execution_id": "9kd7v1vf6owq",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:32.372000861Z"
+  },
+  {
+    "textPayload": "    at /workspace/lib/index.js:124:27",
+    "insertId": "68fccc0c00054bbcf64d1bf9",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:32.347068Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7v1vf6owq"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:32.372000861Z"
+  },
+  {
+    "textPayload": "    at Array.forEach (<anonymous>)",
+    "insertId": "68fccc0c00054bc0dc4bc2d1",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:32.347072Z",
+    "labels": {
+      "execution_id": "9kd7v1vf6owq",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:32.372000861Z"
+  },
+  {
+    "textPayload": "    at processBoardUpdateNotification (/workspace/lib/index.js:106:39)",
+    "insertId": "68fccc0c00054bc694c222ed",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:32.347078Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7v1vf6owq",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:32.372000861Z"
+  },
+  {
+    "textPayload": "    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)",
+    "insertId": "68fccc0c00054bccad7693db",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:32.347084Z",
+    "labels": {
+      "execution_id": "9kd7v1vf6owq",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:32.372000861Z"
+  },
+  {
+    "textPayload": "    at async /workspace/lib/index.js:72:13",
+    "insertId": "68fccc0c00054bd06c052367",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:32.347088Z",
+    "labels": {
+      "execution_id": "9kd7v1vf6owq",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:32.372000861Z"
+  },
+  {
+    "textPayload": "Function execution took 1943 ms, finished with status: 'ok'",
+    "insertId": "1ig744yf1ea0o7",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:09:32.646610144Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "9kd7v1vf6owq",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/4eee5056f58b7170616411f1aca6c826",
+    "receiveTimestamp": "2025-10-25T13:09:32.706822563Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "1qzkcqtf1953g5",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:34.108834610Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "9kd7js2mcpqr",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:34.115969339Z"
+  },
+  {
+    "textPayload": "Processing notification trigger: query",
+    "insertId": "68fcccfe0001b8b3a4532e8c",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:34.112819Z",
+    "labels": {
+      "execution_id": "9kd7js2mcpqr",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:34.449396247Z"
+  },
+  {
+    "textPayload": "Error processing query notification: Error: Value for argument \"data\" is not a valid Firestore document. Cannot use \"undefined\" as a Firestore value (found in field \"userId\"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.",
+    "insertId": "68fccd0000067feb289feae8",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:36.425963Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7js2mcpqr"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:36.445918325Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:383:19)",
+    "insertId": "68fccd0000067ff81e2471b8",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:36.425976Z",
+    "labels": {
+      "execution_id": "9kd7js2mcpqr",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:36.445918325Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:375:13)",
+    "insertId": "68fccd0000067ffc3a5601cf",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:36.425980Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7js2mcpqr"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:36.445918325Z"
+  },
+  {
+    "textPayload": "    at validateDocumentData (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:609:40)",
+    "insertId": "68fccd0000067fff319e93d1",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:36.425983Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7js2mcpqr"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:36.445918325Z"
+  },
+  {
+    "textPayload": "    at WriteBatch.set (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:263:9)",
+    "insertId": "68fccd0000068002caccf960",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:36.425986Z",
+    "labels": {
+      "execution_id": "9kd7js2mcpqr",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:36.445918325Z"
+  },
+  {
+    "textPayload": "    at /workspace/node_modules/@google-cloud/firestore/build/src/reference/document-reference.js:348:41",
+    "insertId": "68fccd00000680057f4005b8",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:36.425989Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7js2mcpqr"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:36.445918325Z"
+  },
+  {
+    "textPayload": "    at /workspace/node_modules/@google-cloud/firestore/build/src/telemetry/enabled-trace-util.js:110:30",
+    "insertId": "68fccd0000068008e13cd0ab",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:36.425992Z",
+    "labels": {
+      "execution_id": "9kd7js2mcpqr",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:36.445918325Z"
+  },
+  {
+    "textPayload": "    at NoopContextManager.with (/workspace/node_modules/@opentelemetry/api/build/src/context/NoopContextManager.js:25:19)",
+    "insertId": "68fccd000006800b7627e446",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:36.425995Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7js2mcpqr"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:36.445918325Z"
+  },
+  {
+    "textPayload": "    at ContextAPI.with (/workspace/node_modules/@opentelemetry/api/build/src/api/context.js:60:46)",
+    "insertId": "68fccd000006800fabb27b38",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:36.425999Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7js2mcpqr",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:36.445918325Z"
+  },
+  {
+    "textPayload": "    at NoopTracer.startActiveSpan (/workspace/node_modules/@opentelemetry/api/build/src/trace/NoopTracer.js:65:31)",
+    "insertId": "68fccd00000680124781ffd0",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:36.426002Z",
+    "labels": {
+      "execution_id": "9kd7js2mcpqr",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:36.445918325Z"
+  },
+  {
+    "textPayload": "    at ProxyTracer.startActiveSpan (/workspace/node_modules/@opentelemetry/api/build/src/trace/ProxyTracer.js:36:24)",
+    "insertId": "68fccd0000068015db08b83a",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:36.426005Z",
+    "labels": {
+      "execution_id": "9kd7js2mcpqr",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:36.445918325Z"
+  },
+  {
+    "textPayload": "Function execution took 3581 ms, finished with status: 'ok'",
+    "insertId": "1t7ncc8f1b80t2",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:13:37.690439607Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "9kd7js2mcpqr",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/eb036251f802e50906652428c53ce371",
+    "receiveTimestamp": "2025-10-25T13:13:37.775850220Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "152gy24e6vy5z",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processPushNotifications",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:14:00.019603999Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "ddtc71rj25qd",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/73514c00da05843dc52675df0ace3fdf",
+    "receiveTimestamp": "2025-10-25T13:14:00.024743543Z"
+  },
+  {
+    "textPayload": "Processing push notification: LCuPHawLH2R07rmQA8N0eDYXk8P2_query_resolved_push_2ZlXXdGW2GkEOETgGucr_1761398039029",
+    "insertId": "68fccd18000068d82e79028b",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processPushNotifications"
+      }
+    },
+    "timestamp": "2025-10-25T13:14:00.026840Z",
+    "labels": {
+      "instance_id": "0069c7a9889f37eb8d4121cfb1be08fe6fa482157d61f0477d7dc7b8847d6bcb59422fc1e2dba441d329d9da8cef4f8cbcbee8f71b1f8ab5a97f56dcadf7c1cb21951b55909ab488896da8401016a0",
+      "execution_id": "ddtc71rj25qd",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/73514c00da05843dc52675df0ace3fdf",
+    "receiveTimestamp": "2025-10-25T13:14:00.358468980Z"
+  },
+  {
+    "textPayload": "Successfully sent FCM message: projects/noticeboard-4f708/messages/0:1761398040144276%1456929314569293",
+    "insertId": "68fccd1800029b7361f832dc",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processPushNotifications"
+      }
+    },
+    "timestamp": "2025-10-25T13:14:00.170867Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a9889f37eb8d4121cfb1be08fe6fa482157d61f0477d7dc7b8847d6bcb59422fc1e2dba441d329d9da8cef4f8cbcbee8f71b1f8ab5a97f56dcadf7c1cb21951b55909ab488896da8401016a0",
+      "execution_id": "ddtc71rj25qd"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/73514c00da05843dc52675df0ace3fdf",
+    "receiveTimestamp": "2025-10-25T13:14:00.358468980Z"
+  },
+  {
+    "textPayload": "Function execution took 1793 ms, finished with status: 'ok'",
+    "insertId": "1qzlkjfemwkgg",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processPushNotifications"
+      }
+    },
+    "timestamp": "2025-10-25T13:14:01.813090081Z",
+    "severity": "DEBUG",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "ddtc71rj25qd"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/73514c00da05843dc52675df0ace3fdf",
+    "receiveTimestamp": "2025-10-25T13:14:02.022549275Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "15ogzbif1guz06",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:29.698301009Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "9kd7opb8y77h",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:29.704488024Z"
+  },
+  {
+    "textPayload": "Processing notification trigger: query",
+    "insertId": "68fccde9000ad0c7fc1ab930",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:29.708807Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7opb8y77h",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:30.038162548Z"
+  },
+  {
+    "textPayload": "Error processing query notification: Error: Value for argument \"data\" is not a valid Firestore document. Cannot use \"undefined\" as a Firestore value (found in field \"userId\"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.",
+    "insertId": "68fccdeb0004a0dba894202b",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:31.303323Z",
+    "labels": {
+      "execution_id": "9kd7opb8y77h",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:31.368462289Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:383:19)",
+    "insertId": "68fccdeb0004a0ede856cc6f",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:31.303341Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7opb8y77h"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:31.368462289Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:375:13)",
+    "insertId": "68fccdeb0004a0f201532131",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:31.303346Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7opb8y77h"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:31.368462289Z"
+  },
+  {
+    "textPayload": "    at validateDocumentData (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:609:40)",
+    "insertId": "68fccdeb0004a0f7d586dffe",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:31.303351Z",
+    "labels": {
+      "execution_id": "9kd7opb8y77h",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:31.368462289Z"
+  },
+  {
+    "textPayload": "    at WriteBatch.set (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:263:9)",
+    "insertId": "68fccdeb0004a0fc561de4b4",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:31.303356Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7opb8y77h"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:31.368462289Z"
+  },
+  {
+    "textPayload": "    at /workspace/node_modules/@google-cloud/firestore/build/src/reference/document-reference.js:348:41",
+    "insertId": "68fccdeb0004a10289302d3f",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:31.303362Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7opb8y77h"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:31.368462289Z"
+  },
+  {
+    "textPayload": "    at /workspace/node_modules/@google-cloud/firestore/build/src/telemetry/enabled-trace-util.js:110:30",
+    "insertId": "68fccdeb0004a1070ec4b076",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:31.303367Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7opb8y77h",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:31.368462289Z"
+  },
+  {
+    "textPayload": "    at NoopContextManager.with (/workspace/node_modules/@opentelemetry/api/build/src/context/NoopContextManager.js:25:19)",
+    "insertId": "68fccdeb0004a10df3c388a9",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:31.303373Z",
+    "labels": {
+      "execution_id": "9kd7opb8y77h",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:31.368462289Z"
+  },
+  {
+    "textPayload": "    at ContextAPI.with (/workspace/node_modules/@opentelemetry/api/build/src/api/context.js:60:46)",
+    "insertId": "68fccdeb0004a1123e8f4e50",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:31.303378Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7opb8y77h"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:31.368462289Z"
+  },
+  {
+    "textPayload": "    at NoopTracer.startActiveSpan (/workspace/node_modules/@opentelemetry/api/build/src/trace/NoopTracer.js:65:31)",
+    "insertId": "68fccdeb0004a118f7c9f738",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:31.303384Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7opb8y77h",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:31.368462289Z"
+  },
+  {
+    "textPayload": "    at ProxyTracer.startActiveSpan (/workspace/node_modules/@opentelemetry/api/build/src/trace/ProxyTracer.js:36:24)",
+    "insertId": "68fccdeb0004a11c8d387d8c",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:31.303388Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7opb8y77h"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:31.368462289Z"
+  },
+  {
+    "textPayload": "Function execution took 1894 ms, finished with status: 'ok'",
+    "insertId": "1qzkcqtf199jur",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:17:31.592999808Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "9kd7opb8y77h",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/a4c9a10f41673e0cbfed1f60deb88e0d",
+    "receiveTimestamp": "2025-10-25T13:17:31.700549949Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "3w0fr0ewryi4",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:53.081873956Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "9kd748912qm8",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:53.087067540Z"
+  },
+  {
+    "textPayload": "Processing notification trigger: query_resolved",
+    "insertId": "68fcd095000155a158efe60f",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:53.087457Z",
+    "labels": {
+      "execution_id": "9kd748912qm8",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:53.419944823Z"
+  },
+  {
+    "textPayload": "Error processing query resolution notification: Error: Value for argument \"data\" is not a valid Firestore document. Cannot use \"undefined\" as a Firestore value (found in field \"userId\"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.",
+    "insertId": "68fcd0970002135da5e2b9e4",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:55.136029Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd748912qm8",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:55.419507645Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:383:19)",
+    "insertId": "68fcd0970002136a6d91931c",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:55.136042Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd748912qm8"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:55.419507645Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:375:13)",
+    "insertId": "68fcd0970002136d79ae8bed",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:55.136045Z",
+    "labels": {
+      "execution_id": "9kd748912qm8",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:55.419507645Z"
+  },
+  {
+    "textPayload": "    at validateDocumentData (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:609:40)",
+    "insertId": "68fcd097000213718d1cd479",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:55.136049Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd748912qm8",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:55.419507645Z"
+  },
+  {
+    "textPayload": "    at WriteBatch.set (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:263:9)",
+    "insertId": "68fcd09700021375f409c448",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:55.136053Z",
+    "labels": {
+      "execution_id": "9kd748912qm8",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:55.419507645Z"
+  },
+  {
+    "textPayload": "    at /workspace/node_modules/@google-cloud/firestore/build/src/reference/document-reference.js:348:41",
+    "insertId": "68fcd0970002137af69d6036",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:55.136058Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd748912qm8"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:55.419507645Z"
+  },
+  {
+    "textPayload": "    at /workspace/node_modules/@google-cloud/firestore/build/src/telemetry/enabled-trace-util.js:110:30",
+    "insertId": "68fcd0970002137d03bdf9e0",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:55.136061Z",
+    "labels": {
+      "execution_id": "9kd748912qm8",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:55.419507645Z"
+  },
+  {
+    "textPayload": "    at NoopContextManager.with (/workspace/node_modules/@opentelemetry/api/build/src/context/NoopContextManager.js:25:19)",
+    "insertId": "68fcd09700021381d2d903ea",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:55.136065Z",
+    "labels": {
+      "execution_id": "9kd748912qm8",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:55.419507645Z"
+  },
+  {
+    "textPayload": "    at ContextAPI.with (/workspace/node_modules/@opentelemetry/api/build/src/api/context.js:60:46)",
+    "insertId": "68fcd097000213846375471b",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:55.136068Z",
+    "labels": {
+      "execution_id": "9kd748912qm8",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:55.419507645Z"
+  },
+  {
+    "textPayload": "    at NoopTracer.startActiveSpan (/workspace/node_modules/@opentelemetry/api/build/src/trace/NoopTracer.js:65:31)",
+    "insertId": "68fcd0970002138863817e90",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:55.136072Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd748912qm8",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:55.419507645Z"
+  },
+  {
+    "textPayload": "    at ProxyTracer.startActiveSpan (/workspace/node_modules/@opentelemetry/api/build/src/trace/ProxyTracer.js:36:24)",
+    "insertId": "68fcd0970002138b4f43c7d8",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:55.136075Z",
+    "labels": {
+      "execution_id": "9kd748912qm8",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:55.419507645Z"
+  },
+  {
+    "textPayload": "Function execution took 3297 ms, finished with status: 'ok'",
+    "insertId": "10x12nwf1kwmdq",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:28:56.379514316Z",
+    "severity": "DEBUG",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd748912qm8"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/955f53ac57f1ab5bc387a435cf600a49",
+    "receiveTimestamp": "2025-10-25T13:28:56.421455242Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "1dyj1qwegp8vz",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:26.535415590Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "9kd7yy6bn1dh",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:26.541864034Z"
+  },
+  {
+    "textPayload": "Processing notification trigger: board_update",
+    "insertId": "68fcd12e0008421585c316c1",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:26.541205Z",
+    "labels": {
+      "execution_id": "9kd7yy6bn1dh",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:26.872853814Z"
+  },
+  {
+    "textPayload": "Found 4 subscribed users for board ANSPAL4470",
+    "insertId": "68fcd1300001c00ada841641",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:28.114698Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7yy6bn1dh",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:28.205552299Z"
+  },
+  {
+    "textPayload": "Error processing board update notification: Error: Value for argument \"data\" is not a valid Firestore document. Cannot use \"undefined\" as a Firestore value (found in field \"userId\"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.",
+    "insertId": "68fcd1300001c2d54ef4eedc",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:28.115413Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7yy6bn1dh"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:28.205552299Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:383:19)",
+    "insertId": "68fcd1300001c2ec027f186a",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:28.115436Z",
+    "labels": {
+      "execution_id": "9kd7yy6bn1dh",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:28.205552299Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:375:13)",
+    "insertId": "68fcd1300001c2f21777db61",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:28.115442Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7yy6bn1dh"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:28.205552299Z"
+  },
+  {
+    "textPayload": "    at validateDocumentData (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:609:40)",
+    "insertId": "68fcd1300001c2f89f56911b",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:28.115448Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7yy6bn1dh",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:28.205552299Z"
+  },
+  {
+    "textPayload": "    at WriteBatch.set (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:263:9)",
+    "insertId": "68fcd1300001c2fd09a55e1c",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:28.115453Z",
+    "labels": {
+      "execution_id": "9kd7yy6bn1dh",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:28.205552299Z"
+  },
+  {
+    "textPayload": "    at /workspace/lib/index.js:124:27",
+    "insertId": "68fcd1300001c303e8ad772b",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:28.115459Z",
+    "labels": {
+      "execution_id": "9kd7yy6bn1dh",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:28.205552299Z"
+  },
+  {
+    "textPayload": "    at Array.forEach (<anonymous>)",
+    "insertId": "68fcd1300001c309356c1172",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:28.115465Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7yy6bn1dh",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:28.205552299Z"
+  },
+  {
+    "textPayload": "    at processBoardUpdateNotification (/workspace/lib/index.js:106:39)",
+    "insertId": "68fcd1300001c30f9e7981b1",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:28.115471Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7yy6bn1dh"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:28.205552299Z"
+  },
+  {
+    "textPayload": "    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)",
+    "insertId": "68fcd1300001c315c5d0b600",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:28.115477Z",
+    "labels": {
+      "execution_id": "9kd7yy6bn1dh",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:28.205552299Z"
+  },
+  {
+    "textPayload": "    at async /workspace/lib/index.js:72:13",
+    "insertId": "68fcd1300001c319da7219df",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:28.115481Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7yy6bn1dh",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:28.205552299Z"
+  },
+  {
+    "textPayload": "Function execution took 1880 ms, finished with status: 'ok'",
+    "insertId": "1fdo642f17y2np",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:28.416164182Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "9kd7yy6bn1dh",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/6c17375e9f8a65f14deae61d1cf58148",
+    "receiveTimestamp": "2025-10-25T13:31:28.539400086Z"
+  },
+  {
+    "textPayload": "Function execution started",
+    "insertId": "xwgssaf1lxk18",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:54.488484660Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "9kd7c05bhgro",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:54.494806629Z"
+  },
+  {
+    "textPayload": "Processing notification trigger: query",
+    "insertId": "68fcd14a0007852b38831777",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:54.492843Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7c05bhgro",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:54.827963287Z"
+  },
+  {
+    "textPayload": "Error processing query notification: Error: Value for argument \"data\" is not a valid Firestore document. Cannot use \"undefined\" as a Firestore value (found in field \"userId\"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.",
+    "insertId": "68fcd14c0000e7a0cab4b47a",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:56.059296Z",
+    "labels": {
+      "execution_id": "9kd7c05bhgro",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:56.160048924Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:383:19)",
+    "insertId": "68fcd14c0000e7dadc9c7c97",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:56.059354Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7c05bhgro",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:56.160048924Z"
+  },
+  {
+    "textPayload": "    at validateUserInput (/workspace/node_modules/@google-cloud/firestore/build/src/serializer.js:375:13)",
+    "insertId": "68fcd14c0000e7e048869d39",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:56.059360Z",
+    "labels": {
+      "execution_id": "9kd7c05bhgro",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:56.160048924Z"
+  },
+  {
+    "textPayload": "    at validateDocumentData (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:609:40)",
+    "insertId": "68fcd14c0000e7e59e1523fe",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:56.059365Z",
+    "labels": {
+      "execution_id": "9kd7c05bhgro",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:56.160048924Z"
+  },
+  {
+    "textPayload": "    at WriteBatch.set (/workspace/node_modules/@google-cloud/firestore/build/src/write-batch.js:263:9)",
+    "insertId": "68fcd14c0000e7ecf5e4f61a",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "function_name": "processNotificationTriggers",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:56.059372Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7c05bhgro",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:56.160048924Z"
+  },
+  {
+    "textPayload": "    at /workspace/node_modules/@google-cloud/firestore/build/src/reference/document-reference.js:348:41",
+    "insertId": "68fcd14c0000e7f1ca837abc",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:56.059377Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7c05bhgro",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:56.160048924Z"
+  },
+  {
+    "textPayload": "    at /workspace/node_modules/@google-cloud/firestore/build/src/telemetry/enabled-trace-util.js:110:30",
+    "insertId": "68fcd14c0000e7f688aa1f31",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:56.059382Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7c05bhgro"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:56.160048924Z"
+  },
+  {
+    "textPayload": "    at NoopContextManager.with (/workspace/node_modules/@opentelemetry/api/build/src/context/NoopContextManager.js:25:19)",
+    "insertId": "68fcd14c0000e800276ab04b",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:56.059392Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "execution_id": "9kd7c05bhgro",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:56.160048924Z"
+  },
+  {
+    "textPayload": "    at ContextAPI.with (/workspace/node_modules/@opentelemetry/api/build/src/api/context.js:60:46)",
+    "insertId": "68fcd14c0000e805e2a99991",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:56.059397Z",
+    "labels": {
+      "execution_id": "9kd7c05bhgro",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:56.160048924Z"
+  },
+  {
+    "textPayload": "    at NoopTracer.startActiveSpan (/workspace/node_modules/@opentelemetry/api/build/src/trace/NoopTracer.js:65:31)",
+    "insertId": "68fcd14c0000e80ca5d2a507",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:56.059404Z",
+    "labels": {
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7c05bhgro",
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:56.160048924Z"
+  },
+  {
+    "textPayload": "    at ProxyTracer.startActiveSpan (/workspace/node_modules/@opentelemetry/api/build/src/trace/ProxyTracer.js:36:24)",
+    "insertId": "68fcd14c0000e811e869d118",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1",
+        "function_name": "processNotificationTriggers"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:56.059409Z",
+    "labels": {
+      "instance_id": "0069c7a988f1ff15aef2ecf475ceebce1a4039d9e62bb650d3d3364288786e2c96fb111352f8f3e5f153b51f7a6fd78d3d11ce16fd31aa7d0bc3fdefa238b2308eb968f70d6d9d709c469038510961",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00",
+      "execution_id": "9kd7c05bhgro"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:56.160048924Z"
+  },
+  {
+    "textPayload": "Function execution took 1863 ms, finished with status: 'ok'",
+    "insertId": "1vzi65xf1gitkv",
+    "resource": {
+      "type": "cloud_function",
+      "labels": {
+        "function_name": "processNotificationTriggers",
+        "project_id": "noticeboard-4f708",
+        "region": "us-central1"
+      }
+    },
+    "timestamp": "2025-10-25T13:31:56.351661878Z",
+    "severity": "DEBUG",
+    "labels": {
+      "execution_id": "9kd7c05bhgro",
+      "runtime_version": "nodejs18_20251019_18_20_8_RC00"
+    },
+    "logName": "projects/noticeboard-4f708/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "trace": "projects/noticeboard-4f708/traces/23ba596a2e92976ff3556f461f497bc7",
+    "receiveTimestamp": "2025-10-25T13:31:56.493022233Z"
+  }
+]

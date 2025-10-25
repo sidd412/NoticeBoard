@@ -16,6 +16,7 @@ data class User(
     val planName: String = "", // Current plan name (e.g., "Basic", "Premium")
     val subscriptionPeriod: String = "", // monthly, annual
     val subscriptionExpiry: Long = 0, // Subscription expiry timestamp
+    val fcmToken: String = "", // Firebase Cloud Messaging token
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )
