@@ -15,6 +15,7 @@ sealed class Screen(val route: String) {
     object UpdateBoard : Screen("update_board/{boardId}") {
         fun createRoute(boardId: String) = "update_board/$boardId"
     }
+    
     object BoardEditor : Screen("board_editor/{boardId}") {
         fun createRoute(boardId: String) = "board_editor/$boardId"
     }
