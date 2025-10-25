@@ -1,6 +1,9 @@
 package com.notifiy.noticeboard.ui.screens
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -55,6 +58,17 @@ fun LoginScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     
+    // Notification permission launcher
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            println("DEBUG: LoginScreen - Notification permission granted")
+        } else {
+            println("DEBUG: LoginScreen - Notification permission denied")
+        }
+    }
+    
     // Google Sign-In launcher
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -82,6 +96,13 @@ fun LoginScreen(
     // Handle successful authentication
     LaunchedEffect(authState.data, authState.isLoading) {
         if (!authState.isLoading && authState.data != null) {
+            // Request notification permission after successful login/signup
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (!authViewModel.hasNotificationPermission()) {
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+            
             navController.navigate(Screen.MainContainer.route) {
                 popUpTo(Screen.Login.route) { inclusive = true }
             }

@@ -1,6 +1,10 @@
 package com.notifiy.noticeboard.ui.viewmodel
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -80,6 +84,25 @@ class AuthViewModel(private val context: Context) : ViewModel() {
                 println("DEBUG: AuthViewModel - Error initializing FCM token: ${e.message}")
             }
         }
+    }
+    
+    // Check if notification permission is granted
+    fun hasNotificationPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true // Permission not required for older versions
+        }
+    }
+    
+    // Request notification permission (to be called from UI)
+    fun requestNotificationPermission() {
+        // This method will be called from the UI layer where we have access to Activity
+        // The actual permission request will be handled in the Activity/Fragment
+        println("DEBUG: AuthViewModel - Notification permission should be requested from UI")
     }
     
     fun refreshAuthState() {
