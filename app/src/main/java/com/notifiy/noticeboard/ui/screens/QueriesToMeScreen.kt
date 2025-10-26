@@ -79,13 +79,13 @@ fun QueriesToMeScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 35.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
                 IconButton(onClick = { navController.popBackStack() }) {
                     Icon(
                         Icons.Default.ArrowBack,
@@ -95,12 +95,12 @@ fun QueriesToMeScreen(
                 }
                 Text(
                     text = "Queries to Me",
-                    fontSize = 24.sp,
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(start = 8.dp)
                 )
-            }
+//            }
             IconButton(onClick = { loadQueries() }) {
                 Icon(
                     Icons.Default.Refresh,
@@ -110,13 +110,13 @@ fun QueriesToMeScreen(
             }
         }
         
-        // Debug info (remove in production)
-        Text(
-            text = "Debug: Org Code = $orgCode",
-            fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
+//        // Debug info (remove in production)
+//        Text(
+//            text = "Debug: Org Code = $orgCode",
+//            fontSize = 12.sp,
+//            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+//            modifier = Modifier.padding(horizontal = 16.dp)
+//        )
         
         // Tabs
         TabRow(
@@ -200,7 +200,7 @@ fun QueriesToMeScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 60.dp, top = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(queriesToShow) { query ->
