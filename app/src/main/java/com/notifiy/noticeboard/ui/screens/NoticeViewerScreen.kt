@@ -124,7 +124,8 @@ fun NoticeViewerScreen(
                         .padding(start = 10.dp, end = 15.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
-                ) {
+                )
+                {
                     IconButton(
                         onClick = {
                             navController.popBackStack()
